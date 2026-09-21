@@ -98,7 +98,7 @@ object BatteryInfoReader {
         BatteryManager.BATTERY_PLUGGED_AC -> "Caricatore AC"
         BatteryManager.BATTERY_PLUGGED_USB -> "USB"
         BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Ricarica wireless"
-        BatteryManager.BATTERY_PLUGGGED_DOCK -> "Dock"
+        BatteryManager.BATTERY_PLUGGED_DOCK -> "Dock"
         else -> "Nessuno"
     }
 }
