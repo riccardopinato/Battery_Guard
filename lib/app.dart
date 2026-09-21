@@ -90,9 +90,19 @@ class _MainShellState extends State<_MainShell> {
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.battery_5_bar_outlined),selectedIcon: Icon(Icons.battery_5_bar_rounded),label: 'Batteria'),
-          NavigationDestination(icon: Icon(Icons.show_chart_rounded),label: 'Storico'),
-          NavigationDestination(icon: Icon(Icons.tune_rounded),label: 'Impostazioni'),
+          NavigationDestination(
+            icon: Icon(Icons.battery_5_bar_outlined),
+            selectedIcon: Icon(Icons.battery_5_bar_rounded),
+            label: 'Batteria',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.show_chart_rounded),
+            label: 'Storico',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.tune_rounded),
+            label: 'Impostazioni',
+          ),
         ],
       ),
     );
