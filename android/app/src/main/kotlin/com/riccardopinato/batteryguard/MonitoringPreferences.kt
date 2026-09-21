@@ -20,14 +20,21 @@ object MonitoringPreferences {
     fun get(context: Context): Config {
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         return Config(
-            enabled = prefs.getBoolean("henabled", false),
+            enabled = prefs.getBoolean("enabled", false),
             targetLevel = prefs.getInt("targetLevel", 80).coerceIn(50, 100),
-            temperatureThresholdC = prefs.getFloat("temperatureThresholdC", 42f).toDouble().coerceIn(35.0, 60.0),
+            temperatureThresholdC = prefs
+                .getFloat("temperatureThresholdC", 42f)
+                .toDouble()
+                .coerceIn(35.0, 60.0),
             notifyFull = prefs.getBoolean("notifyFull", true),
             notifyUnplugged = prefs.getBoolean("notifyUnplugged", true),
             nightMode = prefs.getBoolean("nightMode", false),
-            nightStartMinutes = prefs.getInt("nightStartMinutes", 23 * 60).coerceIn(0, 1439),
-            nightEndMinutes = prefs.getInt("nightEndMinutes", 7 * 60).coerceIn(0, 1439),
+            nightStartMinutes = prefs
+                .getInt("nightStartMinutes", 23 * 60)
+                .coerceIn(0, 1439),
+            nightEndMinutes = prefs
+                .getInt("nightEndMinutes", 7 * 60)
+                .coerceIn(0, 1439),
         )
     }
 
@@ -45,28 +52,52 @@ object MonitoringPreferences {
         )
     }
 
-    fun save(context: Context, values: Map<"~, *>) {
+    fun save(context: Context, values: Map<*, *>) {
         val current = get(context)
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
             .edit()
-            .putBoolean("enabled", values["enabled"] as? Boolean ?: current.enabled)
-            .putInt("targetLevel", (values["targetLevel"] as? Number)?.toInt()?.coerceIn(50, 100) ?: current.targetLevel)
+            .putBoolean(
+                "enabled",
+                values["enabled"] as? Boolean ?: current.enabled,
+            )
+            .putInt(
+                "targetLevel",
+                (values["targetLevel"] as? Number)
+                    ?.toInt()
+                    ?.coerceIn(50, 100)
+                    ?: current.targetLevel,
+            )
             .putFloat(
                 "temperatureThresholdC",
-                (values["temperatureThresholdC"] as? Number)?.toFloat()?.coerceIn(35f, 60f)
+                (values["temperatureThresholdC"] as? Number)
+                    ?.toFloat()
+                    ?.coerceIn(35f, 60f)
                     ?: current.temperatureThresholdC.toFloat(),
             )
-            .putBoolean("notifyFull", values["notifyFull"] as? Boolean ?: current.notifyFull)
-            .putBoolean("notifyUnplugged", values["notifyUnplugged"] as? Boolean ?: current.notifyUnplugged)
-            .putBoolean("nightMode", values["nightMode"] as? Boolean ?: current.nightMode)
+            .putBoolean(
+                "notifyFull",
+                values["notifyFull"] as? Boolean ?: current.notifyFull,
+            )
+            .putBoolean(
+                "notifyUnplugged",
+                values["notifyUnplugged"] as? Boolean ?: current.notifyUnplugged,
+            )
+            .putBoolean(
+                "nightMode",
+                values["nightMode"] as? Boolean ?: current.nightMode,
+            )
             .putInt(
                 "nightStartMinutes",
-                (values["nightStartMinutes"] as? Number)?.toInt()?.coerceIn(0, 1439)
+                (values["nightStartMinutes"] as? Number)
+                    ?.toInt()
+                    ?.coerceIn(0, 1439)
                     ?: current.nightStartMinutes,
             )
             .putInt(
                 "nightEndMinutes",
-                (values["nightEndMinutes"] as? Number)?.toInt()?.coerceIn(0, 1439)
+                (values["nightEndMinutes"] as? Number)
+                    ?.toInt()
+                    ?.coerceIn(0, 1439)
                     ?: current.nightEndMinutes,
             )
             .apply()
@@ -77,16 +108,15 @@ object MonitoringPreferences {
         if (!config.nightMode) return false
 
         val calendar = Calendar.getInstance()
-        val now = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        val now =
+            calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
         val start = config.nightStartMinutes
         val end = config.nightEndMinutes
 
-        return if (start == end) {
-            true
-        } else if (start < end) {
-            now in start until end
-        } else {
-            now >= start || now < end
+        return when {
+            start == end -> true
+            start < end -> now in start until end
+            else -> now >= start || now < end
         }
     }
 }
