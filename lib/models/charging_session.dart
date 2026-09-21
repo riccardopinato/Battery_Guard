@@ -81,18 +81,18 @@ class ChargingSession {
 
   String get durationLabel {
     final minutes = duration.inMinutes;
-    if (minutes < 60) return '${minutes} min';
+    if (minutes < 60) return '$minutes min';
     final hours = minutes ~/ 60;
     final rest = minutes % 60;
-    return rest == 0 ? '${hours} h' : '${hours} h ${rest} min';
+    return rest == 0 ? '$hours h' : '$hours h $rest min';
   }
 
   String get estimateLabel {
     final minutes = estimatedMinutesToTarget;
     if (minutes == null) return 'Calcolo…';
-    if (minutes < 60) return '≈ ${minutes} min';
+    if (minutes < 60) return '≈ $minutes min';
     final hours = minutes ~/ 60;
     final rest = minutes % 60;
-    return rest == 0 ? '≈ ${hours} h' : '≈ ${hours} h ${rest} min';
+    return rest == 0 ? '≈ $hours h' : '≈ $hours h $rest min';
   }
 }
