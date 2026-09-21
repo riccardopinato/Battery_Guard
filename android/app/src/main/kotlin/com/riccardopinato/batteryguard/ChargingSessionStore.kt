@@ -22,6 +22,16 @@ object ChargingSessionStore {
         val current: Map<String, Any?>?,
         val rapidTemperatureAlert: Boolean,
         val slowChargingAlert: Boolean,
+        val adaptiveSlowChargingAlert: Boolean,
+        val adaptiveTemperatureAlert: Boolean,
+        val baselineRate: Double,
+        val baselineMaxTemperatureC: Double,
+    )
+
+    private data class Baseline(
+        val count: Int,
+        val averageRate: Double,
+        val averageMaxTemperatureC: Double,
     )
 
     fun update(
@@ -37,19 +47,39 @@ object ChargingSessionStore {
 
             if (!plugged) {
                 if (active != null) {
-                    active = updateObject(active, snapshot, targetLevel, now, includePowerSample = false)
+                    active = updateObject(
+                        active,
+                        snapshot,
+                        targetLevel,
+                        now,
+                        includePowerSample = false,
+                    )
                     active.put("endedAt", now)
                     active.put("completed", true)
                     addCompletedLocked(prefs, active)
                     prefs.edit().remove(ACTIVE).apply()
                 }
-                return UpdateResult(null, false, false)
+                return UpdateResult(
+                    current = null,
+                    rapidTemperatureAlert = false,
+                    slowChargingAlert = false,
+                    adaptiveSlowChargingAlert = false,
+                    adaptiveTemperatureAlert = false,
+                    baselineRate = 0.0,
+                    baselineMaxTemperatureC = 0.0,
+                )
             }
 
             active = if (active == null) {
                 createActive(snapshot, targetLevel, now)
             } else {
-                updateObject(active, snapshot, targetLevel, now, includePowerSample = true)
+                updateObject(
+                    active,
+                    snapshot,
+                    targetLevel,
+                    now,
+                    includePowerSample = true,
+                )
             }
 
             val elapsed = now - active.optLong("startedAt", now)
@@ -57,21 +87,52 @@ object ChargingSessionStore {
             val startTemp = active.optDouble("startTemperatureC", currentTemp)
             val currentLevel = active.optInt("currentLevel", 0)
             val rate = percentPerHour(active, now)
+            val baseline = baselineFor(
+                prefs = prefs,
+                plugType = active.optString("plugType", ""),
+            )
 
-            val rapidAlready = active.optBoolean("rapidTemperatureAlerted", false)
+            val adaptiveSlowAlready =
+                active.optBoolean("adaptiveSlowChargingAlerted", false)
+            val adaptiveSlowChargingAlert =
+                !adaptiveSlowAlready &&
+                    elapsed >= SLOW_WINDOW_MS &&
+                    currentLevel < 90 &&
+                    baseline.count >= 3 &&
+                    baseline.averageRate >= 8.0 &&
+                    rate < baseline.averageRate * 0.55
+
+            val adaptiveTempAlready =
+                active.optBoolean("adaptiveTemperatureAlerted", false)
+            val adaptiveTemperatureAlert =
+                !adaptiveTempAlready &&
+                    baseline.count >= 3 &&
+                    currentTemp >= 38.0 &&
+                    currentTemp >= baseline.averageMaxTemperatureC + 4.0
+
+            val rapidAlready =
+                active.optBoolean("rapidTemperatureAlerted", false)
             val rapidTemperatureAlert =
-                !rapidAlready &&
+                !adaptiveTemperatureAlert &&
+                    !rapidAlready &&
                     elapsed in 60_000L..RAPID_TEMP_WINDOW_MS &&
                     currentTemp >= 38.0 &&
                     currentTemp - startTemp >= 5.0
 
             val slowAlready = active.optBoolean("slowChargingAlerted", false)
             val slowChargingAlert =
-                !slowAlready &&
+                !adaptiveSlowChargingAlert &&
+                    !slowAlready &&
                     elapsed >= SLOW_WINDOW_MS &&
                     currentLevel < 80 &&
                     rate < 8.0
 
+            if (adaptiveSlowChargingAlert) {
+                active.put("adaptiveSlowChargingAlerted", true)
+            }
+            if (adaptiveTemperatureAlert) {
+                active.put("adaptiveTemperatureAlerted", true)
+            }
             if (rapidTemperatureAlert) {
                 active.put("rapidTemperatureAlerted", true)
             }
@@ -84,6 +145,10 @@ object ChargingSessionStore {
                 current = toMap(active, now),
                 rapidTemperatureAlert = rapidTemperatureAlert,
                 slowChargingAlert = slowChargingAlert,
+                adaptiveSlowChargingAlert = adaptiveSlowChargingAlert,
+                adaptiveTemperatureAlert = adaptiveTemperatureAlert,
+                baselineRate = baseline.averageRate,
+                baselineMaxTemperatureC = baseline.averageMaxTemperatureC,
             )
         }
     }
@@ -103,7 +168,12 @@ object ChargingSessionStore {
             val result = ArrayList<Map<String, Any?>>(array.length())
             for (index in array.length() - 1 downTo 0) {
                 val item = array.optJSONObject(index) ?: continue
-                result.add(toMap(item, item.optLong("endedAt", System.currentTimeMillis())))
+                result.add(
+                    toMap(
+                        item,
+                        item.optLong("endedAt", System.currentTimeMillis()),
+                    ),
+                )
             }
             return result
         }
@@ -144,6 +214,8 @@ object ChargingSessionStore {
             put("targetLevel", targetLevel.coerceIn(50, 100))
             put("rapidTemperatureAlerted", false)
             put("slowChargingAlerted", false)
+            put("adaptiveSlowChargingAlerted", false)
+            put("adaptiveTemperatureAlerted", false)
             put("completed", false)
         }
     }
@@ -162,7 +234,10 @@ object ChargingSessionStore {
         active.put("currentTemperatureC", temperature)
         active.put(
             "maxTemperatureC",
-            max(active.optDouble("maxTemperatureC", temperature), temperature),
+            max(
+                active.optDouble("maxTemperatureC", temperature),
+                temperature,
+            ),
         )
         active.put("targetLevel", targetLevel.coerceIn(50, 100))
 
@@ -174,16 +249,60 @@ object ChargingSessionStore {
         if (includePowerSample) {
             active.put(
                 "powerSum",
-                active.optDouble("powerSum", 0.0) + abs(doubleValue(snapshot, "powerW")),
+                active.optDouble("powerSum", 0.0) +
+                    abs(doubleValue(snapshot, "powerW")),
             )
             active.put(
                 "currentSum",
-                active.optDouble("currentSum", 0.0) + abs(doubleValue(snapshot, "currentMa")),
+                active.optDouble("currentSum", 0.0) +
+                    abs(doubleValue(snapshot, "currentMa")),
             )
             active.put("sampleCount", active.optInt("sampleCount", 0) + 1)
         }
         active.put("lastUpdatedAt", now)
         return active
+    }
+
+    private fun baselineFor(
+        prefs: SharedPreferences,
+        plugType: String,
+    ): Baseline {
+        if (plugType.isBlank() || plugType == "Nessuno") {
+            return Baseline(0, 0.0, 0.0)
+        }
+
+        val array = parseArray(prefs.getString(COMPLETED, null))
+        var count = 0
+        var rateSum = 0.0
+        var temperatureSum = 0.0
+
+        for (index in array.length() - 1 downTo 0) {
+            if (count >= 20) break
+            val item = array.optJSONObject(index) ?: continue
+            if (item.optString("plugType", "") != plugType) continue
+
+            val endedAt = item.optLong("endedAt", 0L)
+            val startedAt = item.optLong("startedAt", endedAt)
+            if (endedAt <= startedAt) continue
+
+            val gained =
+                item.optInt("endLevel", 0) - item.optInt("startLevel", 0)
+            if (gained < 5) continue
+
+            val rate = percentPerHour(item, endedAt)
+            if (rate <= 0.0) continue
+
+            rateSum += rate
+            temperatureSum += item.optDouble("maxTemperatureC", 0.0)
+            count += 1
+        }
+
+        if (count == 0) return Baseline(0, 0.0, 0.0)
+        return Baseline(
+            count = count,
+            averageRate = rateSum / count,
+            averageMaxTemperatureC = temperatureSum / count,
+        )
     }
 
     private fun toMap(item: JSONObject, now: Long): Map<String, Any?> {
@@ -199,7 +318,9 @@ object ChargingSessionStore {
         val remaining = target - currentLevel
         val estimatedMinutes =
             if (remaining > 0 && rate > 0.0) {
-                ((remaining / rate) * 60.0).roundToInt().coerceAtLeast(1)
+                ((remaining / rate) * 60.0)
+                    .roundToInt()
+                    .coerceAtLeast(1)
             } else {
                 -1
             }
@@ -228,13 +349,17 @@ object ChargingSessionStore {
         val startedAt = item.optLong("startedAt", endTime)
         val elapsed = (endTime - startedAt).coerceAtLeast(0L)
         if (elapsed < MIN_RATE_WINDOW_MS) return 0.0
-        val gained = item.optInt("currentLevel", 0) - item.optInt("startLevel", 0)
+        val gained =
+            item.optInt("currentLevel", 0) - item.optInt("startLevel", 0)
         if (gained <= 0) return 0.0
         val hours = elapsed / 3_600_000.0
         return if (hours > 0.0) gained / hours else 0.0
     }
 
-    private fun addCompletedLocked(prefs: SharedPreferences, item: JSONObject) {
+    private fun addCompletedLocked(
+        prefs: SharedPreferences,
+        item: JSONObject,
+    ) {
         val array = parseArray(prefs.getString(COMPLETED, null))
         array.put(item)
         val trimmed = JSONArray()

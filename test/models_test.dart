@@ -1,4 +1,5 @@
 import 'package:battery_guard/models/battery_snapshot.dart';
+import 'package:battery_guard/models/charging_insights.dart';
 import 'package:battery_guard/models/charging_session.dart';
 import 'package:battery_guard/models/monitoring_config.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,5 +60,70 @@ void main() {
     expect(session.percentPerHour, 30.0);
     expect(session.estimatedMinutesToTarget, 50);
     expect(session.completed, isFalse);
+  });
+
+  test('ChargingInsights aggregates observed sessions', () {
+    final now = DateTime(2026, 9, 22, 12);
+
+    ChargingSession buildSession({
+      required String id,
+      required int daysAgo,
+      required int start,
+      required int end,
+      required double maxTemp,
+      required double rate,
+      required String source,
+    }) {
+      final started = now.subtract(Duration(days: daysAgo, hours: 1));
+      return ChargingSession(
+        id: id,
+        startedAt: started,
+        endedAt: started.add(const Duration(hours: 1)),
+        startLevel: start,
+        currentLevel: end,
+        endLevel: end,
+        startTemperatureC: 30,
+        currentTemperatureC: maxTemp - 1,
+        maxTemperatureC: maxTemp,
+        averagePowerW: 18,
+        averageCurrentMa: 4000,
+        percentPerHour: rate,
+        estimatedMinutesToTarget: null,
+        plugType: source,
+        targetLevel: 80,
+        completed: true,
+      );
+    }
+
+    final insights = ChargingInsights.fromSessions(
+      [
+        buildSession(
+          id: 'a',
+          daysAgo: 0,
+          start: 30,
+          end: 100,
+          maxTemp: 43,
+          rate: 35,
+          source: 'Caricatore AC',
+        ),
+        buildSession(
+          id: 'b',
+          daysAgo: 2,
+          start: 40,
+          end: 85,
+          maxTemp: 38,
+          rate: 30,
+          source: 'Caricatore AC',
+        ),
+      ],
+      days: 7,
+      now: now,
+    );
+
+    expect(insights.sessionCount, 2);
+    expect(insights.fullCount, 1);
+    expect(insights.over42Count, 1);
+    expect(insights.dominantSource, 'Caricatore AC');
+    expect(insights.averageRatePercentPerHour, closeTo(32.5, 0.01));
   });
 }

@@ -15,14 +15,16 @@ object NotificationHelper {
     private const val QUIET_CHANNEL = "battery_guard_quiet_alerts"
 
     fun createChannels(context: Context) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val manager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val monitor = NotificationChannel(
             MONITOR_CHANNEL,
             "Monitoraggio Battery Guard",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = "Notifica persistente mentre Battery Guard controlla la batteria"
+            description =
+                "Notifica persistente mentre Battery Guard controlla la batteria"
             setShowBadge(false)
         }
 
@@ -40,7 +42,8 @@ object NotificationHelper {
             "Avvisi silenziosi notturni",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Avvisi visibili ma silenziosi durante la modalità notte"
+            description =
+                "Avvisi visibili ma silenziosi durante la modalità notte"
             setSound(null, null)
             enableVibration(false)
         }
@@ -48,17 +51,39 @@ object NotificationHelper {
         manager.createNotificationChannels(listOf(monitor, alerts, quiet))
     }
 
-    fun monitorNotification(context: Context, snapshot: Map<String, Any>): Notification {
+    fun monitorNotification(
+        context: Context,
+        snapshot: Map<String, Any>,
+    ): Notification {
         createChannels(context)
         val level = snapshot["level"] as? Int ?: 0
-        val temperature = (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
+        val temperature =
+            (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
         val status = snapshot["status"]?.toString() ?: "Monitoraggio"
 
         return Notification.Builder(context, MONITOR_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_battery_guard)
             .setContentTitle("Battery Guard attivo")
-            .setContentText("$level% • ${"%.1f".format(temperature)} °C • $status")
+            .setContentText(
+                "$level% • ${"%.1f".format(temperature)} °C • $status",
+            )
             .setContentIntent(openAppIntent(context))
+            .addAction(
+                quickAction(
+                    context,
+                    "Target 80%",
+                    WidgetActionReceiver.ACTION_SET_TARGET_80,
+                    3301,
+                ),
+            )
+            .addAction(
+                quickAction(
+                    context,
+                    "Disattiva",
+                    WidgetActionReceiver.ACTION_DISABLE_MONITORING,
+                    3302,
+                ),
+            )
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setCategory(Notification.CATEGORY_SERVICE)
@@ -84,12 +109,29 @@ object NotificationHelper {
             .setContentText(message)
             .setStyle(Notification.BigTextStyle().bigText(message))
             .setContentIntent(openAppIntent(context))
+            .addAction(
+                quickAction(
+                    context,
+                    "Target 80%",
+                    WidgetActionReceiver.ACTION_SET_TARGET_80,
+                    3401 + notificationId,
+                ),
+            )
+            .addAction(
+                quickAction(
+                    context,
+                    "Disattiva",
+                    WidgetActionReceiver.ACTION_DISABLE_MONITORING,
+                    3501 + notificationId,
+                ),
+            )
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_ALARM)
             .setColor(Color.rgb(33, 163, 102))
             .build()
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val manager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationId, notification)
 
         if (saveToHistory) {
@@ -97,15 +139,42 @@ object NotificationHelper {
         }
     }
 
+    private fun quickAction(
+        context: Context,
+        title: String,
+        action: String,
+        requestCode: Int,
+    ): Notification.Action {
+        val intent = Intent(
+            context,
+            WidgetActionReceiver::class.java,
+        ).setAction(action)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                PendingIntent.FLAG_IMMUTABLE,
+        )
+        return Notification.Action.Builder(
+            R.drawable.ic_stat_battery_guard,
+            title,
+            pendingIntent,
+        ).build()
+    }
+
     private fun openAppIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         return PendingIntent.getActivity(
             context,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                PendingIntent.FLAG_IMMUTABLE,
         )
     }
 }

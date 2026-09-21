@@ -21,9 +21,26 @@ class WidgetActionReceiver : BroadcastReceiver() {
                 // Reading the latest sticky battery broadcast is enough.
             }
 
+            ACTION_DISABLE_MONITORING -> {
+                MonitoringPreferences.setEnabled(context, false)
+                MonitoringService.sync(context)
+                QuickSettingsTileService.requestRefresh(context)
+            }
+
+            ACTION_SET_TARGET_80 -> {
+                MonitoringPreferences.setTargetLevel(context, 80)
+            }
+
             else -> return
         }
 
         BatteryGuardWidgetProvider.updateAll(context, force = true)
+    }
+
+    companion object {
+        const val ACTION_DISABLE_MONITORING =
+            "com.riccardopinato.batteryguard.action.DISABLE_MONITORING"
+        const val ACTION_SET_TARGET_80 =
+            "com.riccardopinato.batteryguard.action.SET_TARGET_80"
     }
 }

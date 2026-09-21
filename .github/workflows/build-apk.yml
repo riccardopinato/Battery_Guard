@@ -102,35 +102,35 @@ jobs:
           test -s build/app/outputs/flutter-apk/app-release.apk
           test -s build/app/outputs/bundle/release/app-release.aab
 
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk release/Battery-Guard-v0.3.0-arm64-v8a.apk
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk release/Battery-Guard-v0.3.0-armeabi-v7a.apk
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk release/Battery-Guard-v0.3.0-x86_64.apk
-          cp build/app/outputs/flutter-apk/app-release.apk release/Battery-Guard-v0.3.0-universal.apk
-          cp build/app/outputs/bundle/release/app-release.aab release/Battery-Guard-v0.3.0.aab
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk release/Battery-Guard-v0.4.0-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk release/Battery-Guard-v0.4.0-armeabi-v7a.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk release/Battery-Guard-v0.4.0-x86_64.apk
+          cp build/app/outputs/flutter-apk/app-release.apk release/Battery-Guard-v0.4.0-universal.apk
+          cp build/app/outputs/bundle/release/app-release.aab release/Battery-Guard-v0.4.0.aab
 
           (
             cd release
-            sha256sum Battery-Guard-v0.3.0-arm64-v8a.apk \
-                      Battery-Guard-v0.3.0-armeabi-v7a.apk \
-                      Battery-Guard-v0.3.0-x86_64.apk \
-                      Battery-Guard-v0.3.0-universal.apk \
-                      Battery-Guard-v0.3.0.aab > SHA256SUMS.txt
+            sha256sum Battery-Guard-v0.4.0-arm64-v8a.apk \
+                      Battery-Guard-v0.4.0-armeabi-v7a.apk \
+                      Battery-Guard-v0.4.0-x86_64.apk \
+                      Battery-Guard-v0.4.0-universal.apk \
+                      Battery-Guard-v0.4.0.aab > SHA256SUMS.txt
           )
 
           {
-            echo "Battery Guard v0.3.0 - dimensioni build"
+            echo "Battery Guard v0.4.0 - dimensioni build"
             echo
-            du -h release/Battery-Guard-v0.3.0-arm64-v8a.apk
-            du -h release/Battery-Guard-v0.3.0-armeabi-v7a.apk
-            du -h release/Battery-Guard-v0.3.0-x86_64.apk
-            du -h release/Battery-Guard-v0.3.0-universal.apk
-            du -h release/Battery-Guard-v0.3.0.aab
+            du -h release/Battery-Guard-v0.4.0-arm64-v8a.apk
+            du -h release/Battery-Guard-v0.4.0-armeabi-v7a.apk
+            du -h release/Battery-Guard-v0.4.0-x86_64.apk
+            du -h release/Battery-Guard-v0.4.0-universal.apk
+            du -h release/Battery-Guard-v0.4.0.aab
           } | tee release/SIZES.txt
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Battery-Guard-v0.3.0-Quick-Controls
+          name: Battery-Guard-v0.4.0-Adaptive-Protection
           path: |
             release/*
             build/symbols/**
@@ -144,26 +144,26 @@ jobs:
         run: |
           set -euxo pipefail
 
-          if gh release view v0.3.0 >/dev/null 2>&1; then
-            gh release upload v0.3.0 \
-              release/Battery-Guard-v0.3.0-arm64-v8a.apk \
-              release/Battery-Guard-v0.3.0-armeabi-v7a.apk \
-              release/Battery-Guard-v0.3.0-x86_64.apk \
-              release/Battery-Guard-v0.3.0-universal.apk \
-              release/Battery-Guard-v0.3.0.aab \
+          if gh release view v0.4.0 >/dev/null 2>&1; then
+            gh release upload v0.4.0 \
+              release/Battery-Guard-v0.4.0-arm64-v8a.apk \
+              release/Battery-Guard-v0.4.0-armeabi-v7a.apk \
+              release/Battery-Guard-v0.4.0-x86_64.apk \
+              release/Battery-Guard-v0.4.0-universal.apk \
+              release/Battery-Guard-v0.4.0.aab \
               release/SHA256SUMS.txt \
               release/SIZES.txt \
               --clobber
           else
-            gh release create v0.3.0 \
-              release/Battery-Guard-v0.3.0-arm64-v8a.apk \
-              release/Battery-Guard-v0.3.0-armeabi-v7a.apk \
-              release/Battery-Guard-v0.3.0-x86_64.apk \
-              release/Battery-Guard-v0.3.0-universal.apk \
-              release/Battery-Guard-v0.3.0.aab \
+            gh release create v0.4.0 \
+              release/Battery-Guard-v0.4.0-arm64-v8a.apk \
+              release/Battery-Guard-v0.4.0-armeabi-v7a.apk \
+              release/Battery-Guard-v0.4.0-x86_64.apk \
+              release/Battery-Guard-v0.4.0-universal.apk \
+              release/Battery-Guard-v0.4.0.aab \
               release/SHA256SUMS.txt \
               release/SIZES.txt \
               --target "${GITHUB_SHA}" \
-              --title "Battery Guard v0.3.0 Quick Controls" \
-              --notes "Quick Controls: Tile Android nei Quick Settings per attivare/disattivare Battery Guard, widget Home con livello e temperatura, toggle protezione, cambio rapido target 80/85/90/100 e refresh. Nessuna nuova dipendenza."
+              --title "Battery Guard v0.4.0 Adaptive Protection" \
+              --notes "Adaptive Protection: Insights 7/30 giorni con grafici Flutter nativi, statistiche termiche e di ricarica, confronto adattivo con la media personale, cooldown e isteresi degli avvisi, azioni rapide nelle notifiche e maggiore resilienza agli eventi di alimentazione. Nessuna nuova dipendenza."
           fi

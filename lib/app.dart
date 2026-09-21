@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/history_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/insights_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/app_controller.dart';
 import 'theme/app_theme.dart';
@@ -13,7 +14,8 @@ class BatteryGuardApp extends StatefulWidget {
   State<BatteryGuardApp> createState() => _BatteryGuardAppState();
 }
 
-class _BatteryGuardAppState extends State<BatteryGuardApp> with WidgetsBindingObserver {
+class _BatteryGuardAppState extends State<BatteryGuardApp>
+    with WidgetsBindingObserver {
   late final AppController _controller;
 
   @override
@@ -77,6 +79,7 @@ class _MainShellState extends State<_MainShell> {
   Widget build(BuildContext context) {
     final pages = [
       HomeScreen(controller: widget.controller),
+      InsightsScreen(controller: widget.controller),
       HistoryScreen(controller: widget.controller),
       SettingsScreen(controller: widget.controller),
     ];
@@ -94,6 +97,11 @@ class _MainShellState extends State<_MainShell> {
             icon: Icon(Icons.battery_5_bar_outlined),
             selectedIcon: Icon(Icons.battery_5_bar_rounded),
             label: 'Batteria',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: 'Insights',
           ),
           NavigationDestination(
             icon: Icon(Icons.show_chart_rounded),
