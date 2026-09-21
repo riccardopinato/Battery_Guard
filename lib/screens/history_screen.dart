@@ -33,9 +33,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         now.day == local.day;
     final time =
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    if (sameDay) return 'Oggi - ${time}';
+    if (sameDay) return 'Oggi - $time';
     return '${local.day.toString().padLeft(2, '0')}/'
-        '${local.month.toString().padLeft(2, '0')} - ${time}';
+        '${local.month.toString().padLeft(2, '0')} - $time';
   }
 
   IconData _iconFor(HistoryEntry entry) {
@@ -165,8 +165,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     entry.title.isEmpty ? 'Avviso batteria' : entry.title,
                   ),
                   subtitle: Text(
-                    '${entry.message}
-${_dateLabel(entry.timestamp)}',
+                    '${entry.message}\\n${_dateLabel(entry.timestamp)}',
                   ),
                   isThreeLine: true,
                   trailing: Text('${entry.level}%'),
@@ -232,9 +231,8 @@ class _SessionCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
-          '${dateLabel} • ${session.durationLabel} • ${session.plugType}
-'
-          '${speed} • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
+          '$dateLabel • ${session.durationLabel} • ${session.plugType}\\n'
+          '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
         ),
         isThreeLine: true,
         trailing: Icon(
