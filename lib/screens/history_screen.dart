@@ -1,12 +1,13 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../models/history_entry.dart';
 import '../services/app_controller.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({required this.controller, super.key});
+  const HistoryScreen({
+    required this.controller,
+    super.key,
+  });
 
   final AppController controller;
 
@@ -26,17 +27,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String _dateLabel(DateTime date) {
     final now = DateTime.now();
     final local = date.toLocal();
-    final sameDay = now.year == local.year && now.month == local.month && now.day == local.day;
-    final time = '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    if (sameDay) return 'Oggi â€¢ $time';
-    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')} â€¢ $time';
+    final sameDay = now.year == local.year &&
+        now.month == local.month &&
+        now.day == local.day;
+    final time =
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    if (sameDay) {
+      return 'Oggi - $time';
+    }
+    return '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')} - $time';
+  }
+
+  IconData _iconFor(HistoryEntry entry) {
+    final title = entry.title.toLowerCase();
+    if (title.contains('temperatura')) {
+      return Icons.thermostat_rounded;
+    }
+    if (title.contains('scollegato')) {
+      return Icons.power_off_rounded;
+    }
+    if (title.contains('carica')) {
+      return Icons.battery_charging_full_rounded;
+    }
+    return Icons.notifications_active_outlined;
   }
 
   @override
   Widget build(BuildContext context) {
     final history = widget.controller.history;
-    final samples = history.where((e) => e.isSample).take(48).toList().reversed.toList();
-    final alerts = history.where((e) => e.isAlert).toList();
+    final samples =
+        history.where((entry) => entry.isSample).take(24).toList();
+    final alerts =
+        history.where((entry) => entry.isAlert).take(30).toList();
 
     return RefreshIndicator(
       onRefresh: widget.controller.refreshHistory,
@@ -50,130 +73,184 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: Text(
                   'Storico',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeiYÚˆ›ÛÙZYÚÎˆ
-Kˆ
-Kˆ
-KˆYˆ
-\İÜKš\Ó›İ[\JBˆXÛÛ]ÛŠˆÛÛ\ˆ	ĞØ[˜Ù[HİÜšXÛÉËˆÛ”™\ÜÙYˆ
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+              ),
+              if (history.isNotEmpty)
+                IconButton(
+                  tooltip: 'Cancella storico',
+                  onPressed: () => _confirmClear(context),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Campioni locali e ultimi avvisi. Nessun dato viene inviato online.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 18),
+          if (samples.isNotEmpty) ...[
+            Text(
+              'Ultimi campioni',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    for (final entry in samples.take(8))
+                      _SampleRow(
+                        entry: entry,
+                        dateLabel: _dateLabel(entry.timestamp),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
+          Text(
+            'Avvisi recenti',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 10),
+          if (alerts.isEmpty)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.notifications_none_rounded,
+                      size: 36,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Nessun avviso registrato'),
+                  ],
+                ),
+              ),
+            )
+          else
+            ...alerts.map(
+              (entry) => Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: CircleAvatar(
+                    child: Icon(_iconFor(entry)),
+                  ),
+                  title: Text(
+                    entry.title.isEmpty ? 'Avviso batteria' : entry.title,
+                  ),
+                  subtitle: Text(
+                    '${entry.message}\n${_dateLabel(entry.timestamp)}',
+                  ),
+                  isThreeLine: true,
+                  trailing: Text('${entry.level}%'),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
-HOˆØÛÛ™š\›PÛX\ŠÛÛ^
-KˆXÛÛˆÛÛœİXÛÛŠXÛÛœË™[]WÛİ][™WÜ›İ[™Y
-Kˆ
-KˆKˆ
-KˆÛÛœİÚ^™Y›Ş
-ZYÚˆŠKˆ^
-ˆ	ĞØ[\[ÛšHØØ[HH[[ZH]š\ÚKˆ™\Üİ[ˆ]ÈšY[™H[šX]ÈÛ›[™K‰Ëˆİ[Nˆ[YK›ÙŠÛÛ^
-K^[YK˜›ÙSYY][OË˜ÛÜUÚ]
-ˆÛÛÜˆ[YK›ÙŠÛÛ^
-K˜ÛÛÜ”ØÚ[YK›Û”İ\™˜XÙU˜\šX[ˆ
-Kˆ
-KˆÛÛœİÚ^™Y›Ş
-ZYÚˆN
-KˆYˆ
-Ø[\\Ë›[™İHŠH‹‹–ÂˆØ\™
-ˆÚ[ˆY[™ÊˆY[™ÎˆÛÛœİYÙR[œÙ]Ë™œ›ÛSŠM‹NM‹LŠKˆÚ[ˆÚ^™Y›Ş
-ˆZYÚˆNLˆÚ[ˆİ\İÛTZ[
-ˆZ[\ˆÒ\İÜPÚ\Z[\ŠˆØ[\\ÎˆØ[\\Ëˆ]™[ÛÛÜˆ[YK›ÙŠÛÛ^
-K˜ÛÛÜ”ØÚ[YKœš[X\Kˆ[\ÛÛÜˆ[YK›ÙŠÛÛ^
-K˜ÛÛÜ”ØÚ[YK\X\KˆÜšYÛÛÜˆ[YK›ÙŠÛÛ^
-K˜ÛÛÜ”ØÚ[YK›İ][™U˜\šX[ˆ
-Kˆ
-Kˆ
-Kˆ
-Kˆ
-KˆÛÛœİÚ^™Y›Ş
-ZYÚˆN
-KˆKˆ^
-ˆ	Ğ]š\ÚH™XÙ[IËˆİ[Nˆ[YK›ÙŠÛÛ^
-K^[YK]S\™ÙOË˜ÛÜUÚ]
-›ÛÙZYÚˆ›ÛÙZYÚÍÌ
-Kˆ
-KˆÛÛœİÚ^™Y›Ş
-ZYÚˆL
-KˆYˆ
-[\Ëš\Ñ[\JBˆØ\™
-ˆÚ[ˆY[™ÊˆY[™ÎˆÛÛœİYÙR[œÙ]Ë˜[
-
-KˆÚ[ˆÛÛ[[ŠˆÚ[™[ˆÂˆXÛÛŠˆXÛÛœË››İYšXØ][Ûœ×Û›Û™WÜ›İ[™YˆÚ^™NˆÍˆÛÛÜˆ[YK›ÙŠÛÛ^
-K˜ÛÛÜ”ØÚ[YK›Û”İ\™˜XÙU˜\šX[ˆ
-KˆÛÛœİÚ^™Y›Ş
-ZYÚˆL
-KˆÛÛœİ^
-	Ó™\Üİ[ˆ]š\ÛÈ™YÚ\İ˜]ÉÊKˆKˆ
-Kˆ
-Kˆ
-Bˆ[ÙBˆ‹‹˜[\ËZÙJÌ
-K›X\
-ˆ
-[JHOˆØ\™
-ˆÚ[ˆ\İ[JˆÛÛ[Y[™ÎˆÛÛœİYÙR[œÙ]ËœŞ[[Y]šXÊÜš^›Û[ˆM‹™\XØ[ˆ
-KˆXY[™ÎˆÚ\˜ÛP]˜]\ŠˆÚ[ˆXÛÛŠÚXÛÛ‘›ÜŠ[JJKˆ
-Kˆ]Nˆ^
-[K]JKˆİX]Nˆ^
-	ÉÙ[K›Y\ÜØYÙ_W‰×Ù]SX™[
-[K[Y\İ[\
-_IÊKˆ\Õ™YS[™NˆYKˆ˜Z[[™Îˆ^
-	ÉÙ[K›]™[IIÊKˆ
-Kˆ
-Kˆ
-KˆKˆ
-Kˆ
-NÂˆB‚ˆXÛÛ‘]HÚXÛÛ‘›ÜŠ\İÜQ[H[JHÂˆš[˜[]HH[K]KÓİÙ\Ø\ÙJ
-NÂˆYˆ
-]K˜ÛÛZ[œÊ	İ[\\˜]\˜IÊJH™]\›ˆXÛÛœË\›[Üİ]Ü›İ[™YÂˆYˆ
-]K˜ÛÛZ[œÊ	ÜØÛÛYØ]ÉÊJH™]\›ˆXÛÛœËœİÙ\—ÛÙ™—Ü›İ[™YÂˆYˆ
-]K˜ÛÛZ[œÊ	ØØ\šXØIÊJH™]\›ˆXÛÛœË˜˜]\WØÚ\™Ú[™×Ù[Ü›İ[™YÂˆ™]\›ˆXÛÛœË››İYšXØ][Ûœ×ØXİ]™WÛİ][™YÂˆB‚ˆ]\™O›ÚYˆØÛÛ™š\›PÛX\ŠZ[ÛÛ^ÛÛ^
-H\Ş[˜ÈÂˆš[˜[ÛÛ™š\›YYH]ØZ]ÚİÑX[ÙÏ›ÛÛŠˆÛÛ^ˆÛÛ^ˆZ[\ˆ
-ÛÛ^
-HOˆ[\X[ÙÊˆ]NˆÛÛœİ^
-	ĞØ[˜Ù[\™HÈİÜšXÛÏÉÊKˆÛÛ[ˆÛÛœİ^
-	Õ™\œ˜[››Èš[[ÜÜÚHØ[\[ÛšHH]š\ÚHØ[˜]HØØ[Y[K‰ÊKˆXİ[ÛœÎˆÂˆ^]ÛŠÛ”™\ÜÙYˆ
+  Future<void> _confirmClear(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Cancellare lo storico?'),
+        content: const Text(
+          'Verranno rimossi i campioni e gli avvisi salvati localmente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Annulla'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Cancella'),
+          ),
+        ],
+      ),
+    );
 
-HOˆ˜]šYØ]Ü‹œÜ
-ÛÛ^˜[ÙJKÚ[ˆÛÛœİ^
-	Ğ[›[IÊJKˆš[Y]ÛŠÛ”™\ÜÙYˆ
+    if (confirmed == true) {
+      await widget.controller.clearHistory();
+    }
+  }
+}
 
-HOˆ˜]šYØ]Ü‹œÜ
-ÛÛ^YJKÚ[ˆÛÛœİ^
-	ĞØ[˜Ù[IÊJKˆKˆ
-Kˆ
-NÂˆYˆ
-ÛÛ™š\›YYOHYJHÂˆ]ØZ]ÚYÙ]˜ÛÛ›Û\‹˜ÛX\’\İÜJ
-NÂˆBˆBŸB‚˜Û\ÜÈÒ\İÜPÚ\Z[\ˆ^[™Èİ\İÛTZ[\ˆÂˆÛÛœİÒ\İÜPÚ\Z[\ŠÂˆ™\]Z\™Y\ËœØ[\\Ëˆ™\]Z\™Y\Ë›]™[ÛÛÜ‹ˆ™\]Z\™Y\Ë[\ÛÛÜ‹ˆ™\]Z\™Y\Ë™ÜšYÛÛÜ‹ˆJNÂ‚ˆš[˜[\İ\İÜQ[OˆØ[\\ÎÂˆš[˜[ÛÛÜˆ]™[ÛÛÜÂˆš[˜[ÛÛÜˆ[\ÛÛÜÂˆš[˜[ÛÛÜˆÜšYÛÛÜÂ‚ˆİ™\œšYBˆ›ÚYZ[
-Ø[˜\ÈØ[˜\ËÚ^™HÚ^™JHÂˆš[˜[ÜšYHZ[
+class _SampleRow extends StatelessWidget {
+  const _SampleRow({
+    required this.entry,
+    required this.dateLabel,
+  });
 
-Bˆ‹˜ÛÛÜˆHÜšYÛÛÜ‚ˆ‹œİ›ÚÙUÚYHNÂˆ›Üˆ
-˜\ˆHHÈHHÈJÊÊHÂˆš[˜[HHÚ^™KšZYÚ
-ˆHÈÂˆØ[˜\Ë™˜]Ó[™JÙ™œÙ]
-JKÙ™œÙ]
-Ú^™KÚYJKÜšY
-NÂˆB‚ˆYˆ
-Ø[\\Ë›[™İŠH™]\›Â‚ˆ]]›ÜŠİX›H[˜İ[ÛŠ\İÜQ[JH˜[YKİX›HZ[‹İX›HX^
-HÂˆš[˜[]H]
+  final HistoryEntry entry;
+  final String dateLabel;
 
-NÂˆ›Üˆ
-˜\ˆHHÈHØ[\\Ë›[™İÈJÊÊHÂˆš[˜[HÚ^™KÚY
-ˆHÈ
-Ø[\\Ë›[™İHJNÂˆš[˜[›Ü›X[^™YH
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final level = entry.level.clamp(0, 100);
 
-˜[YJØ[\\ÖÚWJHHZ[ŠHÈX]›X^
-ŒKX^HZ[ŠJK˜Û[\
-ŒKŒ
-NÂˆš[˜[HHÚ^™KšZYÚH›Ü›X[^™Y
-ˆÚ^™KšZYÚÂˆYˆ
-HOH
-HÂˆ]›[İ™UÊJNÂˆH[ÙHÂˆ]›[™UÊJNÂˆBˆBˆ™]\›ˆ]ÂˆB‚ˆš[˜[]™[Z[HZ[
-
-Bˆ‹˜ÛÛÜˆH]™[ÛÛÜ‚ˆ‹œİ[HHZ[[™Ôİ[Kœİ›ÚÙBˆ‹œİ›ÚÙUÚYHÂˆ‹œİ›ÚÙPØ\Hİ›ÚÙPØ\œ›İ[™ˆ‹œİ›ÚÙR›Ú[ˆHİ›ÚÙR›Ú[‹œ›İ[™Âˆš[˜[[\Z[HZ[
-
-Bˆ‹˜ÛÛÜˆH[\ÛÛÜ‚ˆ‹œİ[HHZ[[™Ôİ[Kœİ›ÚÙBˆ‹œİ›ÚÙUÚYH‚ˆ‹œİ›ÚÙPØ\Hİ›ÚÙPØ\œ›İ[™ˆ‹œİ›ÚÙR›Ú[ˆHİ›ÚÙR›Ú[‹œ›İ[™Â‚ˆØ[˜\Ë™˜]Ô]
-]›ÜŠ
-JHOˆK›]™[ÑİX›J
-KL
-K]™[Z[
-NÂˆØ[˜\Ë™˜]Ô]
-]›ÜŠ
-JHOˆK[\\˜]\™PËŒL
-K[\Z[
-NÂˆB‚ˆİ™\œšYBˆ›ÛÛÚİ[™\Z[
-Ûİ˜\šX[Ò\İÜPÚ\Z[\ˆÛ[YØ]JHÂˆ™]\›ˆÛ[YØ]KœØ[\\ÈOHØ[\\ÈˆÛ[YØ]K›]™[ÛÛÜˆOH]™[ÛÛÜˆˆÛ[YØ]K[\ÛÛÜˆOH[\ÛÛÜˆˆÛ[YØ]K™ÜšYÛÛÜˆOHÜšYÛÛÜÂˆBŸB
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 44,
+            child: Text(
+              '${entry.level}%',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: level / 100,
+                minHeight: 8,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 58,
+            child: Text(
+              '${entry.temperatureC.toStringAsFixed(1)} Â°C',
+              textAlign: TextAlign.end,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 86,
+            child: Text(
+              dateLabel,
+              textAlign: TextAlign.end,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
