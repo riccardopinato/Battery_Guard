@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -46,6 +46,7 @@ jobs:
           cp /tmp/battery_guard_scaffold/android/gradlew.bat android/gradlew.bat
           mkdir -p android/gradle/wrapper
           cp /tmp/battery_guard_scaffold/android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar
+          cp /tmp/battery_guard_scaffold/android/gradle/wrapper/gradle-wrapper.properties android/gradle/wrapper/gradle-wrapper.properties
           if [ ! -f .metadata ]; then
             cp /tmp/battery_guard_scaffold/.metadata .metadata
           fi
