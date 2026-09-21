@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/charging_session.dart';
 import '../services/app_controller.dart';
 import '../widgets/battery_ring.dart';
 import '../widgets/metric_card.dart';
@@ -14,6 +15,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final snapshot = controller.snapshot;
     final config = controller.config;
+    final session = controller.currentSession;
     final scheme = Theme.of(context).colorScheme;
 
     return RefreshIndicator(
@@ -36,9 +38,13 @@ class HomeScreen extends StatelessWidget {
                           ),
                     ),
                     Text(
-                      config.enabled ? 'Protezione attiva' : 'Protezione disattivata',
+                      config.enabled
+                          ? 'Protezione attiva'
+                          : 'Protezione disattivata',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: config.enabled ? scheme.primary : scheme.onSurfaceVariant,
+                            color: config.enabled
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -67,8 +73,12 @@ class HomeScreen extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        snapshot.isPlugged ? Icons.power_rounded : Icons.power_off_rounded,
-                        color: snapshot.isPlugged ? scheme.primary : scheme.onSurfaceVariant,
+                        snapshot.isPlugged
+                            ? Icons.power_rounded
+                            : Icons.power_off_rounded,
+                        color: snapshot.isPlugged
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -76,16 +86,20 @@ class HomeScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              snapshot.isPlugged ? snapshot.plugType : 'Non collegato',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              snapshot.isPlugged
+                                  ? snapshot.plugType
+                                  : 'Non collegato',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             Text(
                               '${snapshot.status} • salute ${snapshot.health.toLowerCase()}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -127,6 +141,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (session != null && snapshot.isPlugged) ...[
+            const SizedBox(height: 14),
+            _ChargingSessionCard(session: session),
+          ],
           const SizedBox(height: 14),
           GridView.count(
             crossAxisCount: 2,
@@ -140,9 +158,10 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.thermostat_rounded,
                 label: 'Temperatura',
                 value: '${snapshot.temperatureC.toStringAsFixed(1)} °C',
-                caption: snapshot.temperatureC >= config.temperatureThresholdC
-                    ? 'Sopra la soglia impostata'
-                    : 'Soglia ${config.temperatureThresholdC.toStringAsFixed(0)} °C',
+                caption:
+                    snapshot.temperatureC >= config.temperatureThresholdC
+                        ? 'Sopra la soglia impostata'
+                        : 'Soglia ${config.temperatureThresholdC.toStringAsFixed(0)} °C',
               ),
               MetricCard(
                 icon: Icons.electric_bolt_rounded,
@@ -172,7 +191,10 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.notifications_off_outlined, color: scheme.onErrorContainer),
+                    Icon(
+                      Icons.notifications_off_outlined,
+                      color: scheme.onErrorContainer,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -191,11 +213,121 @@ class HomeScreen extends StatelessWidget {
           ],
           if (controller.lastError case final error?) ...[
             const SizedBox(height: 14),
-            Text(
-              error,
-              style: TextStyle(color: scheme.error),
+            Text(error, style: TextStyle(color: scheme.error)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ChargingSessionCard extends StatelessWidget {
+  const _ChargingSessionCard({required this.session});
+
+  final ChargingSession session;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final speed = session.percentPerHour > 0
+        ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
+        : 'Calcolo…';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: scheme.primaryContainer,
+                  foregroundColor: scheme.onPrimaryContainer,
+                  child: const Icon(Icons.battery_charging_full_rounded),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sessione attuale',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
+                      Text(
+                        '${session.plugType} • ${session.durationLabel}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${session.startLevel}% → ${session.currentLevel}%',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _SessionMetric(label: 'Velocità', value: speed),
+                _SessionMetric(
+                  label: 'Potenza media',
+                  value: '${session.averagePowerW.toStringAsFixed(1)} W',
+                ),
+                _SessionMetric(
+                  label: 'Al ${session.targetLevel}%',
+                  value: session.estimateLabel,
+                ),
+                _SessionMetric(
+                  label: 'Temperatura',
+                  value:
+                      '${session.currentTemperatureC.toStringAsFixed(1)} °C • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
+                ),
+              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionMetric extends StatelessWidget {
+  const _SessionMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      constraints: const BoxConstraints(minWidth: 128),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
     );

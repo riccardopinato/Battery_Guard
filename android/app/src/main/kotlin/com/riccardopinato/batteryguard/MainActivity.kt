@@ -42,8 +42,11 @@ class MainActivity : FlutterActivity() {
                         result.success(null)
                     }
                     "getHistory" -> result.success(HistoryStore.getAll(this))
+                    "getChargingSessions" -> result.success(ChargingSessionStore.getAll(this))
+                    "getCurrentChargingSession" -> result.success(ChargingSessionStore.getCurrent(this))
                     "clearHistory" -> {
                         HistoryStore.clear(this)
+                        ChargingSessionStore.clearCompleted(this)
                         result.success(null)
                     }
                     "hasNotificationPermission" -> result.success(hasNotificationPermission())
@@ -74,11 +77,14 @@ class MainActivity : FlutterActivity() {
 
     private fun hasNotificationPermission(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestNotificationPermission(result: MethodChannel.Result) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || hasNotificationPermission()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            hasNotificationPermission()
+        ) {
             result.success(true)
             return
         }
@@ -87,7 +93,10 @@ class MainActivity : FlutterActivity() {
             return
         }
         pendingPermissionResult = result
-        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), notificationRequestCode)
+        requestPermissions(
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            notificationRequestCode,
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -97,7 +106,8 @@ class MainActivity : FlutterActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == notificationRequestCode) {
-            val granted = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+            val granted =
+                grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
             pendingPermissionResult?.success(granted)
             pendingPermissionResult = null
         }
@@ -146,7 +156,11 @@ class MainActivity : FlutterActivity() {
             }
             if (!registered) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+                    context.registerReceiver(
+                        receiver,
+                        filter,
+                        Context.RECEIVER_NOT_EXPORTED,
+                    )
                 } else {
                     @Suppress("DEPRECATION")
                     context.registerReceiver(receiver, filter)

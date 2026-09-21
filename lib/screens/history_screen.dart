@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../services/app_controller.dart';
 
@@ -32,34 +33,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
         now.day == local.day;
     final time =
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    if (sameDay) {
-      return 'Oggi - $time';
-    }
+    if (sameDay) return 'Oggi - ${time}';
     return '${local.day.toString().padLeft(2, '0')}/'
-        '${local.month.toString().padLeft(2, '0')} - $time';
+        '${local.month.toString().padLeft(2, '0')} - ${time}';
   }
 
   IconData _iconFor(HistoryEntry entry) {
     final title = entry.title.toLowerCase();
-    if (title.contains('temperatura')) {
-      return Icons.thermostat_rounded;
-    }
-    if (title.contains('scollegato')) {
-      return Icons.power_off_rounded;
-    }
-    if (title.contains('carica')) {
-      return Icons.battery_charging_full_rounded;
-    }
+    if (title.contains('temperatura')) return Icons.thermostat_rounded;
+    if (title.contains('scollegato')) return Icons.power_off_rounded;
+    if (title.contains('lenta')) return Icons.speed_rounded;
+    if (title.contains('carica')) return Icons.battery_charging_full_rounded;
     return Icons.notifications_active_outlined;
   }
 
   @override
   Widget build(BuildContext context) {
     final history = widget.controller.history;
-    final samples =
-        history.where((entry) => entry.isSample).take(24).toList();
-    final alerts =
-        history.where((entry) => entry.isAlert).take(30).toList();
+    final sessions = widget.controller.chargingSessions.take(20).toList();
+    final samples = history.where((entry) => entry.isSample).take(24).toList();
+    final alerts = history.where((entry) => entry.isAlert).take(30).toList();
+    final hasAnything =
+        history.isNotEmpty || widget.controller.chargingSessions.isNotEmpty;
 
     return RefreshIndicator(
       onRefresh: widget.controller.refreshHistory,
@@ -77,7 +72,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                 ),
               ),
-              if (history.isNotEmpty)
+              if (hasAnything)
                 IconButton(
                   tooltip: 'Cancella storico',
                   onPressed: () => _confirmClear(context),
@@ -87,13 +82,29 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Campioni locali e ultimi avvisi. Nessun dato viene inviato online.',
+            'Sessioni, campioni e avvisi salvati solo sul dispositivo.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
-          const SizedBox(height: 18),
+          if (sessions.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              'Sessioni di ricarica',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            ...sessions.map(
+              (session) => _SessionCard(
+                session: session,
+                dateLabel: _dateLabel(session.startedAt),
+              ),
+            ),
+          ],
           if (samples.isNotEmpty) ...[
+            const SizedBox(height: 18),
             Text(
               'Ultimi campioni',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -115,8 +126,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 18),
           ],
+          const SizedBox(height: 18),
           Text(
             'Avvisi recenti',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -149,14 +160,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  leading: CircleAvatar(
-                    child: Icon(_iconFor(entry)),
-                  ),
+                  leading: CircleAvatar(child: Icon(_iconFor(entry))),
                   title: Text(
                     entry.title.isEmpty ? 'Avviso batteria' : entry.title,
                   ),
                   subtitle: Text(
-                    '${entry.message}\n${_dateLabel(entry.timestamp)}',
+                    '${entry.message}
+${_dateLabel(entry.timestamp)}',
                   ),
                   isThreeLine: true,
                   trailing: Text('${entry.level}%'),
@@ -174,7 +184,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Cancellare lo storico?'),
         content: const Text(
-          'Verranno rimossi i campioni e gli avvisi salvati localmente.',
+          'Verranno rimossi sessioni concluse, campioni e avvisi salvati localmente. La sessione in corso resterà attiva.',
         ),
         actions: [
           TextButton(
@@ -192,6 +202,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (confirmed == true) {
       await widget.controller.clearHistory();
     }
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  const _SessionCard({
+    required this.session,
+    required this.dateLabel,
+  });
+
+  final ChargingSession session;
+  final String dateLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final speed = session.percentPerHour > 0
+        ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
+        : '—';
+
+    return Card(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        leading: const CircleAvatar(
+          child: Icon(Icons.battery_charging_full_rounded),
+        ),
+        title: Text(
+          '${session.startLevel}% → ${session.endLevel}%  (+${session.gainedPercent}%)',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          '${dateLabel} • ${session.durationLabel} • ${session.plugType}
+'
+          '${speed} • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
+        ),
+        isThreeLine: true,
+        trailing: Icon(
+          Icons.check_circle_outline_rounded,
+          color: scheme.primary,
+        ),
+      ),
+    );
   }
 }
 

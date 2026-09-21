@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import '../models/battery_snapshot.dart';
+import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 
@@ -43,21 +44,41 @@ class NativeBatteryService {
   }
 
   Future<List<HistoryEntry>> getHistory() async {
-    final raw = await _control.invokeMethod<List<dynamic>>('getHistory') ?? const [];
+    final raw =
+        await _control.invokeMethod<List<dynamic>>('getHistory') ?? const [];
     return raw
         .whereType<Map<dynamic, dynamic>>()
         .map(HistoryEntry.fromMap)
         .toList(growable: false);
   }
 
+  Future<List<ChargingSession>> getChargingSessions() async {
+    final raw =
+        await _control.invokeMethod<List<dynamic>>('getChargingSessions') ??
+            const [];
+    return raw
+        .whereType<Map<dynamic, dynamic>>()
+        .map(ChargingSession.fromMap)
+        .toList(growable: false);
+  }
+
+  Future<ChargingSession?> getCurrentChargingSession() async {
+    final raw = await _control
+        .invokeMethod<Map<dynamic, dynamic>>('getCurrentChargingSession');
+    if (raw == null || raw.isEmpty) return null;
+    return ChargingSession.fromMap(raw);
+  }
+
   Future<void> clearHistory() => _control.invokeMethod<void>('clearHistory');
 
   Future<bool> requestNotificationPermission() async {
-    return await _control.invokeMethod<bool>('requestNotificationPermission') ?? false;
+    return await _control.invokeMethod<bool>('requestNotificationPermission') ??
+        false;
   }
 
   Future<bool> hasNotificationPermission() async {
-    return await _control.invokeMethod<bool>('hasNotificationPermission') ?? false;
+    return await _control.invokeMethod<bool>('hasNotificationPermission') ??
+        false;
   }
 
   Future<void> openBatterySettings() {

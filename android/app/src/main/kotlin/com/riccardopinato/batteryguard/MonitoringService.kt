@@ -43,8 +43,7 @@ class MonitoringService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        val snapshot = BatteryInfoReader.read(this)
-        processSnapshot(snapshot)
+        processSnapshot(BatteryInfoReader.read(this))
         return START_STICKY
     }
 
@@ -82,13 +81,43 @@ class MonitoringService : Service() {
         val isCharging = snapshot["isCharging"] as? Boolean ?: false
         val isPlugged = snapshot["isPlugged"] as? Boolean ?: false
 
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val manager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(
             NotificationHelper.MONITOR_NOTIFICATION_ID,
             NotificationHelper.monitorNotification(this, snapshot),
         )
 
         HistoryStore.addSample(this, snapshot)
+
+        val sessionUpdate = ChargingSessionStore.update(
+            context = this,
+            snapshot = snapshot,
+            targetLevel = config.targetLevel,
+        )
+
+        if (sessionUpdate.rapidTemperatureAlert) {
+            NotificationHelper.showAlert(
+                context = this,
+                title = "Temperatura in rapido aumento",
+                message = "La batteria è salita rapidamente fino a ${"%.1f".format(temperature)} °C durante questa ricarica.",
+                snapshot = snapshot,
+                notificationId = 2105,
+            )
+        }
+
+        if (sessionUpdate.slowChargingAlert) {
+            val rate = (sessionUpdate.current?.get("percentPerHour") as? Number)
+                ?.toDouble()
+                ?: 0.0
+            NotificationHelper.showAlert(
+                context = this,
+                title = "Ricarica insolitamente lenta",
+                message = "Velocità media circa ${"%.1f".format(rate)} %/h. Verifica cavo e alimentatore; alcuni dispositivi possono limitare volontariamente la ricarica.",
+                snapshot = snapshot,
+                notificationId = 2106,
+            )
+        }
 
         var targetAlerted = runtimePrefs.getBoolean("targetAlerted", false)
         var fullAlerted = runtimePrefs.getBoolean("fullAlerted", false)
@@ -107,7 +136,7 @@ class MonitoringService : Service() {
         if (isCharging && level >= config.targetLevel && !targetAlerted) {
             NotificationHelper.showAlert(
                 context = this,
-                title = "Soglia raggiunta: $level%",
+                title = "Soglia raggiunta: ${level}%",
                 message = if (config.targetLevel < 100) {
                     "La batteria ha raggiunto il ${config.targetLevel}%. Puoi scollegare il caricatore."
                 } else {
@@ -146,7 +175,7 @@ class MonitoringService : Service() {
             NotificationHelper.showAlert(
                 context = this,
                 title = "Cavo scollegato",
-                message = "Ricarica interrotta con batteria al $level%.",
+                message = "Ricarica interrotta con batteria al ${level}%.",
                 snapshot = snapshot,
                 notificationId = 2104,
             )
@@ -168,7 +197,6 @@ class MonitoringService : Service() {
                     context.startForegroundService(intent)
                 } catch (_: RuntimeException) {
                     // Some OEMs can temporarily reject background FGS starts.
-                    // The next app launch / battery event can resynchronize it.
                 }
             } else {
                 context.stopService(intent)

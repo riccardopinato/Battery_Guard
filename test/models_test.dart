@@ -1,4 +1,5 @@
 import 'package:battery_guard/models/battery_snapshot.dart';
+import 'package:battery_guard/models/charging_session.dart';
 import 'package:battery_guard/models/monitoring_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,5 +33,31 @@ void main() {
     expect(config.temperatureThresholdC, 42);
     expect(config.notifyFull, isTrue);
     expect(config.notifyUnplugged, isTrue);
+  });
+
+  test('ChargingSession parses live smart-charging metrics', () {
+    final session = ChargingSession.fromMap({
+      'id': '1',
+      'startedAt': 1000,
+      'endedAt': 0,
+      'startLevel': 40,
+      'currentLevel': 55,
+      'endLevel': 55,
+      'startTemperatureC': 30.0,
+      'currentTemperatureC': 34.0,
+      'maxTemperatureC': 35.0,
+      'averagePowerW': 18.4,
+      'averageCurrentMa': 4200.0,
+      'percentPerHour': 30.0,
+      'estimatedMinutesToTarget': 50,
+      'plugType': 'Caricatore AC',
+      'targetLevel': 80,
+      'completed': false,
+    });
+
+    expect(session.gainedPercent, 15);
+    expect(session.percentPerHour, 30.0);
+    expect(session.estimatedMinutesToTarget, 50);
+    expect(session.completed, isFalse);
   });
 }
