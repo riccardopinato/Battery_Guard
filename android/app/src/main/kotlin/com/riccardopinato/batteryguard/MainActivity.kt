@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -24,6 +25,9 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NotificationHelper.createChannels(this)
+        if (MonitoringPreferences.get(this).enabled) {
+            MonitoringService.sync(this)
+        }
         BatteryGuardWidgetProvider.updateAll(this, force = true)
         QuickSettingsTileService.requestRefresh(this)
     }
@@ -37,8 +41,8 @@ class MainActivity : FlutterActivity() {
                     "getSnapshot" -> result.success(BatteryInfoReader.read(this))
                     "getConfig" -> result.success(MonitoringPreferences.asMap(this))
                     "setConfig" -> {
-                        @Suppress("UNCHECKED_CAST")
-                        val values = call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
+                        val values =
+                            call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
                         MonitoringPreferences.save(this, values)
                         MonitoringService.sync(this)
                         BatteryGuardWidgetProvider.updateAll(this, force = true)
@@ -46,17 +50,40 @@ class MainActivity : FlutterActivity() {
                         result.success(null)
                     }
                     "getHistory" -> result.success(HistoryStore.getAll(this))
-                    "getChargingSessions" -> result.success(ChargingSessionStore.getAll(this))
-                    "getCurrentChargingSession" -> result.success(ChargingSessionStore.getCurrent(this))
+                    "getChargingSessions" ->
+                        result.success(ChargingSessionStore.getAll(this))
+                    "getCurrentChargingSession" ->
+                        result.success(ChargingSessionStore.getCurrent(this))
                     "clearHistory" -> {
                         HistoryStore.clear(this)
                         ChargingSessionStore.clearCompleted(this)
                         result.success(null)
                     }
-                    "hasNotificationPermission" -> result.success(hasNotificationPermission())
-                    "requestNotificationPermission" -> requestNotificationPermission(result)
+                    "hasNotificationPermission" ->
+                        result.success(hasNotificationPermission())
+                    "requestNotificationPermission" ->
+                        requestNotificationPermission(result)
+                    "getReliabilityStatus" ->
+                        result.success(reliabilityStatus())
+                    "isOnboardingComplete" ->
+                        result.success(appStatePrefs().getBoolean("onboardingComplete", false))
+                    "setOnboardingComplete" -> {
+                        val value = call.arguments as? Boolean ?: true
+                        appStatePrefs().edit()
+                            .putBoolean("onboardingComplete", value)
+                            .apply()
+                        result.success(null)
+                    }
+                    "repairMonitoring" -> {
+                        MonitoringService.sync(this)
+                        result.success(null)
+                    }
                     "openBatterySettings" -> {
                         openBatterySettings()
+                        result.success(null)
+                    }
+                    "openNotificationSettings" -> {
+                        openNotificationSettings()
                         result.success(null)
                     }
                     "testAlert" -> {
@@ -77,6 +104,44 @@ class MainActivity : FlutterActivity() {
 
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, eventChannel)
             .setStreamHandler(BatteryStreamHandler(this))
+    }
+
+    private fun appStatePrefs() =
+        getSharedPreferences("battery_guard_app_state", Context.MODE_PRIVATE)
+
+    private fun reliabilityStatus(): Map<String, Any> {
+        val config = MonitoringPreferences.get(this)
+        val runtime = getSharedPreferences(
+            "battery_guard_runtime",
+            Context.MODE_PRIVATE,
+        )
+        val heartbeat = runtime.getLong("lastHeartbeatAt", 0L)
+        val failure = runtime.getLong("lastStartFailureAt", 0L)
+        val heartbeatFresh =
+            heartbeat > 0L &&
+                System.currentTimeMillis() - heartbeat < 30 * 60 * 1000L
+
+        val powerManager =
+            getSystemService(Context.POWER_SERVICE) as PowerManager
+        val optimizationIgnored =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                powerManager.isIgnoringBatteryOptimizations(packageName)
+            } else {
+                true
+            }
+
+        return mapOf(
+            "notificationsGranted" to hasNotificationPermission(),
+            "batteryOptimizationIgnored" to optimizationIgnored,
+            "monitoringRequested" to config.enabled,
+            "serviceHealthy" to (!config.enabled || heartbeatFresh),
+            "lastHeartbeatAt" to heartbeat,
+            "lastStartFailureAt" to failure,
+            "manufacturer" to
+                Build.MANUFACTURER.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                },
+        )
     }
 
     private fun hasNotificationPermission(): Boolean {
@@ -129,8 +194,22 @@ class MainActivity : FlutterActivity() {
                 startActivity(intent)
                 return
             } catch (_: Throwable) {
-                // Try the next system settings page.
             }
+        }
+    }
+
+    private fun openNotificationSettings() {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        }
+        try {
+            startActivity(intent)
+        } catch (_: Throwable) {
+            startActivity(
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:$packageName")
+                },
+            )
         }
     }
 
@@ -145,13 +224,20 @@ class MainActivity : FlutterActivity() {
                 sink?.success(
                     BatteryInfoReader.read(
                         context,
-                        if (intent.action == Intent.ACTION_BATTERY_CHANGED) intent else null,
+                        if (intent.action == Intent.ACTION_BATTERY_CHANGED) {
+                            intent
+                        } else {
+                            null
+                        },
                     ),
                 )
             }
         }
 
-        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        override fun onListen(
+            arguments: Any?,
+            events: EventChannel.EventSink?,
+        ) {
             sink = events
             val filter = IntentFilter().apply {
                 addAction(Intent.ACTION_BATTERY_CHANGED)
@@ -179,7 +265,6 @@ class MainActivity : FlutterActivity() {
                 try {
                     context.unregisterReceiver(receiver)
                 } catch (_: Throwable) {
-                    // Ignore duplicated cleanup.
                 }
                 registered = false
             }

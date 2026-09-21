@@ -27,6 +27,10 @@ class MonitoringService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        runtimePrefs.edit()
+            .putLong("lastServiceStartAt", System.currentTimeMillis())
+            .remove("lastStartFailureAt")
+            .apply()
         NotificationHelper.createChannels(this)
         val initial = BatteryInfoReader.read(this)
         startForeground(
@@ -48,6 +52,9 @@ class MonitoringService : Service() {
     }
 
     override fun onDestroy() {
+        runtimePrefs.edit()
+            .putLong("lastServiceStopAt", System.currentTimeMillis())
+            .apply()
         if (registered) {
             try {
                 unregisterReceiver(receiver)
@@ -75,6 +82,10 @@ class MonitoringService : Service() {
     private fun processSnapshot(snapshot: Map<String, Any>) {
         val config = MonitoringPreferences.get(this)
         if (!config.enabled) return
+
+        runtimePrefs.edit()
+            .putLong("lastHeartbeatAt", System.currentTimeMillis())
+            .apply()
 
         val level = snapshot["level"] as? Int ?: 0
         val temperature = (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
@@ -255,7 +266,15 @@ class MonitoringService : Service() {
                 try {
                     context.startForegroundService(intent)
                 } catch (_: RuntimeException) {
-                    // Some OEMs can temporarily reject background FGS starts.
+                    context.getSharedPreferences(
+                        "battery_guard_runtime",
+                        Context.MODE_PRIVATE,
+                    ).edit()
+                        .putLong(
+                            "lastStartFailureAt",
+                            System.currentTimeMillis(),
+                        )
+                        .apply()
                 }
             } else {
                 context.stopService(intent)

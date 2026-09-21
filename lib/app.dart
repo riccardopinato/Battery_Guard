@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'screens/history_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/insights_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/app_controller.dart';
 import 'theme/app_theme.dart';
@@ -30,6 +31,7 @@ class _BatteryGuardAppState extends State<BatteryGuardApp>
     if (state == AppLifecycleState.resumed) {
       _controller.refreshSnapshot();
       _controller.refreshHistory();
+      _controller.refreshReliability();
     }
   }
 
@@ -55,6 +57,9 @@ class _BatteryGuardAppState extends State<BatteryGuardApp>
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
+          }
+          if (!_controller.onboardingComplete) {
+            return OnboardingScreen(controller: _controller);
           }
           return _MainShell(controller: _controller);
         },
@@ -91,6 +96,7 @@ class _MainShellState extends State<_MainShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (value) => setState(() => _index = value),
         destinations: const [
           NavigationDestination(

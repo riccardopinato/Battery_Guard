@@ -6,18 +6,16 @@ import '../models/battery_snapshot.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
+import '../models/reliability_status.dart';
 
 class NativeBatteryService {
   NativeBatteryService._();
-
   static final NativeBatteryService instance = NativeBatteryService._();
 
-  static const MethodChannel _control = MethodChannel(
-    'com.riccardopinato.batteryguard/control',
-  );
-  static const EventChannel _events = EventChannel(
-    'com.riccardopinato.batteryguard/events',
-  );
+  static const MethodChannel _control =
+      MethodChannel('com.riccardopinato.batteryguard/control');
+  static const EventChannel _events =
+      EventChannel('com.riccardopinato.batteryguard/events');
 
   Stream<BatterySnapshot>? _cachedStream;
 
@@ -30,18 +28,19 @@ class NativeBatteryService {
   }
 
   Future<BatterySnapshot> getSnapshot() async {
-    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>('getSnapshot');
+    final raw =
+        await _control.invokeMethod<Map<dynamic, dynamic>>('getSnapshot');
     return BatterySnapshot.fromMap(raw ?? const {});
   }
 
   Future<MonitoringConfig> getConfig() async {
-    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>('getConfig');
+    final raw =
+        await _control.invokeMethod<Map<dynamic, dynamic>>('getConfig');
     return MonitoringConfig.fromMap(raw ?? const {});
   }
 
-  Future<void> setConfig(MonitoringConfig config) {
-    return _control.invokeMethod<void>('setConfig', config.toMap());
-  }
+  Future<void> setConfig(MonitoringConfig config) =>
+      _control.invokeMethod<void>('setConfig', config.toMap());
 
   Future<List<HistoryEntry>> getHistory() async {
     final raw =
@@ -71,21 +70,33 @@ class NativeBatteryService {
 
   Future<void> clearHistory() => _control.invokeMethod<void>('clearHistory');
 
-  Future<bool> requestNotificationPermission() async {
-    return await _control.invokeMethod<bool>('requestNotificationPermission') ??
-        false;
+  Future<bool> requestNotificationPermission() async =>
+      await _control.invokeMethod<bool>('requestNotificationPermission') ??
+      false;
+
+  Future<bool> hasNotificationPermission() async =>
+      await _control.invokeMethod<bool>('hasNotificationPermission') ?? false;
+
+  Future<ReliabilityStatus> getReliabilityStatus() async {
+    final raw = await _control
+        .invokeMethod<Map<dynamic, dynamic>>('getReliabilityStatus');
+    return ReliabilityStatus.fromMap(raw ?? const {});
   }
 
-  Future<bool> hasNotificationPermission() async {
-    return await _control.invokeMethod<bool>('hasNotificationPermission') ??
-        false;
-  }
+  Future<bool> isOnboardingComplete() async =>
+      await _control.invokeMethod<bool>('isOnboardingComplete') ?? false;
 
-  Future<void> openBatterySettings() {
-    return _control.invokeMethod<void>('openBatterySettings');
-  }
+  Future<void> setOnboardingComplete(bool value) =>
+      _control.invokeMethod<void>('setOnboardingComplete', value);
 
-  Future<void> testAlert() {
-    return _control.invokeMethod<void>('testAlert');
-  }
+  Future<void> repairMonitoring() =>
+      _control.invokeMethod<void>('repairMonitoring');
+
+  Future<void> openBatterySettings() =>
+      _control.invokeMethod<void>('openBatterySettings');
+
+  Future<void> openNotificationSettings() =>
+      _control.invokeMethod<void>('openNotificationSettings');
+
+  Future<void> testAlert() => _control.invokeMethod<void>('testAlert');
 }

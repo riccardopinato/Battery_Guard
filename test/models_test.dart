@@ -2,6 +2,7 @@ import 'package:battery_guard/models/battery_snapshot.dart';
 import 'package:battery_guard/models/charging_insights.dart';
 import 'package:battery_guard/models/charging_session.dart';
 import 'package:battery_guard/models/monitoring_config.dart';
+import 'package:battery_guard/models/reliability_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -125,5 +126,34 @@ void main() {
     expect(insights.over42Count, 1);
     expect(insights.dominantSource, 'Caricatore AC');
     expect(insights.averageRatePercentPerHour, closeTo(32.5, 0.01));
+  });
+
+  test('ReliabilityStatus reports attention when service is unhealthy', () {
+    final status = ReliabilityStatus.fromMap({
+      'notificationsGranted': true,
+      'batteryOptimizationIgnored': false,
+      'monitoringRequested': true,
+      'serviceHealthy': false,
+      'lastHeartbeatAt': 0,
+      'lastStartFailureAt': 1234,
+      'manufacturer': 'Samsung',
+    });
+
+    expect(status.needsAttention, isTrue);
+    expect(status.serviceLabel, 'Da verificare');
+    expect(status.oemHint, contains('Samsung'));
+  });
+
+  test('ReliabilityStatus accepts disabled monitoring as healthy state', () {
+    final status = ReliabilityStatus.fromMap({
+      'notificationsGranted': true,
+      'batteryOptimizationIgnored': false,
+      'monitoringRequested': false,
+      'serviceHealthy': true,
+      'manufacturer': 'Android',
+    });
+
+    expect(status.needsAttention, isFalse);
+    expect(status.serviceLabel, 'Non richiesto');
   });
 }
