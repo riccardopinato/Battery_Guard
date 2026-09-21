@@ -87,9 +87,6 @@ object NotificationHelper {
             .setAutoCancel(true)
             .setCategory(Notification.CATEGORY_ALARM)
             .setColor(Color.rgb(33, 163, 102))
-            .apply {
-                if (quiet) setSilent(true)
-            }
             .build()
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
