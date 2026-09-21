@@ -1,7 +1,7 @@
 name: battery_guard
 description: Battery Guard - monitoraggio intelligente della batteria e avvisi di ricarica.
 publish_to: "none"
-version: 0.2.0+3
+version: 0.3.0+4
 
 environment:
   sdk: ">=3.9.0 <4.0.0"

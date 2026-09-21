@@ -5,6 +5,7 @@ import java.util.Calendar
 
 object MonitoringPreferences {
     private const val FILE = "battery_guard_config"
+    private val targetSteps = intArrayOf(80, 85, 90, 100)
 
     data class Config(
         val enabled: Boolean,
@@ -101,6 +102,38 @@ object MonitoringPreferences {
                     ?: current.nightEndMinutes,
             )
             .apply()
+    }
+
+    fun setEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("enabled", enabled)
+            .apply()
+    }
+
+    fun toggleEnabled(context: Context): Boolean {
+        val next = !get(context).enabled
+        setEnabled(context, next)
+        return next
+    }
+
+    fun setTargetLevel(context: Context, targetLevel: Int) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit()
+            .putInt("targetLevel", targetLevel.coerceIn(50, 100))
+            .apply()
+    }
+
+    fun cycleTargetLevel(context: Context): Int {
+        val current = get(context).targetLevel
+        val currentIndex = targetSteps.indexOf(current)
+        val next = if (currentIndex >= 0) {
+            targetSteps[(currentIndex + 1) % targetSteps.size]
+        } else {
+            targetSteps.first()
+        }
+        setTargetLevel(context, next)
+        return next
     }
 
     fun isQuietNow(context: Context): Boolean {

@@ -13,6 +13,8 @@ class BootReceiver : BroadcastReceiver() {
             if (MonitoringPreferences.get(context).enabled) {
                 MonitoringService.sync(context)
             }
+            BatteryGuardWidgetProvider.updateAll(context, force = true)
+            QuickSettingsTileService.requestRefresh(context)
         }
     }
 }

@@ -24,6 +24,8 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NotificationHelper.createChannels(this)
+        BatteryGuardWidgetProvider.updateAll(this, force = true)
+        QuickSettingsTileService.requestRefresh(this)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -39,6 +41,8 @@ class MainActivity : FlutterActivity() {
                         val values = call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
                         MonitoringPreferences.save(this, values)
                         MonitoringService.sync(this)
+                        BatteryGuardWidgetProvider.updateAll(this, force = true)
+                        QuickSettingsTileService.requestRefresh(this)
                         result.success(null)
                     }
                     "getHistory" -> result.success(HistoryStore.getAll(this))
