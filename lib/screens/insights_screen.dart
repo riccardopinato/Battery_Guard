@@ -59,7 +59,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
           ),
           const SizedBox(height: 16),
           SegmentedButton<int>(
-            segments: const [
+            segments: [
               ButtonSegment(value: 7, label: Text(l10n.days7)),
               ButtonSegment(value: 30, label: Text(l10n.days30)),
             ],
