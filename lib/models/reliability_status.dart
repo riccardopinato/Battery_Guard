@@ -1,55 +1,89 @@
 class ReliabilityStatus {
   const ReliabilityStatus({
     required this.notificationsGranted,
+    required this.notificationsGloballyEnabled,
+    required this.monitorChannelEnabled,
+    required this.alertChannelEnabled,
+    required this.quietChannelEnabled,
     required this.batteryOptimizationIgnored,
     required this.monitoringRequested,
     required this.serviceHealthy,
-    required this.lastHeartbeatAt,
+    required this.lastServiceStartAt,
+    required this.lastServiceStopAt,
+    required this.lastBatteryEventAt,
     required this.lastStartFailureAt,
     required this.manufacturer,
   });
 
   factory ReliabilityStatus.fromMap(Map<dynamic, dynamic> map) {
-    int number(String key) => (map[key] as num?)?.round() ?? 0;
-    final heartbeat = number('lastHeartbeatAt');
-    final failure = number('lastStartFailureAt');
+    DateTime? time(String key) {
+      final value = (map[key] as num?)?.round() ?? 0;
+      return value > 0 ? DateTime.fromMillisecondsSinceEpoch(value) : null;
+    }
+
+    bool flag(String key, [bool fallback = false]) =>
+        map[key] as bool? ?? fallback;
 
     return ReliabilityStatus(
-      notificationsGranted: map['notificationsGranted'] as bool? ?? false,
-      batteryOptimizationIgnored:
-          map['batteryOptimizationIgnored'] as bool? ?? false,
-      monitoringRequested: map['monitoringRequested'] as bool? ?? false,
-      serviceHealthy: map['serviceHealthy'] as bool? ?? false,
-      lastHeartbeatAt: heartbeat > 0
-          ? DateTime.fromMillisecondsSinceEpoch(heartbeat)
-          : null,
-      lastStartFailureAt: failure > 0
-          ? DateTime.fromMillisecondsSinceEpoch(failure)
-          : null,
+      notificationsGranted: flag('notificationsGranted'),
+      notificationsGloballyEnabled: flag('notificationsGloballyEnabled'),
+      monitorChannelEnabled: flag('monitorChannelEnabled'),
+      alertChannelEnabled: flag('alertChannelEnabled'),
+      quietChannelEnabled: flag('quietChannelEnabled'),
+      batteryOptimizationIgnored: flag('batteryOptimizationIgnored'),
+      monitoringRequested: flag('monitoringRequested'),
+      serviceHealthy: flag('serviceHealthy'),
+      lastServiceStartAt: time('lastServiceStartAt'),
+      lastServiceStopAt: time('lastServiceStopAt'),
+      lastBatteryEventAt: time('lastBatteryEventAt'),
+      lastStartFailureAt: time('lastStartFailureAt'),
       manufacturer: map['manufacturer']?.toString() ?? 'Android',
     );
   }
 
   static const unknown = ReliabilityStatus(
     notificationsGranted: false,
+    notificationsGloballyEnabled: false,
+    monitorChannelEnabled: false,
+    alertChannelEnabled: false,
+    quietChannelEnabled: false,
     batteryOptimizationIgnored: false,
     monitoringRequested: false,
     serviceHealthy: true,
-    lastHeartbeatAt: null,
+    lastServiceStartAt: null,
+    lastServiceStopAt: null,
+    lastBatteryEventAt: null,
     lastStartFailureAt: null,
     manufacturer: 'Android',
   );
 
   final bool notificationsGranted;
+  final bool notificationsGloballyEnabled;
+  final bool monitorChannelEnabled;
+  final bool alertChannelEnabled;
+  final bool quietChannelEnabled;
   final bool batteryOptimizationIgnored;
   final bool monitoringRequested;
   final bool serviceHealthy;
-  final DateTime? lastHeartbeatAt;
+  final DateTime? lastServiceStartAt;
+  final DateTime? lastServiceStopAt;
+  final DateTime? lastBatteryEventAt;
   final DateTime? lastStartFailureAt;
   final String manufacturer;
 
+  bool get deliveryReady =>
+      notificationsGranted &&
+      notificationsGloballyEnabled &&
+      alertChannelEnabled;
+
+  bool get monitorDeliveryReady =>
+      notificationsGranted &&
+      notificationsGloballyEnabled &&
+      monitorChannelEnabled;
+
   bool get needsAttention =>
-      !notificationsGranted || (monitoringRequested && !serviceHealthy);
+      !deliveryReady ||
+      (monitoringRequested && (!serviceHealthy || !monitorDeliveryReady));
 
   String get serviceLabel {
     if (!monitoringRequested) return 'Non richiesto';
@@ -57,16 +91,22 @@ class ReliabilityStatus {
     return 'Da verificare';
   }
 
-  String get heartbeatLabel {
-    final value = lastHeartbeatAt;
-    if (value == null) return 'Nessun heartbeat registrato';
+  String get deliveryLabel {
+    if (!notificationsGranted) return 'Permesso notifiche mancante';
+    if (!notificationsGloballyEnabled) return 'Notifiche app disattivate';
+    if (!alertChannelEnabled) return 'Canale avvisi disattivato';
+    return 'Avvisi pronti';
+  }
 
+  String get batteryEventLabel {
+    final value = lastBatteryEventAt;
+    if (value == null) return 'Nessun evento batteria registrato';
     final elapsed = DateTime.now().difference(value);
-    if (elapsed.inMinutes < 1) return 'Aggiornato ora';
+    if (elapsed.inMinutes < 1) return 'Ultimo evento ora';
     if (elapsed.inMinutes < 60) {
-      return 'Aggiornato ${elapsed.inMinutes} min fa';
+      return 'Ultimo evento ${elapsed.inMinutes} min fa';
     }
-    return 'Aggiornato ${elapsed.inHours} h fa';
+    return 'Ultimo evento ${elapsed.inHours} h fa';
   }
 
   String get oemHint {

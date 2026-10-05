@@ -157,22 +157,31 @@ class HomeScreen extends StatelessWidget {
               MetricCard(
                 icon: Icons.thermostat_rounded,
                 label: 'Temperatura',
-                value: '${snapshot.temperatureC.toStringAsFixed(1)} °C',
-                caption:
-                    snapshot.temperatureC >= config.temperatureThresholdC
+                value: snapshot.temperatureAvailable
+                    ? '${snapshot.temperatureC.toStringAsFixed(1)} °C'
+                    : 'Non disponibile',
+                caption: snapshot.temperatureAvailable
+                    ? (snapshot.temperatureC >= config.temperatureThresholdC
                         ? 'Sopra la soglia impostata'
-                        : 'Soglia ${config.temperatureThresholdC.toStringAsFixed(0)} °C',
+                        : 'Soglia ${config.temperatureThresholdC.toStringAsFixed(0)} °C')
+                    : 'Dato non esposto dal dispositivo',
               ),
               MetricCard(
                 icon: Icons.electric_bolt_rounded,
                 label: 'Potenza stimata',
-                value: '${snapshot.powerW.abs().toStringAsFixed(1)} W',
-                caption: '${snapshot.currentMa.abs().toStringAsFixed(0)} mA',
+                value: snapshot.powerAvailable
+                    ? '${snapshot.powerW.abs().toStringAsFixed(1)} W'
+                    : 'Non disponibile',
+                caption: snapshot.currentAvailable
+                    ? '${snapshot.currentMa.abs().toStringAsFixed(0)} mA'
+                    : 'Corrente non esposta dal dispositivo',
               ),
               MetricCard(
                 icon: Icons.speed_rounded,
                 label: 'Tensione',
-                value: '${snapshot.voltageV.toStringAsFixed(2)} V',
+                value: snapshot.voltageAvailable
+                    ? '${snapshot.voltageV.toStringAsFixed(2)} V'
+                    : 'Non disponibile',
                 caption: snapshot.technology,
               ),
               MetricCard(
@@ -183,7 +192,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          if (!controller.notificationsGranted) ...[
+          if (!controller.reliability.deliveryReady) ...[
             const SizedBox(height: 14),
             Card(
               color: scheme.errorContainer,
@@ -198,7 +207,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Consenti le notifiche per ricevere gli avvisi anche a schermo spento.',
+                        controller.reliability.deliveryLabel,
                         style: TextStyle(color: scheme.onErrorContainer),
                       ),
                     ),

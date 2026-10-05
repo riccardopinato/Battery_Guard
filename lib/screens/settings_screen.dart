@@ -108,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 title: const Text('Stato monitoraggio'),
                 subtitle: Text(
-                  '${reliability.serviceLabel} • ${reliability.heartbeatLabel}',
+                  '${reliability.serviceLabel} • ${reliability.batteryEventLabel}',
                 ),
                 trailing: reliability.monitoringRequested &&
                         !reliability.serviceHealthy
@@ -123,15 +123,19 @@ class SettingsScreen extends StatelessWidget {
                 leading: const Icon(Icons.notifications_active_outlined),
                 title: const Text('Notifiche'),
                 subtitle: Text(
-                  reliability.notificationsGranted
-                      ? 'Permesso concesso'
-                      : 'Permesso mancante',
+                  reliability.deliveryLabel,
                 ),
-                trailing: reliability.notificationsGranted
+                trailing: reliability.deliveryReady
                     ? const Icon(Icons.check_circle_outline_rounded)
                     : FilledButton.tonal(
-                        onPressed: controller.requestNotificationPermission,
-                        child: const Text('Consenti'),
+                        onPressed: reliability.notificationsGranted
+                            ? controller.openNotificationSettings
+                            : controller.requestNotificationPermission,
+                        child: Text(
+                          reliability.notificationsGranted
+                              ? 'Sistema'
+                              : 'Consenti',
+                        ),
                       ),
                 onTap: controller.openNotificationSettings,
               ),
@@ -164,7 +168,20 @@ class SettingsScreen extends StatelessWidget {
                 leading: const Icon(Icons.volume_up_outlined),
                 title: const Text('Prova avviso'),
                 subtitle: const Text('Invia una notifica di test.'),
-                onTap: controller.testAlert,
+                onTap: () async {
+                  final delivered = await controller.testAlert();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        delivered
+                            ? 'Avviso inviato al sistema Android.'
+                            : 'Avviso non inviabile: controlla permessi e canali.',
+                      ),
+                    ),
+                  );
+                  await controller.refreshReliability();
+                },
               ),
             ],
           ),
@@ -219,7 +236,7 @@ class SettingsScreen extends StatelessWidget {
               Divider(height: 1),
               ListTile(
                 title: Text('Versione'),
-                trailing: Text('0.5.0 RC1'),
+                trailing: Text('0.6.0'),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 package com.riccardopinato.batteryguard
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -38,8 +39,10 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, controlChannel)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "getSnapshot" -> result.success(BatteryInfoReader.read(this))
-                    "getConfig" -> result.success(MonitoringPreferences.asMap(this))
+                    "getSnapshot" ->
+                        result.success(BatteryInfoReader.read(this))
+                    "getConfig" ->
+                        result.success(MonitoringPreferences.asMap(this))
                     "setConfig" -> {
                         val values =
                             call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
@@ -49,7 +52,8 @@ class MainActivity : FlutterActivity() {
                         QuickSettingsTileService.requestRefresh(this)
                         result.success(null)
                     }
-                    "getHistory" -> result.success(HistoryStore.getAll(this))
+                    "getHistory" ->
+                        result.success(HistoryStore.getAll(this))
                     "getChargingSessions" ->
                         result.success(ChargingSessionStore.getAll(this))
                     "getCurrentChargingSession" ->
@@ -66,7 +70,12 @@ class MainActivity : FlutterActivity() {
                     "getReliabilityStatus" ->
                         result.success(reliabilityStatus())
                     "isOnboardingComplete" ->
-                        result.success(appStatePrefs().getBoolean("onboardingComplete", false))
+                        result.success(
+                            appStatePrefs().getBoolean(
+                                "onboardingComplete",
+                                false,
+                            ),
+                        )
                     "setOnboardingComplete" -> {
                         val value = call.arguments as? Boolean ?: true
                         appStatePrefs().edit()
@@ -88,7 +97,7 @@ class MainActivity : FlutterActivity() {
                     }
                     "testAlert" -> {
                         val snapshot = BatteryInfoReader.read(this)
-                        NotificationHelper.showAlert(
+                        val sent = NotificationHelper.showAlert(
                             context = this,
                             title = "Battery Guard funziona",
                             message = "Questo è un avviso di prova.",
@@ -96,7 +105,7 @@ class MainActivity : FlutterActivity() {
                             notificationId = 2199,
                             saveToHistory = false,
                         )
-                        result.success(null)
+                        result.success(sent)
                     }
                     else -> result.notImplemented()
                 }
@@ -107,7 +116,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun appStatePrefs() =
-        getSharedPreferences("battery_guard_app_state", Context.MODE_PRIVATE)
+        getSharedPreferences(
+            "battery_guard_app_state",
+            Context.MODE_PRIVATE,
+        )
 
     private fun reliabilityStatus(): Map<String, Any> {
         val config = MonitoringPreferences.get(this)
@@ -115,11 +127,7 @@ class MainActivity : FlutterActivity() {
             "battery_guard_runtime",
             Context.MODE_PRIVATE,
         )
-        val heartbeat = runtime.getLong("lastHeartbeatAt", 0L)
-        val failure = runtime.getLong("lastStartFailureAt", 0L)
-        val heartbeatFresh =
-            heartbeat > 0L &&
-                System.currentTimeMillis() - heartbeat < 30 * 60 * 1000L
+        val delivery = NotificationHelper.deliveryState(this)
 
         val powerManager =
             getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -131,17 +139,36 @@ class MainActivity : FlutterActivity() {
             }
 
         return mapOf(
-            "notificationsGranted" to hasNotificationPermission(),
+            "notificationsGranted" to delivery.permissionGranted,
+            "notificationsGloballyEnabled" to delivery.globallyEnabled,
+            "monitorChannelEnabled" to delivery.monitorChannelEnabled,
+            "alertChannelEnabled" to delivery.alertChannelEnabled,
+            "quietChannelEnabled" to delivery.quietChannelEnabled,
             "batteryOptimizationIgnored" to optimizationIgnored,
             "monitoringRequested" to config.enabled,
-            "serviceHealthy" to (!config.enabled || heartbeatFresh),
-            "lastHeartbeatAt" to heartbeat,
-            "lastStartFailureAt" to failure,
+            "serviceHealthy" to (!config.enabled || isMonitoringServiceRunning()),
+            "lastServiceStartAt" to
+                runtime.getLong("lastServiceStartAt", 0L),
+            "lastServiceStopAt" to
+                runtime.getLong("lastServiceStopAt", 0L),
+            "lastBatteryEventAt" to
+                runtime.getLong("lastBatteryEventAt", 0L),
+            "lastStartFailureAt" to
+                runtime.getLong("lastStartFailureAt", 0L),
             "manufacturer" to
                 Build.MANUFACTURER.replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase() else it.toString()
                 },
         )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun isMonitoringServiceRunning(): Boolean {
+        val manager =
+            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return manager.getRunningServices(Int.MAX_VALUE).any {
+            it.service.className == MonitoringService::class.java.name
+        }
     }
 
     private fun hasNotificationPermission(): Boolean {
@@ -151,7 +178,8 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun requestNotificationPermission(result: MethodChannel.Result) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             hasNotificationPermission()
         ) {
             result.success(true)
@@ -173,10 +201,15 @@ class MainActivity : FlutterActivity() {
         permissions: Array<out String>,
         grantResults: IntArray,
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults,
+        )
         if (requestCode == notificationRequestCode) {
             val granted =
-                grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+                grantResults.firstOrNull() ==
+                    PackageManager.PERMISSION_GRANTED
             pendingPermissionResult?.success(granted)
             pendingPermissionResult = null
         }
@@ -199,9 +232,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun openNotificationSettings() {
-        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-        }
+        val intent =
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            }
         try {
             startActivity(intent)
         } catch (_: Throwable) {

@@ -98,5 +98,6 @@ class NativeBatteryService {
   Future<void> openNotificationSettings() =>
       _control.invokeMethod<void>('openNotificationSettings');
 
-  Future<void> testAlert() => _control.invokeMethod<void>('testAlert');
+  Future<bool> testAlert() async =>
+      await _control.invokeMethod<bool>('testAlert') ?? false;
 }

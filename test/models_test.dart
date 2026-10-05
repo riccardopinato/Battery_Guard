@@ -6,13 +6,17 @@ import 'package:battery_guard/models/reliability_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('BatterySnapshot parses Android payload', () {
+  test('BatterySnapshot distinguishes unavailable telemetry from zero', () {
     final snapshot = BatterySnapshot.fromMap({
       'level': 85,
       'temperatureC': 34.6,
       'voltageMv': 4321,
       'currentMa': -1200.0,
       'powerW': 5.18,
+      'temperatureAvailable': true,
+      'voltageAvailable': true,
+      'currentAvailable': true,
+      'powerAvailable': true,
       'status': 'In carica',
       'health': 'Buona',
       'technology': 'Li-ion',
@@ -27,6 +31,11 @@ void main() {
     expect(snapshot.temperatureC, 34.6);
     expect(snapshot.voltageV, closeTo(4.321, 0.001));
     expect(snapshot.isCharging, isTrue);
+    expect(snapshot.powerAvailable, isTrue);
+
+    final unsupported = BatterySnapshot.fromMap({'level': 50});
+    expect(unsupported.powerAvailable, isFalse);
+    expect(unsupported.currentAvailable, isFalse);
   });
 
   test('MonitoringConfig defaults are battery-friendly', () {
@@ -41,7 +50,9 @@ void main() {
     final session = ChargingSession.fromMap({
       'id': '1',
       'startedAt': 1000,
+      'lastObservedAt': 2000,
       'endedAt': 0,
+      'quality': 'active',
       'startLevel': 40,
       'currentLevel': 55,
       'endLevel': 55,
@@ -60,10 +71,10 @@ void main() {
     expect(session.gainedPercent, 15);
     expect(session.percentPerHour, 30.0);
     expect(session.estimatedMinutesToTarget, 50);
-    expect(session.completed, isFalse);
+    expect(session.quality, ChargingSessionQuality.active);
   });
 
-  test('ChargingInsights aggregates observed sessions', () {
+  test('ChargingInsights excludes interrupted sessions', () {
     final now = DateTime(2026, 9, 22, 12);
 
     ChargingSession buildSession({
@@ -74,12 +85,15 @@ void main() {
       required double maxTemp,
       required double rate,
       required String source,
+      ChargingSessionQuality quality = ChargingSessionQuality.completed,
     }) {
       final started = now.subtract(Duration(days: daysAgo, hours: 1));
+      final ended = started.add(const Duration(hours: 1));
       return ChargingSession(
         id: id,
         startedAt: started,
-        endedAt: started.add(const Duration(hours: 1)),
+        endedAt: ended,
+        lastObservedAt: ended,
         startLevel: start,
         currentLevel: end,
         endLevel: end,
@@ -92,7 +106,8 @@ void main() {
         estimatedMinutesToTarget: null,
         plugType: source,
         targetLevel: 80,
-        completed: true,
+        completed: quality == ChargingSessionQuality.completed,
+        quality: quality,
       );
     }
 
@@ -116,6 +131,16 @@ void main() {
           rate: 30,
           source: 'Caricatore AC',
         ),
+        buildSession(
+          id: 'interrupted',
+          daysAgo: 1,
+          start: 20,
+          end: 80,
+          maxTemp: 50,
+          rate: 5,
+          source: 'Caricatore AC',
+          quality: ChargingSessionQuality.interrupted,
+        ),
       ],
       days: 7,
       now: now,
@@ -128,25 +153,31 @@ void main() {
     expect(insights.averageRatePercentPerHour, closeTo(32.5, 0.01));
   });
 
-  test('ReliabilityStatus reports attention when service is unhealthy', () {
+  test('ReliabilityStatus exposes notification channel truth', () {
     final status = ReliabilityStatus.fromMap({
       'notificationsGranted': true,
+      'notificationsGloballyEnabled': true,
+      'monitorChannelEnabled': true,
+      'alertChannelEnabled': false,
+      'quietChannelEnabled': true,
       'batteryOptimizationIgnored': false,
       'monitoringRequested': true,
-      'serviceHealthy': false,
-      'lastHeartbeatAt': 0,
-      'lastStartFailureAt': 1234,
+      'serviceHealthy': true,
       'manufacturer': 'Samsung',
     });
 
+    expect(status.deliveryReady, isFalse);
     expect(status.needsAttention, isTrue);
-    expect(status.serviceLabel, 'Da verificare');
-    expect(status.oemHint, contains('Samsung'));
+    expect(status.deliveryLabel, contains('Canale'));
   });
 
-  test('ReliabilityStatus accepts disabled monitoring as healthy state', () {
+  test('ReliabilityStatus accepts disabled monitoring with ready alerts', () {
     final status = ReliabilityStatus.fromMap({
       'notificationsGranted': true,
+      'notificationsGloballyEnabled': true,
+      'monitorChannelEnabled': true,
+      'alertChannelEnabled': true,
+      'quietChannelEnabled': true,
       'batteryOptimizationIgnored': false,
       'monitoringRequested': false,
       'serviceHealthy': true,
@@ -155,5 +186,6 @@ void main() {
 
     expect(status.needsAttention, isFalse);
     expect(status.serviceLabel, 'Non richiesto');
+    expect(status.deliveryReady, isTrue);
   });
 }

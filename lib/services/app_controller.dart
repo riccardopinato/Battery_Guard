@@ -175,7 +175,7 @@ class AppController extends ChangeNotifier {
   Future<void> openNotificationSettings() =>
       _platform.openNotificationSettings();
 
-  Future<void> testAlert() => _platform.testAlert();
+  Future<bool> testAlert() => _platform.testAlert();
 
   @override
   void dispose() {

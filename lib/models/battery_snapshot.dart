@@ -5,6 +5,10 @@ class BatterySnapshot {
     required this.voltageMv,
     required this.currentMa,
     required this.powerW,
+    required this.temperatureAvailable,
+    required this.voltageAvailable,
+    required this.currentAvailable,
+    required this.powerAvailable,
     required this.status,
     required this.health,
     required this.technology,
@@ -21,6 +25,10 @@ class BatterySnapshot {
         voltageMv: 0,
         currentMa: 0,
         powerW: 0,
+        temperatureAvailable: false,
+        voltageAvailable: false,
+        currentAvailable: false,
+        powerAvailable: false,
         status: 'Sconosciuto',
         health: 'Sconosciuta',
         technology: '—',
@@ -53,6 +61,10 @@ class BatterySnapshot {
       voltageMv: number('voltageMv').round(),
       currentMa: number('currentMa').toDouble(),
       powerW: number('powerW').toDouble(),
+      temperatureAvailable: boolean('temperatureAvailable'),
+      voltageAvailable: boolean('voltageAvailable'),
+      currentAvailable: boolean('currentAvailable'),
+      powerAvailable: boolean('powerAvailable'),
       status: text('status', 'Sconosciuto'),
       health: text('health', 'Sconosciuta'),
       technology: text('technology'),
@@ -71,6 +83,10 @@ class BatterySnapshot {
   final int voltageMv;
   final double currentMa;
   final double powerW;
+  final bool temperatureAvailable;
+  final bool voltageAvailable;
+  final bool currentAvailable;
+  final bool powerAvailable;
   final String status;
   final String health;
   final String technology;

@@ -1,24 +1,44 @@
 # Battery Guard
 
-Flutter Android utility per monitorare batteria, temperatura e ricarica con avvisi persistenti anche a schermo spento.
+Battery Guard è una utility Android Flutter/Dart local-first per monitorare ricarica, temperatura e comportamento della batteria senza account, backend o telemetria remota.
 
 ## Stato
-Versione: 0.1.0+1
-Package: `com.riccardopinato.batteryguard`
 
-## Funzioni incluse
-- Dashboard con livello batteria, temperatura, tensione, corrente/potenza stimata e salute Android.
-- Soglia di avviso selezionabile: 80 / 85 / 90 / 100%.
-- Avviso carica completa.
-- Avviso temperatura elevata con soglia configurabile.
-- Avviso cavo scollegato.
-- Modalità notte con notifiche silenziose.
-- Foreground service Android per monitoraggio a schermo spento.
-- Riavvio monitoraggio dopo boot/aggiornamento se l'utente lo aveva attivato.
-- Storico locale di campioni e avvisi.
-- Nessun account, cloud o telemetria.
+Versione sorgente: **0.6.0+7 — Core Reliability**
 
-## Nota tecnica
-L'interfaccia e la logica applicativa sono Flutter/Dart. Il progetto include il minimo bridge Android/Kotlin necessario per leggere le API batteria avanzate e mantenere gli avvisi affidabili in background.
+Evidence attuale:
+- IMPLEMENTED
+- STATICALLY CHECKED: in verifica CI
+- TESTED: test unitari in verifica CI
+- PHYSICAL DEVICE VERIFIED: **NO**
+- STORE READY: **NO**
 
-Battery Guard avvisa l'utente ma non interrompe fisicamente la ricarica.
+Non considerare una build verde equivalente a validazione fisica del foreground service o della consegna notifiche.
+
+## Funzioni
+
+- soglia 80/85/90/100%;
+- temperatura batteria;
+- corrente, tensione e potenza quando esposte dal dispositivo;
+- foreground monitoring Android;
+- avvisi soglia, temperatura, 100%, cavo scollegato;
+- modalità notte;
+- Smart Charging con sessioni, velocità, ETA e baseline personale;
+- Insights 7/30 giorni;
+- widget Home;
+- Quick Settings Tile;
+- diagnostica di servizio, permessi e notification channel;
+- gestione sessioni interrotte/non affidabili;
+- storage locale bounded.
+
+Battery Guard **non interrompe fisicamente la ricarica** e non inventa una percentuale di battery health.
+
+## Privacy
+
+La v0.6 disabilita Android Auto Backup per mantenere coerente la promessa local-only. Dati e configurazioni restano sul dispositivo salvo azioni future esplicite dell'utente.
+
+## Build
+
+Toolchain CI fissata a Flutter 3.47.5. Le build CI senza credenziali di produzione usano signing di test e **non sono store-ready**. La firma di produzione è supportata tramite secret GitHub dedicati, non conservati nel repository.
+
+Vedi `PRODUCT_BIBLE.md`, `ROADMAP.md` e `CHANGELOG.md`.

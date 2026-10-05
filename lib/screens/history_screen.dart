@@ -232,12 +232,17 @@ class _SessionCard extends StatelessWidget {
         ),
         subtitle: Text(
           '$dateLabel • ${session.durationLabel} • ${session.plugType}\\n'
-          '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
+          '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C • ${session.qualityLabel}',
         ),
         isThreeLine: true,
-        trailing: Icon(
-          Icons.check_circle_outline_rounded,
-          color: scheme.primary,
+        trailing: Tooltip(
+          message: session.qualityLabel,
+          child: Icon(
+            session.trustedForInsights
+                ? Icons.check_circle_outline_rounded
+                : Icons.warning_amber_rounded,
+            color: session.trustedForInsights ? scheme.primary : scheme.tertiary,
+          ),
         ),
       ),
     );

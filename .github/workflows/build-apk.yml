@@ -1,4 +1,4 @@
-name: Build Battery Guard Lightweight
+name: Battery Guard CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: battery-guard-android-main
@@ -29,13 +29,14 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - name: Set up Flutter
+      - name: Set up Flutter 3.47.5
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: "3.47.5"
           channel: stable
           cache: true
 
-      - name: Complete generated Flutter Android files
+      - name: Complete pinned Flutter Android wrapper
         shell: bash
         run: |
           set -euxo pipefail
@@ -45,7 +46,6 @@ jobs:
             --org com.riccardopinato \
             --project-name battery_guard \
             /tmp/battery_guard_scaffold
-
           cp /tmp/battery_guard_scaffold/android/gradlew android/gradlew
           cp /tmp/battery_guard_scaffold/android/gradlew.bat android/gradlew.bat
           mkdir -p android/gradle/wrapper
@@ -55,6 +55,26 @@ jobs:
             cp /tmp/battery_guard_scaffold/.metadata .metadata
           fi
           chmod +x android/gradlew
+
+      - name: Prepare optional production signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/battery-guard-release.jks"
+            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/battery-guard-release.jks" >> "$GITHUB_ENV"
+            echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "PRODUCTION_SIGNING_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "PRODUCTION_SIGNING_READY=false" >> "$GITHUB_ENV"
+          fi
 
       - name: Flutter environment
         run: |
@@ -70,100 +90,47 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Build lightweight APKs
-        shell: bash
+      - name: Build split APKs
         run: |
-          set -euxo pipefail
           rm -rf build/symbols
           mkdir -p build/symbols
           flutter build apk --release --split-per-abi --split-debug-info=build/symbols
 
       - name: Build universal APK
-        shell: bash
-        run: |
-          set -euxo pipefail
-          flutter build apk --release --split-debug-info=build/symbols
+        run: flutter build apk --release --split-debug-info=build/symbols
 
-      - name: Build Play Store AAB
-        shell: bash
-        run: |
-          set -euxo pipefail
-          flutter build appbundle --release --split-debug-info=build/symbols
+      - name: Build AAB
+        run: flutter build appbundle --release --split-debug-info=build/symbols
 
-      - name: Prepare release files
+      - name: Prepare immutable CI bundle
         shell: bash
         run: |
           set -euxo pipefail
+          VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          SHORT_SHA="${GITHUB_SHA:0:12}"
           mkdir -p release
-
-          test -s build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-          test -s build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-          test -s build/app/outputs/flutter-apk/app-x86_64-release.apk
-          test -s build/app/outputs/flutter-apk/app-release.apk
-          test -s build/app/outputs/bundle/release/app-release.aab
-
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk release/Battery-Guard-v0.5.0-arm64-v8a.apk
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk release/Battery-Guard-v0.5.0-armeabi-v7a.apk
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk release/Battery-Guard-v0.5.0-x86_64.apk
-          cp build/app/outputs/flutter-apk/app-release.apk release/Battery-Guard-v0.5.0-universal.apk
-          cp build/app/outputs/bundle/release/app-release.aab release/Battery-Guard-v0.5.0.aab
-
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-arm64-v8a.apk"
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-armeabi-v7a.apk"
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-x86_64.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-universal.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-${VERSION}-${SHORT_SHA}.aab"
           (
             cd release
-            sha256sum Battery-Guard-v0.5.0-arm64-v8a.apk \
-                      Battery-Guard-v0.5.0-armeabi-v7a.apk \
-                      Battery-Guard-v0.5.0-x86_64.apk \
-                      Battery-Guard-v0.5.0-universal.apk \
-                      Battery-Guard-v0.5.0.aab > SHA256SUMS.txt
+            sha256sum * > SHA256SUMS.txt
           )
-
           {
-            echo "Battery Guard v0.5.0 - dimensioni build"
-            echo
-            du -h release/Battery-Guard-v0.5.0-arm64-v8a.apk
-            du -h release/Battery-Guard-v0.5.0-armeabi-v7a.apk
-            du -h release/Battery-Guard-v0.5.0-x86_64.apk
-            du -h release/Battery-Guard-v0.5.0-universal.apk
-            du -h release/Battery-Guard-v0.5.0.aab
-          } | tee release/SIZES.txt
+            echo "version=$VERSION"
+            echo "sourceSha=$GITHUB_SHA"
+            echo "productionSigningReady=$PRODUCTION_SIGNING_READY"
+            echo "flutter=3.47.5"
+          } > release/BUILD_EVIDENCE.txt
 
-      - name: Upload workflow artifact
+      - name: Upload immutable CI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Battery-Guard-v0.5.0-RC1
+          name: Battery-Guard-${{ github.sha }}
           path: |
             release/*
             build/symbols/**
           if-no-files-found: error
-          retention-days: 1
-
-      - name: Publish GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euxo pipefail
-
-          if gh release view v0.5.0 >/dev/null 2>&1; then
-            gh release upload v0.5.0 \
-              release/Battery-Guard-v0.5.0-arm64-v8a.apk \
-              release/Battery-Guard-v0.5.0-armeabi-v7a.apk \
-              release/Battery-Guard-v0.5.0-x86_64.apk \
-              release/Battery-Guard-v0.5.0-universal.apk \
-              release/Battery-Guard-v0.5.0.aab \
-              release/SHA256SUMS.txt \
-              release/SIZES.txt \
-              --clobber
-          else
-            gh release create v0.5.0 \
-              release/Battery-Guard-v0.5.0-arm64-v8a.apk \
-              release/Battery-Guard-v0.5.0-armeabi-v7a.apk \
-              release/Battery-Guard-v0.5.0-x86_64.apk \
-              release/Battery-Guard-v0.5.0-universal.apk \
-              release/Battery-Guard-v0.5.0.aab \
-              release/SHA256SUMS.txt \
-              release/SIZES.txt \
-              --target "${GITHUB_SHA}" \
-              --title "Battery Guard v0.5.0 RC1" \
-              --notes "Release Candidate 1: onboarding guidato, diagnostica reale del monitoraggio con heartbeat, indicazioni OEM, ripristino servizio, impostazioni notifiche/batteria, sincronizzazione al resume, R8/resource shrinking, test aggiuntivi e polish pre-release."
-          fi
+          retention-days: 7

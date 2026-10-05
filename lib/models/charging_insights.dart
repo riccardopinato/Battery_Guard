@@ -43,7 +43,7 @@ class ChargingInsights {
     final cutoff = today.subtract(Duration(days: days - 1));
 
     final filtered = sessions
-        .where((session) => session.completed)
+        .where((session) => session.trustedForInsights)
         .where((session) {
           final local = session.startedAt.toLocal();
           final date = DateTime(local.year, local.month, local.day);

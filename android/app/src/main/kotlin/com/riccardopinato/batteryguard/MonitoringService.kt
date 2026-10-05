@@ -59,7 +59,6 @@ class MonitoringService : Service() {
             try {
                 unregisterReceiver(receiver)
             } catch (_: Throwable) {
-                // Receiver already unregistered.
             }
             registered = false
         }
@@ -84,16 +83,20 @@ class MonitoringService : Service() {
         if (!config.enabled) return
 
         runtimePrefs.edit()
-            .putLong("lastHeartbeatAt", System.currentTimeMillis())
+            .putLong("lastBatteryEventAt", System.currentTimeMillis())
             .apply()
 
         val level = snapshot["level"] as? Int ?: 0
-        val temperature = (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
+        val temperature =
+            (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
+        val temperatureAvailable =
+            snapshot["temperatureAvailable"] as? Boolean ?: false
         val isCharging = snapshot["isCharging"] as? Boolean ?: false
         val isPlugged = snapshot["isPlugged"] as? Boolean ?: false
 
         val manager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            getSystemService(Context.NOTIFICATION_SERVICE)
+                as android.app.NotificationManager
         manager.notify(
             NotificationHelper.MONITOR_NOTIFICATION_ID,
             NotificationHelper.monitorNotification(this, snapshot),
@@ -109,54 +112,63 @@ class MonitoringService : Service() {
         )
 
         if (sessionUpdate.adaptiveTemperatureAlert) {
-            NotificationHelper.showAlert(
-                context = this,
+            deliverSessionAlert(
+                type = "adaptiveTemperature",
                 title = "Temperatura sopra la tua media",
-                message = "Questa ricarica è a ${"%.1f".format(temperature)} °C, circa 4 °C o più sopra la temperatura massima media delle tue sessioni simili (${"%.1f".format(sessionUpdate.baselineMaxTemperatureC)} °C).",
+                message =
+                    "Questa ricarica è a ${"%.1f".format(temperature)} °C, circa 4 °C o più sopra la temperatura massima media delle tue sessioni simili (${"%.1f".format(sessionUpdate.baselineMaxTemperatureC)} °C).",
                 snapshot = snapshot,
                 notificationId = 2108,
             )
         }
 
         if (sessionUpdate.adaptiveSlowChargingAlert) {
-            val rate = (sessionUpdate.current?.get("percentPerHour") as? Number)
-                ?.toDouble()
-                ?: 0.0
-            NotificationHelper.showAlert(
-                context = this,
+            val rate =
+                (sessionUpdate.current?.get("percentPerHour") as? Number)
+                    ?.toDouble()
+                    ?: 0.0
+            deliverSessionAlert(
+                type = "adaptiveSlowCharging",
                 title = "Ricarica più lenta del solito",
-                message = "Velocità attuale circa ${"%.1f".format(rate)} %/h contro una media personale di ${"%.1f".format(sessionUpdate.baselineRate)} %/h con questa sorgente.",
+                message =
+                    "Velocità attuale circa ${"%.1f".format(rate)} %/h contro una media personale di ${"%.1f".format(sessionUpdate.baselineRate)} %/h con questa sorgente.",
                 snapshot = snapshot,
                 notificationId = 2107,
             )
         }
 
         if (sessionUpdate.rapidTemperatureAlert) {
-            NotificationHelper.showAlert(
-                context = this,
+            deliverSessionAlert(
+                type = "rapidTemperature",
                 title = "Temperatura in rapido aumento",
-                message = "La batteria è salita rapidamente fino a ${"%.1f".format(temperature)} °C durante questa ricarica.",
+                message =
+                    "La batteria è salita rapidamente fino a ${"%.1f".format(temperature)} °C durante questa ricarica.",
                 snapshot = snapshot,
                 notificationId = 2105,
             )
         }
 
         if (sessionUpdate.slowChargingAlert) {
-            val rate = (sessionUpdate.current?.get("percentPerHour") as? Number)
-                ?.toDouble()
-                ?: 0.0
-            NotificationHelper.showAlert(
-                context = this,
+            val rate =
+                (sessionUpdate.current?.get("percentPerHour") as? Number)
+                    ?.toDouble()
+                    ?: 0.0
+            deliverSessionAlert(
+                type = "slowCharging",
                 title = "Ricarica insolitamente lenta",
-                message = "Velocità media circa ${"%.1f".format(rate)} %/h. Verifica cavo e alimentatore; alcuni dispositivi possono limitare volontariamente la ricarica.",
+                message =
+                    "Velocità media circa ${"%.1f".format(rate)} %/h. Verifica cavo e alimentatore; alcuni dispositivi possono limitare volontariamente la ricarica.",
                 snapshot = snapshot,
                 notificationId = 2106,
             )
         }
 
-        var targetAlerted = runtimePrefs.getBoolean("targetAlerted", false)
-        var fullAlerted = runtimePrefs.getBoolean("fullAlerted", false)
-        var temperatureAlerted = runtimePrefs.getBoolean("temperatureAlerted", false)
+        var targetAlerted =
+            runtimePrefs.getBoolean("targetAlerted", false)
+        var fullAlerted =
+            runtimePrefs.getBoolean("fullAlerted", false)
+        var temperatureAlerted =
+            runtimePrefs.getBoolean("temperatureAlerted", false)
 
         if (!isPlugged || level <= config.targetLevel - 3) {
             targetAlerted = false
@@ -164,7 +176,10 @@ class MonitoringService : Service() {
         if (!isPlugged || level < 98) {
             fullAlerted = false
         }
-        if (temperature < config.temperatureThresholdC - 2) {
+        if (
+            !temperatureAvailable ||
+            temperature < config.temperatureThresholdC - 2
+        ) {
             temperatureAlerted = false
         }
 
@@ -172,20 +187,24 @@ class MonitoringService : Service() {
             isCharging &&
             level >= config.targetLevel &&
             !targetAlerted &&
-            canSendAlert("lastTargetAlertAt", 10 * 60 * 1000L)
+            canAttemptAlert("lastTargetAlertAt", 10 * 60 * 1000L)
         ) {
-            NotificationHelper.showAlert(
+            val sent = NotificationHelper.showAlert(
                 context = this,
-                title = "Soglia raggiunta: ${level}%",
-                message = if (config.targetLevel < 100) {
-                    "La batteria ha raggiunto il ${config.targetLevel}%. Puoi scollegare il caricatore."
-                } else {
-                    "La batteria ha raggiunto il 100%."
-                },
+                title = "Soglia raggiunta: $level%",
+                message =
+                    if (config.targetLevel < 100) {
+                        "La batteria ha raggiunto il ${config.targetLevel}%. Puoi scollegare il caricatore."
+                    } else {
+                        "La batteria ha raggiunto il 100%."
+                    },
                 snapshot = snapshot,
                 notificationId = 2101,
             )
-            targetAlerted = true
+            if (sent) {
+                recordAlertSent("lastTargetAlertAt")
+                targetAlerted = true
+            }
         }
 
         if (
@@ -193,31 +212,45 @@ class MonitoringService : Service() {
             isCharging &&
             level >= 100 &&
             !fullAlerted &&
-            canSendAlert("lastFullAlertAt", 30 * 60 * 1000L)
+            canAttemptAlert("lastFullAlertAt", 30 * 60 * 1000L)
         ) {
-            NotificationHelper.showAlert(
-                context = this,
-                title = "Carica completa",
-                message = "La batteria è al 100%. Puoi scollegare il caricatore.",
-                snapshot = snapshot,
-                notificationId = 2102,
-            )
-            fullAlerted = true
+            if (
+                NotificationHelper.showAlert(
+                    context = this,
+                    title = "Carica completa",
+                    message =
+                        "La batteria è al 100%. Puoi scollegare il caricatore.",
+                    snapshot = snapshot,
+                    notificationId = 2102,
+                )
+            ) {
+                recordAlertSent("lastFullAlertAt")
+                fullAlerted = true
+            }
         }
 
         if (
+            temperatureAvailable &&
             temperature >= config.temperatureThresholdC &&
             !temperatureAlerted &&
-            canSendAlert("lastTemperatureAlertAt", 30 * 60 * 1000L)
-        ) {
-            NotificationHelper.showAlert(
-                context = this,
-                title = "Temperatura batteria elevata",
-                message = "La batteria è a ${"%.1f".format(temperature)} °C. Controlla il telefono e la ricarica.",
-                snapshot = snapshot,
-                notificationId = 2103,
+            canAttemptAlert(
+                "lastTemperatureAlertAt",
+                30 * 60 * 1000L,
             )
-            temperatureAlerted = true
+        ) {
+            if (
+                NotificationHelper.showAlert(
+                    context = this,
+                    title = "Temperatura batteria elevata",
+                    message =
+                        "La batteria è a ${"%.1f".format(temperature)} °C. Controlla il telefono e la ricarica.",
+                    snapshot = snapshot,
+                    notificationId = 2103,
+                )
+            ) {
+                recordAlertSent("lastTemperatureAlertAt")
+                temperatureAlerted = true
+            }
         }
 
         val oldPlugged = previousPlugged
@@ -225,15 +258,20 @@ class MonitoringService : Service() {
             oldPlugged == true &&
             !isPlugged &&
             config.notifyUnplugged &&
-            canSendAlert("lastUnplugAlertAt", 5 * 60 * 1000L)
+            canAttemptAlert("lastUnplugAlertAt", 5 * 60 * 1000L)
         ) {
-            NotificationHelper.showAlert(
-                context = this,
-                title = "Cavo scollegato",
-                message = "Ricarica interrotta con batteria al ${level}%.",
-                snapshot = snapshot,
-                notificationId = 2104,
-            )
+            if (
+                NotificationHelper.showAlert(
+                    context = this,
+                    title = "Cavo scollegato",
+                    message =
+                        "Ricarica interrotta con batteria al $level%.",
+                    snapshot = snapshot,
+                    notificationId = 2104,
+                )
+            ) {
+                recordAlertSent("lastUnplugAlertAt")
+            }
         }
         previousPlugged = isPlugged
 
@@ -244,19 +282,40 @@ class MonitoringService : Service() {
             .apply()
     }
 
-    private fun canSendAlert(
+    private fun deliverSessionAlert(
+        type: String,
+        title: String,
+        message: String,
+        snapshot: Map<String, Any>,
+        notificationId: Int,
+    ) {
+        if (
+            NotificationHelper.showAlert(
+                context = this,
+                title = title,
+                message = message,
+                snapshot = snapshot,
+                notificationId = notificationId,
+            )
+        ) {
+            ChargingSessionStore.markAlertDelivered(this, type)
+        }
+    }
+
+    private fun canAttemptAlert(
         key: String,
         cooldownMs: Long,
     ): Boolean {
+        if (!NotificationHelper.canDeliverAlert(this)) return false
         val now = System.currentTimeMillis()
         val last = runtimePrefs.getLong(key, 0L)
-        if (last > 0L && now - last < cooldownMs) {
-            return false
-        }
+        return last <= 0L || now - last >= cooldownMs
+    }
+
+    private fun recordAlertSent(key: String) {
         runtimePrefs.edit()
-            .putLong(key, now)
+            .putLong(key, System.currentTimeMillis())
             .apply()
-        return true
     }
 
     companion object {
