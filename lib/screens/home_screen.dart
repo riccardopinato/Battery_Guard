@@ -122,9 +122,9 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       if (snapshot.isPowerSaveMode)
-                        const Tooltip(
+                        Tooltip(
                           message: l10n.batterySaverActive,
-                          child: Icon(Icons.energy_savings_leaf_outlined),
+                          child: const Icon(Icons.energy_savings_leaf_outlined),
                         ),
                     ],
                   ),
