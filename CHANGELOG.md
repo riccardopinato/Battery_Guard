@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+- Flutter localization infrastructure for EN/IT/ES/FR/DE/PT;
+- system-language default with persistent manual override;
+- browser-safe simulated Web Preview;
+- GitHub Pages preview branch generated from the same source SHA;
+- navigation, onboarding, Home, History, Insights and Settings migrated to localized strings;
+- Web Preview explicitly labels native Android telemetry as simulated.
+
 ## 0.6.0
 - notification reliability now checks app-wide notifications and individual channels;
 - alert cooldown is recorded only after a deliverable notification succeeds;

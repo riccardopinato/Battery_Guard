@@ -1,0 +1,163 @@
+{
+  "@@locale": "de",
+  "appTitle": "Battery Guard",
+  "navBattery": "Akku",
+  "navInsights": "Insights",
+  "navHistory": "Verlauf",
+  "navSettings": "Einstellungen",
+  "protectionActive": "Schutz aktiv",
+  "protectionInactive": "Schutz aus",
+  "notConnected": "Nicht verbunden",
+  "healthInline": "health {health}",
+  "@healthInline": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "batterySaverActive": "Battery saver active",
+  "notifyAt": "Benachrichtigen bei",
+  "temperature": "Temperatur",
+  "aboveThreshold": "Above the configured threshold",
+  "thresholdValue": "Threshold {value} °C",
+  "@thresholdValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dataUnavailable": "Nicht verfügbar",
+  "dataNotExposed": "Data not exposed by this device",
+  "estimatedPower": "Geschätzte Leistung",
+  "currentNotExposed": "Current not exposed by this device",
+  "voltage": "Spannung",
+  "health": "Zustand",
+  "currentSession": "Aktuelle Sitzung",
+  "calculating": "Calculating…",
+  "speed": "Geschwindigkeit",
+  "averagePower": "Durchschnittsleistung",
+  "atTarget": "At {target}%",
+  "@atTarget": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "allowNotificationsToAlert": "Enable notifications to receive alerts even with the screen off.",
+  "allow": "Erlauben",
+  "protectCharging": "Ladevorgang schützen",
+  "introBody": "Battery Guard monitors level, temperature and charging sessions. It alerts you at the selected threshold, with no account and no cloud.",
+  "allowAlerts": "Benachrichtigungen erlauben",
+  "allowAlertsBody": "Notifications are used for threshold, temperature and anomaly alerts even when Battery Guard is not open.",
+  "permissionGranted": "Berechtigung erteilt",
+  "keepOperational": "Betrieb sicherstellen",
+  "openBatterySettings": "Akkueinstellungen öffnen",
+  "protectionAlreadyActive": "Protection already active",
+  "activateProtection": "Schutz aktivieren",
+  "start": "Start",
+  "continueLabel": "Weiter",
+  "skipSetup": "Einrichtung überspringen",
+  "historyTitle": "Verlauf",
+  "deleteHistory": "Verlauf löschen",
+  "historySubtitle": "Sessions, samples and alerts stored only on this device.",
+  "chargingSessions": "Ladesitzungen",
+  "recentSamples": "Letzte Messwerte",
+  "recentAlerts": "Letzte Warnungen",
+  "noAlerts": "Keine Warnungen",
+  "batteryAlert": "Battery alert",
+  "clearHistoryTitle": "Delete history?",
+  "clearHistoryBody": "Completed sessions, samples and locally stored alerts will be removed. The current session will remain active.",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "qualityActive": "Aktiv",
+  "qualityCompleted": "Abgeschlossen",
+  "qualityInterrupted": "Unterbrochen",
+  "qualityUncertain": "Zu prüfen",
+  "insightsSubtitle": "Statistics based only on sessions observed on this device.",
+  "days7": "7 Tage",
+  "days30": "30 Tage",
+  "noSessionsPeriod": "There are no completed sessions in the selected period.",
+  "sessions": "Sitzungen",
+  "averageDuration": "Average {duration}",
+  "@averageDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "averageSpeed": "Durchschnittsgeschwindigkeit",
+  "measurableSessions": "Sessions with measurable increase",
+  "averageMaxTemp": "Avg max temp",
+  "peakValue": "Peak {value} °C",
+  "@peakValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "averagePowerMetric": "Average power",
+  "androidEstimate": "Estimate from data exposed by Android",
+  "chargingFrequency": "Ladehäufigkeit",
+  "averageMaxTemperature": "Average maximum temperature",
+  "exposure": "Belastung",
+  "sessionsAbove40": "Sessions ≥ 40 °C",
+  "sessionsAbove42": "Sessions ≥ 42 °C",
+  "endingAbove90": "Ending ≥ 90%",
+  "ending100": "Ending 100%",
+  "averageTimeAbove80": "Average time above 80%",
+  "chargingSources": "Ladequellen",
+  "observedHabits": "Beobachtete Gewohnheiten",
+  "settingsTitle": "Einstellungen",
+  "protection": "Schutz",
+  "batteryGuardActive": "Battery Guard aktiv",
+  "monitoringScreenOff": "Keeps monitoring active with the screen off.",
+  "chargingThreshold": "Ladeschwelle",
+  "alertAt": "Alert at {level}%",
+  "@alertAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "maxTemperature": "Maximale Temperatur",
+  "notifyAt100": "Notify at 100%",
+  "fullChargeExtraAlert": "Extra alert when charging is complete.",
+  "notifyCableUnplugged": "Notify when cable is unplugged",
+  "reliability": "Zuverlässigkeit",
+  "monitoringStatus": "Überwachungsstatus",
+  "notifications": "Benachrichtigungen",
+  "batteryOptimization": "Akkuoptimierung",
+  "unrestrictedDoze": "Battery Guard is not limited by Doze",
+  "androidMayLimit": "Android may limit background work",
+  "recheckReliability": "Zuverlässigkeit prüfen",
+  "testAlert": "Warnung testen",
+  "sendTestNotification": "Send a test notification.",
+  "testAlertSent": "Alert sent to Android.",
+  "testAlertBlocked": "Alert cannot be sent: check permissions and channels.",
+  "nightMode": "Nachtmodus",
+  "silenceNightAlerts": "Silence alerts at night",
+  "nightAlertsVisible": "Notifications remain visible, without sound or vibration.",
+  "begin": "Start",
+  "end": "End",
+  "information": "Informationen",
+  "localOnly": "Nur lokale Daten",
+  "localOnlyBody": "No account, cloud or battery telemetry upload.",
+  "whatBatteryGuardDoes": "Was Battery Guard macht",
+  "whatBatteryGuardDoesBody": "It alerts you when the selected threshold is reached. Android does not allow a normal app to physically stop charging.",
+  "version": "Version",
+  "language": "Sprache",
+  "systemLanguage": "Systemsprache",
+  "english": "English",
+  "italian": "Italian",
+  "spanish": "Spanish",
+  "french": "French",
+  "german": "Deutsch",
+  "portuguese": "Portugiesisch",
+  "webPreviewNotice": "Web-Vorschau: Akkudaten und Android-Hintergrundüberwachung werden simuliert."
+}

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: battery-guard-android-main
@@ -84,11 +84,36 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate localization
+        run: flutter gen-l10n
+
       - name: Analyze
         run: flutter analyze
 
       - name: Test
         run: flutter test
+
+      - name: Build Web Preview
+        run: flutter build web --release --base-href /Battery_Guard/
+
+      - name: Deploy Web Preview branch
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/battery_guard_pages
+          mkdir -p /tmp/battery_guard_pages
+          cp -R build/web/. /tmp/battery_guard_pages/
+          cd /tmp/battery_guard_pages
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy Battery Guard Web Preview ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
 
       - name: Build split APKs
         run: |
@@ -123,6 +148,7 @@ jobs:
             echo "sourceSha=$GITHUB_SHA"
             echo "productionSigningReady=$PRODUCTION_SIGNING_READY"
             echo "flutter=3.47.5"
+            echo "webPreviewBranch=gh-pages"
           } > release/BUILD_EVIDENCE.txt
 
       - name: Upload immutable CI artifact

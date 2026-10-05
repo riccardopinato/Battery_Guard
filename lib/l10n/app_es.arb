@@ -1,0 +1,163 @@
+{
+  "@@locale": "es",
+  "appTitle": "Battery Guard",
+  "navBattery": "Batería",
+  "navInsights": "Insights",
+  "navHistory": "Historial",
+  "navSettings": "Ajustes",
+  "protectionActive": "Protección activa",
+  "protectionInactive": "Protección desactivada",
+  "notConnected": "No conectado",
+  "healthInline": "health {health}",
+  "@healthInline": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "batterySaverActive": "Battery saver active",
+  "notifyAt": "Avísame al",
+  "temperature": "Temperatura",
+  "aboveThreshold": "Above the configured threshold",
+  "thresholdValue": "Threshold {value} °C",
+  "@thresholdValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dataUnavailable": "No disponible",
+  "dataNotExposed": "Data not exposed by this device",
+  "estimatedPower": "Potencia estimada",
+  "currentNotExposed": "Current not exposed by this device",
+  "voltage": "Voltaje",
+  "health": "Salud",
+  "currentSession": "Sesión actual",
+  "calculating": "Calculating…",
+  "speed": "Velocidad",
+  "averagePower": "Potencia media",
+  "atTarget": "At {target}%",
+  "@atTarget": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "allowNotificationsToAlert": "Enable notifications to receive alerts even with the screen off.",
+  "allow": "Permitir",
+  "protectCharging": "Protege la carga",
+  "introBody": "Battery Guard monitors level, temperature and charging sessions. It alerts you at the selected threshold, with no account and no cloud.",
+  "allowAlerts": "Permitir avisos",
+  "allowAlertsBody": "Notifications are used for threshold, temperature and anomaly alerts even when Battery Guard is not open.",
+  "permissionGranted": "Permiso concedido",
+  "keepOperational": "Mantenlo operativo",
+  "openBatterySettings": "Abrir ajustes de batería",
+  "protectionAlreadyActive": "Protection already active",
+  "activateProtection": "Activar protección",
+  "start": "Empezar",
+  "continueLabel": "Continuar",
+  "skipSetup": "Omitir configuración",
+  "historyTitle": "Historial",
+  "deleteHistory": "Borrar historial",
+  "historySubtitle": "Sessions, samples and alerts stored only on this device.",
+  "chargingSessions": "Sesiones de carga",
+  "recentSamples": "Muestras recientes",
+  "recentAlerts": "Avisos recientes",
+  "noAlerts": "No hay avisos",
+  "batteryAlert": "Battery alert",
+  "clearHistoryTitle": "Delete history?",
+  "clearHistoryBody": "Completed sessions, samples and locally stored alerts will be removed. The current session will remain active.",
+  "cancel": "Cancelar",
+  "delete": "Borrar",
+  "qualityActive": "En curso",
+  "qualityCompleted": "Completa",
+  "qualityInterrupted": "Interrumpida",
+  "qualityUncertain": "Por verificar",
+  "insightsSubtitle": "Statistics based only on sessions observed on this device.",
+  "days7": "7 días",
+  "days30": "30 días",
+  "noSessionsPeriod": "There are no completed sessions in the selected period.",
+  "sessions": "Sesiones",
+  "averageDuration": "Average {duration}",
+  "@averageDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "averageSpeed": "Velocidad media",
+  "measurableSessions": "Sessions with measurable increase",
+  "averageMaxTemp": "Avg max temp",
+  "peakValue": "Peak {value} °C",
+  "@peakValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "averagePowerMetric": "Average power",
+  "androidEstimate": "Estimate from data exposed by Android",
+  "chargingFrequency": "Frecuencia de carga",
+  "averageMaxTemperature": "Average maximum temperature",
+  "exposure": "Exposición",
+  "sessionsAbove40": "Sessions ≥ 40 °C",
+  "sessionsAbove42": "Sessions ≥ 42 °C",
+  "endingAbove90": "Ending ≥ 90%",
+  "ending100": "Ending 100%",
+  "averageTimeAbove80": "Average time above 80%",
+  "chargingSources": "Fuentes de carga",
+  "observedHabits": "Hábitos observados",
+  "settingsTitle": "Ajustes",
+  "protection": "Protección",
+  "batteryGuardActive": "Battery Guard activo",
+  "monitoringScreenOff": "Keeps monitoring active with the screen off.",
+  "chargingThreshold": "Umbral de carga",
+  "alertAt": "Alert at {level}%",
+  "@alertAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "maxTemperature": "Temperatura máxima",
+  "notifyAt100": "Notify at 100%",
+  "fullChargeExtraAlert": "Extra alert when charging is complete.",
+  "notifyCableUnplugged": "Notify when cable is unplugged",
+  "reliability": "Fiabilidad",
+  "monitoringStatus": "Estado de monitorización",
+  "notifications": "Notificaciones",
+  "batteryOptimization": "Optimización de batería",
+  "unrestrictedDoze": "Battery Guard is not limited by Doze",
+  "androidMayLimit": "Android may limit background work",
+  "recheckReliability": "Revisar fiabilidad",
+  "testAlert": "Probar aviso",
+  "sendTestNotification": "Send a test notification.",
+  "testAlertSent": "Alert sent to Android.",
+  "testAlertBlocked": "Alert cannot be sent: check permissions and channels.",
+  "nightMode": "Modo nocturno",
+  "silenceNightAlerts": "Silence alerts at night",
+  "nightAlertsVisible": "Notifications remain visible, without sound or vibration.",
+  "begin": "Start",
+  "end": "End",
+  "information": "Información",
+  "localOnly": "Solo datos locales",
+  "localOnlyBody": "No account, cloud or battery telemetry upload.",
+  "whatBatteryGuardDoes": "Qué hace Battery Guard",
+  "whatBatteryGuardDoesBody": "It alerts you when the selected threshold is reached. Android does not allow a normal app to physically stop charging.",
+  "version": "Versión",
+  "language": "Idioma",
+  "systemLanguage": "Idioma del sistema",
+  "english": "English",
+  "italian": "Italian",
+  "spanish": "Español",
+  "french": "Francés",
+  "german": "Alemán",
+  "portuguese": "Portugués",
+  "webPreviewNotice": "Vista web: los datos de batería y la monitorización Android son simulados."
+}

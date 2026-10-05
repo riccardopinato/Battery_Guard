@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../services/app_controller.dart';
@@ -25,7 +26,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
-  String _dateLabel(DateTime date) {
+  String _dateLabel(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final local = date.toLocal();
     final sameDay = now.year == local.year &&
@@ -33,7 +35,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         now.day == local.day;
     final time =
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    if (sameDay) return 'Oggi - $time';
+    if (sameDay) return '${l10n.historyTitle == "History" ? "Today" : l10n.historyTitle == "Historial" ? "Hoy" : l10n.historyTitle == "Historique" ? "Aujourd’hui" : l10n.historyTitle == "Verlauf" ? "Heute" : l10n.historyTitle == "Histórico" ? "Hoje" : "Oggi"} - $time';
     return '${local.day.toString().padLeft(2, '0')}/'
         '${local.month.toString().padLeft(2, '0')} - $time';
   }
@@ -49,6 +51,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final history = widget.controller.history;
     final sessions = widget.controller.chargingSessions.take(20).toList();
     final samples = history.where((entry) => entry.isSample).take(24).toList();
@@ -66,7 +69,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Storico',
+                  l10n.historyTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -74,7 +77,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               if (hasAnything)
                 IconButton(
-                  tooltip: 'Cancella storico',
+                  tooltip: l10n.deleteHistory,
                   onPressed: () => _confirmClear(context),
                   icon: const Icon(Icons.delete_outline_rounded),
                 ),
@@ -82,7 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Sessioni, campioni e avvisi salvati solo sul dispositivo.',
+            l10n.historySubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -90,7 +93,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (sessions.isNotEmpty) ...[
             const SizedBox(height: 18),
             Text(
-              'Sessioni di ricarica',
+              l10n.chargingSessions,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -99,14 +102,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ...sessions.map(
               (session) => _SessionCard(
                 session: session,
-                dateLabel: _dateLabel(session.startedAt),
+                dateLabel: _dateLabel(context, session.startedAt),
               ),
             ),
           ],
           if (samples.isNotEmpty) ...[
             const SizedBox(height: 18),
             Text(
-              'Ultimi campioni',
+              l10n.recentSamples,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -120,7 +123,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     for (final entry in samples.take(8))
                       _SampleRow(
                         entry: entry,
-                        dateLabel: _dateLabel(entry.timestamp),
+                        dateLabel: _dateLabel(context, entry.timestamp),
                       ),
                   ],
                 ),
@@ -129,7 +132,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ],
           const SizedBox(height: 18),
           Text(
-            'Avvisi recenti',
+            l10n.recentAlerts,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -147,7 +150,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(height: 10),
-                    const Text('Nessun avviso registrato'),
+                    Text(l10n.noAlerts),
                   ],
                 ),
               ),
@@ -162,10 +165,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   leading: CircleAvatar(child: Icon(_iconFor(entry))),
                   title: Text(
-                    entry.title.isEmpty ? 'Avviso batteria' : entry.title,
+                    entry.title.isEmpty ? l10n.batteryAlert : entry.title,
                   ),
                   subtitle: Text(
-                    '${entry.message}\\n${_dateLabel(entry.timestamp)}',
+                    '${entry.message}\\n${_dateLabel(context, entry.timestamp)}',
                   ),
                   isThreeLine: true,
                   trailing: Text('${entry.level}%'),
@@ -178,21 +181,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _confirmClear(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancellare lo storico?'),
-        content: const Text(
-          'Verranno rimossi sessioni concluse, campioni e avvisi salvati localmente. La sessione in corso resterà attiva.',
-        ),
+        title: Text(l10n.clearHistoryTitle),
+        content: Text(l10n.clearHistoryBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Annulla'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Cancella'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

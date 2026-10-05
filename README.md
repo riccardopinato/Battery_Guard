@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **0.6.0+7 — Core Reliability**
+Versione sorgente: **0.7.0+8 — Factory Compliance & Web Preview**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -35,10 +35,10 @@ Battery Guard **non interrompe fisicamente la ricarica** e non inventa una perce
 
 ## Privacy
 
-La v0.6 disabilita Android Auto Backup per mantenere coerente la promessa local-only. Dati e configurazioni restano sul dispositivo salvo azioni future esplicite dell'utente.
+La v0.7 mantiene disabilitato Android Auto Backup per mantenere coerente la promessa local-only. Dati e configurazioni restano sul dispositivo salvo azioni future esplicite dell'utente.
 
 ## Build
 
-Toolchain CI fissata a Flutter 3.47.5. Le build CI senza credenziali di produzione usano signing di test e **non sono store-ready**. La firma di produzione è supportata tramite secret GitHub dedicati, non conservati nel repository.
+Toolchain CI fissata a Flutter 3.47.5. La Web Preview usa dati simulati e non certifica le capability native. Le build CI senza credenziali di produzione usano signing di test e **non sono store-ready**. La firma di produzione è supportata tramite secret GitHub dedicati, non conservati nel repository.
 
 Vedi `PRODUCT_BIBLE.md`, `ROADMAP.md` e `CHANGELOG.md`.

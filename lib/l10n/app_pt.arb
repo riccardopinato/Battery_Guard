@@ -1,0 +1,163 @@
+{
+  "@@locale": "pt",
+  "appTitle": "Battery Guard",
+  "navBattery": "Bateria",
+  "navInsights": "Insights",
+  "navHistory": "Histórico",
+  "navSettings": "Definições",
+  "protectionActive": "Proteção ativa",
+  "protectionInactive": "Proteção desativada",
+  "notConnected": "Não ligado",
+  "healthInline": "health {health}",
+  "@healthInline": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "batterySaverActive": "Battery saver active",
+  "notifyAt": "Avisar-me aos",
+  "temperature": "Temperatura",
+  "aboveThreshold": "Above the configured threshold",
+  "thresholdValue": "Threshold {value} °C",
+  "@thresholdValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dataUnavailable": "Indisponível",
+  "dataNotExposed": "Data not exposed by this device",
+  "estimatedPower": "Potência estimada",
+  "currentNotExposed": "Current not exposed by this device",
+  "voltage": "Tensão",
+  "health": "Saúde",
+  "currentSession": "Sessão atual",
+  "calculating": "Calculating…",
+  "speed": "Velocidade",
+  "averagePower": "Potência média",
+  "atTarget": "At {target}%",
+  "@atTarget": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "allowNotificationsToAlert": "Enable notifications to receive alerts even with the screen off.",
+  "allow": "Permitir",
+  "protectCharging": "Proteja o carregamento",
+  "introBody": "Battery Guard monitors level, temperature and charging sessions. It alerts you at the selected threshold, with no account and no cloud.",
+  "allowAlerts": "Permitir alertas",
+  "allowAlertsBody": "Notifications are used for threshold, temperature and anomaly alerts even when Battery Guard is not open.",
+  "permissionGranted": "Permissão concedida",
+  "keepOperational": "Mantenha-o operacional",
+  "openBatterySettings": "Abrir definições da bateria",
+  "protectionAlreadyActive": "Protection already active",
+  "activateProtection": "Ativar proteção",
+  "start": "Começar",
+  "continueLabel": "Continuar",
+  "skipSetup": "Ignorar configuração",
+  "historyTitle": "Histórico",
+  "deleteHistory": "Apagar histórico",
+  "historySubtitle": "Sessions, samples and alerts stored only on this device.",
+  "chargingSessions": "Sessões de carregamento",
+  "recentSamples": "Amostras recentes",
+  "recentAlerts": "Alertas recentes",
+  "noAlerts": "Sem alertas",
+  "batteryAlert": "Battery alert",
+  "clearHistoryTitle": "Delete history?",
+  "clearHistoryBody": "Completed sessions, samples and locally stored alerts will be removed. The current session will remain active.",
+  "cancel": "Cancelar",
+  "delete": "Apagar",
+  "qualityActive": "Em curso",
+  "qualityCompleted": "Completa",
+  "qualityInterrupted": "Interrompida",
+  "qualityUncertain": "A verificar",
+  "insightsSubtitle": "Statistics based only on sessions observed on this device.",
+  "days7": "7 dias",
+  "days30": "30 dias",
+  "noSessionsPeriod": "There are no completed sessions in the selected period.",
+  "sessions": "Sessões",
+  "averageDuration": "Average {duration}",
+  "@averageDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "averageSpeed": "Velocidade média",
+  "measurableSessions": "Sessions with measurable increase",
+  "averageMaxTemp": "Avg max temp",
+  "peakValue": "Peak {value} °C",
+  "@peakValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "averagePowerMetric": "Average power",
+  "androidEstimate": "Estimate from data exposed by Android",
+  "chargingFrequency": "Frequência de carregamento",
+  "averageMaxTemperature": "Average maximum temperature",
+  "exposure": "Exposição",
+  "sessionsAbove40": "Sessions ≥ 40 °C",
+  "sessionsAbove42": "Sessions ≥ 42 °C",
+  "endingAbove90": "Ending ≥ 90%",
+  "ending100": "Ending 100%",
+  "averageTimeAbove80": "Average time above 80%",
+  "chargingSources": "Fontes de carregamento",
+  "observedHabits": "Hábitos observados",
+  "settingsTitle": "Definições",
+  "protection": "Proteção",
+  "batteryGuardActive": "Battery Guard ativo",
+  "monitoringScreenOff": "Keeps monitoring active with the screen off.",
+  "chargingThreshold": "Limite de carregamento",
+  "alertAt": "Alert at {level}%",
+  "@alertAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "maxTemperature": "Temperatura máxima",
+  "notifyAt100": "Notify at 100%",
+  "fullChargeExtraAlert": "Extra alert when charging is complete.",
+  "notifyCableUnplugged": "Notify when cable is unplugged",
+  "reliability": "Fiabilidade",
+  "monitoringStatus": "Estado da monitorização",
+  "notifications": "Notificações",
+  "batteryOptimization": "Otimização da bateria",
+  "unrestrictedDoze": "Battery Guard is not limited by Doze",
+  "androidMayLimit": "Android may limit background work",
+  "recheckReliability": "Verificar fiabilidade",
+  "testAlert": "Testar alerta",
+  "sendTestNotification": "Send a test notification.",
+  "testAlertSent": "Alert sent to Android.",
+  "testAlertBlocked": "Alert cannot be sent: check permissions and channels.",
+  "nightMode": "Modo noturno",
+  "silenceNightAlerts": "Silence alerts at night",
+  "nightAlertsVisible": "Notifications remain visible, without sound or vibration.",
+  "begin": "Start",
+  "end": "End",
+  "information": "Informações",
+  "localOnly": "Apenas dados locais",
+  "localOnlyBody": "No account, cloud or battery telemetry upload.",
+  "whatBatteryGuardDoes": "O que faz o Battery Guard",
+  "whatBatteryGuardDoesBody": "It alerts you when the selected threshold is reached. Android does not allow a normal app to physically stop charging.",
+  "version": "Versão",
+  "language": "Idioma",
+  "systemLanguage": "Idioma do sistema",
+  "english": "English",
+  "italian": "Italian",
+  "spanish": "Spanish",
+  "french": "French",
+  "german": "German",
+  "portuguese": "Português",
+  "webPreviewNotice": "Pré-visualização Web: os dados da bateria e a monitorização Android são simulados."
+}

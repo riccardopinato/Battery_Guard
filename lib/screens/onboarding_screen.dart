@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../services/app_controller.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -47,6 +48,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -58,7 +60,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _pageController,
                 onPageChanged: (value) => setState(() => _page = value),
                 children: [
-                  _IntroPage(accent: scheme.primary),
+                  _BasePage(
+                    icon: Icons.battery_charging_full_rounded,
+                    accent: scheme.primary,
+                    title: l10n.protectCharging,
+                    body: l10n.introBody,
+                  ),
                   _PermissionPage(controller: widget.controller),
                   _ReliabilityPage(controller: widget.controller),
                 ],
@@ -89,12 +96,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const SizedBox(height: 18),
                   FilledButton(
                     onPressed: _finishing ? null : _next,
-                    child: Text(_page == 2 ? 'Inizia' : 'Continua'),
+                    child: Text(
+                      _page == 2 ? l10n.start : l10n.continueLabel,
+                    ),
                   ),
                   if (_page < 2)
                     TextButton(
                       onPressed: _finishing ? null : _finish,
-                      child: const Text('Salta configurazione'),
+                      child: Text(l10n.skipSetup),
                     ),
                 ],
               ),
@@ -102,23 +111,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _IntroPage extends StatelessWidget {
-  const _IntroPage({required this.accent});
-
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return _BasePage(
-      icon: Icons.battery_charging_full_rounded,
-      accent: accent,
-      title: 'Proteggi la ricarica',
-      body:
-          'Battery Guard controlla livello, temperatura e sessioni di ricarica. Ti avvisa alla soglia scelta, senza account e senza cloud.',
     );
   }
 }
@@ -191,6 +183,7 @@ class _PermissionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final granted = controller.notificationsGranted;
 
@@ -199,20 +192,19 @@ class _PermissionPage extends StatelessWidget {
           ? Icons.notifications_active_rounded
           : Icons.notifications_none_rounded,
       accent: granted ? scheme.primary : scheme.onSurfaceVariant,
-      title: 'Consenti gli avvisi',
-      body:
-          'Le notifiche servono per soglia, temperatura e anomalie anche quando Battery Guard non è aperta.',
+      title: l10n.allowAlerts,
+      body: l10n.allowAlertsBody,
       children: [
         if (granted)
-          const Chip(
-            avatar: Icon(Icons.check_circle_outline_rounded),
-            label: Text('Permesso concesso'),
+          Chip(
+            avatar: const Icon(Icons.check_circle_outline_rounded),
+            label: Text(l10n.permissionGranted),
           )
         else
           FilledButton.tonalIcon(
             onPressed: controller.requestNotificationPermission,
             icon: const Icon(Icons.notifications_active_outlined),
-            label: const Text('Consenti notifiche'),
+            label: Text(l10n.allow),
           ),
       ],
     );
@@ -226,19 +218,20 @@ class _ReliabilityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final status = controller.reliability;
 
     return _BasePage(
       icon: Icons.shield_outlined,
       accent: scheme.primary,
-      title: 'Mantienilo operativo',
+      title: l10n.keepOperational,
       body: status.oemHint,
       children: [
         OutlinedButton.icon(
           onPressed: controller.openBatterySettings,
           icon: const Icon(Icons.battery_saver_outlined),
-          label: const Text('Apri impostazioni batteria'),
+          label: Text(l10n.openBatterySettings),
         ),
         const SizedBox(height: 10),
         FilledButton.tonalIcon(
@@ -248,8 +241,8 @@ class _ReliabilityPage extends StatelessWidget {
           icon: const Icon(Icons.shield_rounded),
           label: Text(
             controller.config.enabled
-                ? 'Protezione già attiva'
-                : 'Attiva protezione',
+                ? l10n.protectionAlreadyActive
+                : l10n.activateProtection,
           ),
         ),
       ],

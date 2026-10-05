@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
 import '../services/app_controller.dart';
 import '../widgets/battery_ring.dart';
@@ -13,6 +14,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final snapshot = controller.snapshot;
     final config = controller.config;
     final session = controller.currentSession;
@@ -39,8 +41,8 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Text(
                       config.enabled
-                          ? 'Protezione attiva'
-                          : 'Protezione disattivata',
+                          ? l10n.protectionActive
+                          : l10n.protectionInactive,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: config.enabled
                                 ? scheme.primary
@@ -56,6 +58,21 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
+          if (controller.isWebPreview) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.language_rounded),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(l10n.webPreviewNotice)),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 18),
           Center(
             child: BatteryRing(
@@ -88,14 +105,14 @@ class HomeScreen extends StatelessWidget {
                             Text(
                               snapshot.isPlugged
                                   ? snapshot.plugType
-                                  : 'Non collegato',
+                                  : l10n.notConnected,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             Text(
-                              '${snapshot.status} • salute ${snapshot.health.toLowerCase()}',
+                              '${snapshot.status} • ${l10n.healthInline(snapshot.health.toLowerCase())}',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -106,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       if (snapshot.isPowerSaveMode)
                         const Tooltip(
-                          message: 'Risparmio energetico attivo',
+                          message: l10n.batterySaverActive,
                           child: Icon(Icons.energy_savings_leaf_outlined),
                         ),
                     ],
@@ -115,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Avvisami al',
+                      l10n.notifyAt,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
@@ -156,29 +173,29 @@ class HomeScreen extends StatelessWidget {
             children: [
               MetricCard(
                 icon: Icons.thermostat_rounded,
-                label: 'Temperatura',
+                label: l10n.temperature,
                 value: snapshot.temperatureAvailable
                     ? '${snapshot.temperatureC.toStringAsFixed(1)} °C'
                     : 'Non disponibile',
                 caption: snapshot.temperatureAvailable
                     ? (snapshot.temperatureC >= config.temperatureThresholdC
-                        ? 'Sopra la soglia impostata'
-                        : 'Soglia ${config.temperatureThresholdC.toStringAsFixed(0)} °C')
-                    : 'Dato non esposto dal dispositivo',
+                        ? l10n.aboveThreshold
+                        : l10n.thresholdValue(config.temperatureThresholdC.toStringAsFixed(0)))
+                    : l10n.dataNotExposed,
               ),
               MetricCard(
                 icon: Icons.electric_bolt_rounded,
-                label: 'Potenza stimata',
+                label: l10n.estimatedPower,
                 value: snapshot.powerAvailable
                     ? '${snapshot.powerW.abs().toStringAsFixed(1)} W'
                     : 'Non disponibile',
                 caption: snapshot.currentAvailable
                     ? '${snapshot.currentMa.abs().toStringAsFixed(0)} mA'
-                    : 'Corrente non esposta dal dispositivo',
+                    : l10n.currentNotExposed,
               ),
               MetricCard(
                 icon: Icons.speed_rounded,
-                label: 'Tensione',
+                label: l10n.voltage,
                 value: snapshot.voltageAvailable
                     ? '${snapshot.voltageV.toStringAsFixed(2)} V'
                     : 'Non disponibile',
@@ -186,7 +203,7 @@ class HomeScreen extends StatelessWidget {
               ),
               MetricCard(
                 icon: Icons.favorite_outline_rounded,
-                label: 'Salute',
+                label: l10n.health,
                 value: snapshot.health,
                 caption: snapshot.status,
               ),
@@ -207,13 +224,13 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        controller.reliability.deliveryLabel,
+                        l10n.allowNotificationsToAlert,
                         style: TextStyle(color: scheme.onErrorContainer),
                       ),
                     ),
                     TextButton(
                       onPressed: controller.requestNotificationPermission,
-                      child: const Text('Consenti'),
+                      child: Text(l10n.allow),
                     ),
                   ],
                 ),
@@ -237,10 +254,11 @@ class _ChargingSessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final speed = session.percentPerHour > 0
         ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
-        : 'Calcolo…';
+        : l10n.calculating;
 
     return Card(
       child: Padding(
@@ -261,7 +279,7 @@ class _ChargingSessionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sessione attuale',
+                        l10n.currentSession,
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -287,17 +305,17 @@ class _ChargingSessionCard extends StatelessWidget {
               spacing: 10,
               runSpacing: 10,
               children: [
-                _SessionMetric(label: 'Velocità', value: speed),
+                _SessionMetric(label: l10n.speed, value: speed),
                 _SessionMetric(
-                  label: 'Potenza media',
+                  label: l10n.averagePower,
                   value: '${session.averagePowerW.toStringAsFixed(1)} W',
                 ),
                 _SessionMetric(
-                  label: 'Al ${session.targetLevel}%',
+                  label: l10n.atTarget(session.targetLevel),
                   value: session.estimateLabel,
                 ),
                 _SessionMetric(
-                  label: 'Temperatura',
+                  label: l10n.temperature,
                   value:
                       '${session.currentTemperatureC.toStringAsFixed(1)} °C • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
                 ),

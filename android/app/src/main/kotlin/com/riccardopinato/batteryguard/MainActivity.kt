@@ -76,6 +76,24 @@ class MainActivity : FlutterActivity() {
                                 false,
                             ),
                         )
+                    "getLocaleOverride" ->
+                        result.success(
+                            appStatePrefs().getString(
+                                "localeOverride",
+                                null,
+                            ),
+                        )
+                    "setLocaleOverride" -> {
+                        val code = call.arguments as? String
+                        val editor = appStatePrefs().edit()
+                        if (code.isNullOrBlank()) {
+                            editor.remove("localeOverride")
+                        } else {
+                            editor.putString("localeOverride", code)
+                        }
+                        editor.apply()
+                        result.success(null)
+                    }
                     "setOnboardingComplete" -> {
                         val value = call.arguments as? Boolean ?: true
                         appStatePrefs().edit()

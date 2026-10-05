@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/charging_insights.dart';
 import '../services/app_controller.dart';
 
@@ -30,6 +31,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final insights = ChargingInsights.fromSessions(
       widget.controller.chargingSessions,
       days: _days,
@@ -43,14 +45,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: [
           Text(
-            'Insights',
+            l10n.navInsights,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
           ),
           const SizedBox(height: 6),
           Text(
-            'Statistiche basate solo sulle sessioni osservate sul dispositivo.',
+            l10n.insightsSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -58,8 +60,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
           const SizedBox(height: 16),
           SegmentedButton<int>(
             segments: const [
-              ButtonSegment(value: 7, label: Text('7 giorni')),
-              ButtonSegment(value: 30, label: Text('30 giorni')),
+              ButtonSegment(value: 7, label: Text(l10n.days7)),
+              ButtonSegment(value: 30, label: Text(l10n.days30)),
             ],
             selected: {_days},
             showSelectedIcon: false,
@@ -80,8 +82,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       color: scheme.onSurfaceVariant,
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Non ci sono ancora sessioni concluse nel periodo selezionato.',
+                    Text(
+                      l10n.noSessionsPeriod,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -99,36 +101,38 @@ class _InsightsScreenState extends State<InsightsScreen> {
               children: [
                 _InsightMetric(
                   icon: Icons.battery_charging_full_rounded,
-                  label: 'Sessioni',
+                  label: l10n.sessions,
                   value: '${insights.sessionCount}',
-                  caption:
-                      'Media ${_durationLabel(insights.averageDurationMinutes)}',
+                  caption: l10n.averageDuration(
+                    _durationLabel(insights.averageDurationMinutes),
+                  ),
                 ),
                 _InsightMetric(
                   icon: Icons.speed_rounded,
-                  label: 'Velocità media',
+                  label: l10n.averageSpeed,
                   value:
                       '${insights.averageRatePercentPerHour.toStringAsFixed(1)} %/h',
-                  caption: 'Sessioni con incremento misurabile',
+                  caption: l10n.measurableSessions,
                 ),
                 _InsightMetric(
                   icon: Icons.thermostat_rounded,
-                  label: 'Temp. media max',
+                  label: l10n.averageMaxTemp,
                   value:
                       '${insights.averageMaxTemperatureC.toStringAsFixed(1)} °C',
-                  caption:
-                      'Picco ${insights.maximumTemperatureC.toStringAsFixed(1)} °C',
+                  caption: l10n.peakValue(
+                    insights.maximumTemperatureC.toStringAsFixed(1),
+                  ),
                 ),
                 _InsightMetric(
                   icon: Icons.electric_bolt_rounded,
-                  label: 'Potenza media',
+                  label: l10n.averagePowerMetric,
                   value: '${insights.averagePowerW.toStringAsFixed(1)} W',
-                  caption: 'Stima dai dati esposti da Android',
+                  caption: l10n.androidEstimate,
                 ),
               ],
             ),
             const SizedBox(height: 18),
-            const _SectionTitle(title: 'Frequenza ricariche'),
+            _SectionTitle(title: l10n.chargingFrequency),
             const SizedBox(height: 10),
             Card(
               child: SizedBox(
@@ -148,7 +152,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const _SectionTitle(title: 'Temperatura massima media'),
+            _SectionTitle(title: l10n.averageMaxTemperature),
             const SizedBox(height: 10),
             Card(
               child: SizedBox(
@@ -168,7 +172,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const _SectionTitle(title: 'Esposizione'),
+            _SectionTitle(title: l10n.exposure),
             const SizedBox(height: 10),
             Card(
               child: Padding(
@@ -176,23 +180,23 @@ class _InsightsScreenState extends State<InsightsScreen> {
                 child: Column(
                   children: [
                     _StatRow(
-                      label: 'Sessioni ≥ 40 °C',
+                      label: l10n.sessionsAbove40,
                       value: '${insights.over40Count}',
                     ),
                     _StatRow(
-                      label: 'Sessioni ≥ 42 °C',
+                      label: l10n.sessionsAbove42,
                       value: '${insights.over42Count}',
                     ),
                     _StatRow(
-                      label: 'Finale ≥ 90%',
+                      label: l10n.endingAbove90,
                       value: '${insights.over90Count}',
                     ),
                     _StatRow(
-                      label: 'Finale 100%',
+                      label: l10n.ending100,
                       value: '${insights.fullCount}',
                     ),
                     _StatRow(
-                      label: 'Tempo medio sopra 80%',
+                      label: l10n.averageTimeAbove80,
                       value:
                           '≈ ${_durationLabel(insights.estimatedAverageMinutesAbove80)}',
                       last: true,
@@ -202,7 +206,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const _SectionTitle(title: 'Sorgenti di ricarica'),
+            _SectionTitle(title: l10n.chargingSources),
             const SizedBox(height: 10),
             Card(
               child: Padding(
@@ -225,7 +229,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const _SectionTitle(title: 'Abitudini osservate'),
+            _SectionTitle(title: l10n.observedHabits),
             const SizedBox(height: 10),
             Card(
               child: Padding(

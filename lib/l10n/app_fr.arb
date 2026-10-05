@@ -1,0 +1,163 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Battery Guard",
+  "navBattery": "Batterie",
+  "navInsights": "Insights",
+  "navHistory": "Historique",
+  "navSettings": "Réglages",
+  "protectionActive": "Protection active",
+  "protectionInactive": "Protection désactivée",
+  "notConnected": "Non connecté",
+  "healthInline": "health {health}",
+  "@healthInline": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "batterySaverActive": "Battery saver active",
+  "notifyAt": "M'alerter à",
+  "temperature": "Température",
+  "aboveThreshold": "Above the configured threshold",
+  "thresholdValue": "Threshold {value} °C",
+  "@thresholdValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dataUnavailable": "Indisponible",
+  "dataNotExposed": "Data not exposed by this device",
+  "estimatedPower": "Puissance estimée",
+  "currentNotExposed": "Current not exposed by this device",
+  "voltage": "Tension",
+  "health": "Santé",
+  "currentSession": "Session actuelle",
+  "calculating": "Calculating…",
+  "speed": "Vitesse",
+  "averagePower": "Puissance moyenne",
+  "atTarget": "At {target}%",
+  "@atTarget": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "allowNotificationsToAlert": "Enable notifications to receive alerts even with the screen off.",
+  "allow": "Autoriser",
+  "protectCharging": "Protégez la charge",
+  "introBody": "Battery Guard monitors level, temperature and charging sessions. It alerts you at the selected threshold, with no account and no cloud.",
+  "allowAlerts": "Autoriser les alertes",
+  "allowAlertsBody": "Notifications are used for threshold, temperature and anomaly alerts even when Battery Guard is not open.",
+  "permissionGranted": "Autorisation accordée",
+  "keepOperational": "Maintenez-le opérationnel",
+  "openBatterySettings": "Ouvrir les réglages batterie",
+  "protectionAlreadyActive": "Protection already active",
+  "activateProtection": "Activer la protection",
+  "start": "Commencer",
+  "continueLabel": "Continuer",
+  "skipSetup": "Ignorer la configuration",
+  "historyTitle": "Historique",
+  "deleteHistory": "Effacer l'historique",
+  "historySubtitle": "Sessions, samples and alerts stored only on this device.",
+  "chargingSessions": "Sessions de charge",
+  "recentSamples": "Échantillons récents",
+  "recentAlerts": "Alertes récentes",
+  "noAlerts": "Aucune alerte",
+  "batteryAlert": "Battery alert",
+  "clearHistoryTitle": "Delete history?",
+  "clearHistoryBody": "Completed sessions, samples and locally stored alerts will be removed. The current session will remain active.",
+  "cancel": "Annuler",
+  "delete": "Effacer",
+  "qualityActive": "En cours",
+  "qualityCompleted": "Terminée",
+  "qualityInterrupted": "Interrompue",
+  "qualityUncertain": "À vérifier",
+  "insightsSubtitle": "Statistics based only on sessions observed on this device.",
+  "days7": "7 jours",
+  "days30": "30 jours",
+  "noSessionsPeriod": "There are no completed sessions in the selected period.",
+  "sessions": "Sessions",
+  "averageDuration": "Average {duration}",
+  "@averageDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "averageSpeed": "Vitesse moyenne",
+  "measurableSessions": "Sessions with measurable increase",
+  "averageMaxTemp": "Avg max temp",
+  "peakValue": "Peak {value} °C",
+  "@peakValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "averagePowerMetric": "Average power",
+  "androidEstimate": "Estimate from data exposed by Android",
+  "chargingFrequency": "Fréquence de charge",
+  "averageMaxTemperature": "Average maximum temperature",
+  "exposure": "Exposition",
+  "sessionsAbove40": "Sessions ≥ 40 °C",
+  "sessionsAbove42": "Sessions ≥ 42 °C",
+  "endingAbove90": "Ending ≥ 90%",
+  "ending100": "Ending 100%",
+  "averageTimeAbove80": "Average time above 80%",
+  "chargingSources": "Sources de charge",
+  "observedHabits": "Habitudes observées",
+  "settingsTitle": "Réglages",
+  "protection": "Protection",
+  "batteryGuardActive": "Battery Guard actif",
+  "monitoringScreenOff": "Keeps monitoring active with the screen off.",
+  "chargingThreshold": "Seuil de charge",
+  "alertAt": "Alert at {level}%",
+  "@alertAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "maxTemperature": "Température maximale",
+  "notifyAt100": "Notify at 100%",
+  "fullChargeExtraAlert": "Extra alert when charging is complete.",
+  "notifyCableUnplugged": "Notify when cable is unplugged",
+  "reliability": "Fiabilité",
+  "monitoringStatus": "État de surveillance",
+  "notifications": "Notifications",
+  "batteryOptimization": "Optimisation batterie",
+  "unrestrictedDoze": "Battery Guard is not limited by Doze",
+  "androidMayLimit": "Android may limit background work",
+  "recheckReliability": "Revérifier la fiabilité",
+  "testAlert": "Tester l'alerte",
+  "sendTestNotification": "Send a test notification.",
+  "testAlertSent": "Alert sent to Android.",
+  "testAlertBlocked": "Alert cannot be sent: check permissions and channels.",
+  "nightMode": "Mode nuit",
+  "silenceNightAlerts": "Silence alerts at night",
+  "nightAlertsVisible": "Notifications remain visible, without sound or vibration.",
+  "begin": "Start",
+  "end": "End",
+  "information": "Informations",
+  "localOnly": "Données locales uniquement",
+  "localOnlyBody": "No account, cloud or battery telemetry upload.",
+  "whatBatteryGuardDoes": "Ce que fait Battery Guard",
+  "whatBatteryGuardDoesBody": "It alerts you when the selected threshold is reached. Android does not allow a normal app to physically stop charging.",
+  "version": "Version",
+  "language": "Langue",
+  "systemLanguage": "Langue du système",
+  "english": "English",
+  "italian": "Italian",
+  "spanish": "Spanish",
+  "french": "Français",
+  "german": "Allemand",
+  "portuguese": "Portugais",
+  "webPreviewNotice": "Aperçu web : les données batterie et la surveillance Android sont simulées."
+}

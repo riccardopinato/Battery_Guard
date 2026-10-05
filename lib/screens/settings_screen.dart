@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/monitoring_config.dart';
 import '../services/app_controller.dart';
 
@@ -17,6 +18,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final config = controller.config;
     final reliability = controller.reliability;
     final scheme = Theme.of(context).colorScheme;
@@ -28,33 +30,31 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
         children: [
           Text(
-            'Impostazioni',
+            l10n.settingsTitle,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
           ),
           const SizedBox(height: 18),
           _Section(
-            title: 'Protezione',
+            title: l10n.protection,
             children: [
               SwitchListTile.adaptive(
-                title: const Text('Battery Guard attivo'),
-                subtitle: const Text(
-                  'Mantiene il monitoraggio anche con schermo spento.',
-                ),
+                title: Text(l10n.batteryGuardActive),
+                subtitle: Text(l10n.monitoringScreenOff),
                 value: config.enabled,
                 onChanged: controller.setEnabled,
               ),
               const Divider(height: 1),
               ListTile(
-                title: const Text('Soglia di ricarica'),
-                subtitle: Text('Avviso al ${config.targetLevel}%'),
+                title: Text(l10n.chargingThreshold),
+                subtitle: Text(l10n.alertAt(config.targetLevel)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _chooseTarget(context, config),
               ),
               const Divider(height: 1),
               ListTile(
-                title: const Text('Temperatura massima'),
+                title: Text(l10n.maxTemperature),
                 subtitle: Text(
                   '${config.temperatureThresholdC.toStringAsFixed(0)} °C',
                 ),
@@ -75,17 +75,15 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               SwitchListTile.adaptive(
-                title: const Text('Avvisa al 100%'),
-                subtitle: const Text(
-                  'Avviso aggiuntivo quando la carica è completa.',
-                ),
+                title: Text(l10n.notifyAt100),
+                subtitle: Text(l10n.fullChargeExtraAlert),
                 value: config.notifyFull,
                 onChanged: (value) => controller.updateConfig(
                   config.copyWith(notifyFull: value),
                 ),
               ),
               SwitchListTile.adaptive(
-                title: const Text('Avvisa se il cavo viene scollegato'),
+                title: Text(l10n.notifyCableUnplugged),
                 value: config.notifyUnplugged,
                 onChanged: (value) => controller.updateConfig(
                   config.copyWith(notifyUnplugged: value),
@@ -95,7 +93,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _Section(
-            title: 'Affidabilità',
+            title: l10n.reliability,
             children: [
               ListTile(
                 leading: Icon(
@@ -106,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
                       ? scheme.primary
                       : scheme.error,
                 ),
-                title: const Text('Stato monitoraggio'),
+                title: Text(l10n.monitoringStatus),
                 subtitle: Text(
                   '${reliability.serviceLabel} • ${reliability.batteryEventLabel}',
                 ),
@@ -121,9 +119,9 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.notifications_active_outlined),
-                title: const Text('Notifiche'),
+                title: Text(l10n.notifications),
                 subtitle: Text(
-                  reliability.deliveryLabel,
+                  reliability.deliveryReady ? l10n.permissionGranted : l10n.testAlertBlocked,
                 ),
                 trailing: reliability.deliveryReady
                     ? const Icon(Icons.check_circle_outline_rounded)
@@ -142,11 +140,11 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.battery_saver_outlined),
-                title: const Text('Ottimizzazione batteria'),
+                title: Text(l10n.batteryOptimization),
                 subtitle: Text(
                   reliability.batteryOptimizationIgnored
-                      ? 'Battery Guard non è limitata da Doze'
-                      : 'Android può limitare il lavoro in background',
+                      ? l10n.unrestrictedDoze
+                      : l10n.androidMayLimit,
                 ),
                 trailing: const Icon(Icons.open_in_new_rounded),
                 onTap: controller.openBatterySettings,
@@ -160,14 +158,14 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.refresh_rounded),
-                title: const Text('Ricontrolla affidabilità'),
+                title: Text(l10n.recheckReliability),
                 onTap: controller.refreshReliability,
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.volume_up_outlined),
-                title: const Text('Prova avviso'),
-                subtitle: const Text('Invia una notifica di test.'),
+                title: Text(l10n.testAlert),
+                subtitle: Text(l10n.sendTestNotification),
                 onTap: () async {
                   final delivered = await controller.testAlert();
                   if (!context.mounted) return;
@@ -175,8 +173,8 @@ class SettingsScreen extends StatelessWidget {
                     SnackBar(
                       content: Text(
                         delivered
-                            ? 'Avviso inviato al sistema Android.'
-                            : 'Avviso non inviabile: controlla permessi e canali.',
+                            ? l10n.testAlertSent
+                            : l10n.testAlertBlocked,
                       ),
                     ),
                   );
@@ -187,13 +185,11 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _Section(
-            title: 'Modalità notte',
+            title: l10n.nightMode,
             children: [
               SwitchListTile.adaptive(
-                title: const Text('Silenzia gli avvisi di notte'),
-                subtitle: const Text(
-                  'Le notifiche restano visibili, ma senza suono o vibrazione.',
-                ),
+                title: Text(l10n.silenceNightAlerts),
+                subtitle: Text(l10n.nightAlertsVisible),
                 value: config.nightMode,
                 onChanged: (value) => controller.updateConfig(
                   config.copyWith(nightMode: value),
@@ -202,12 +198,12 @@ class SettingsScreen extends StatelessWidget {
               if (config.nightMode) ...[
                 const Divider(height: 1),
                 ListTile(
-                  title: const Text('Inizio'),
+                  title: Text(l10n.begin),
                   trailing: Text(_formatMinutes(config.nightStartMinutes)),
                   onTap: () => _pickTime(context, start: true),
                 ),
                 ListTile(
-                  title: const Text('Fine'),
+                  title: Text(l10n.end),
                   trailing: Text(_formatMinutes(config.nightEndMinutes)),
                   onTap: () => _pickTime(context, start: false),
                 ),
@@ -216,33 +212,89 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _Section(
-            title: 'Informazioni',
-            children: const [
+            title: l10n.information,
+            children: [
               ListTile(
-                leading: Icon(Icons.lock_outline_rounded),
-                title: Text('Solo dati locali'),
-                subtitle: Text(
-                  'Nessun account, cloud o invio dei dati della batteria.',
-                ),
+                leading: const Icon(Icons.language_rounded),
+                title: Text(l10n.language),
+                subtitle: Text(_languageLabel(context)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => _chooseLanguage(context),
               ),
-              Divider(height: 1),
+              const Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.info_outline_rounded),
-                title: Text('Cosa fa Battery Guard'),
-                subtitle: Text(
-                  'Ti avvisa quando raggiungi la soglia scelta. Android non consente a una normale app di interrompere fisicamente la ricarica.',
-                ),
+                leading: const Icon(Icons.lock_outline_rounded),
+                title: Text(l10n.localOnly),
+                subtitle: Text(l10n.localOnlyBody),
               ),
-              Divider(height: 1),
+              const Divider(height: 1),
               ListTile(
-                title: Text('Versione'),
-                trailing: Text('0.6.0'),
+                leading: const Icon(Icons.info_outline_rounded),
+                title: Text(l10n.whatBatteryGuardDoes),
+                subtitle: Text(l10n.whatBatteryGuardDoesBody),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                title: Text(l10n.version),
+                trailing: const Text('0.7.0'),
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  String _languageLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return switch (controller.localeOverride?.languageCode) {
+      'en' => l10n.english,
+      'it' => l10n.italian,
+      'es' => l10n.spanish,
+      'fr' => l10n.french,
+      'de' => l10n.german,
+      'pt' => l10n.portuguese,
+      _ => l10n.systemLanguage,
+    };
+  }
+
+  Future<void> _chooseLanguage(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final selected = await showModalBottomSheet<String?>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(l10n.systemLanguage),
+              onTap: () => Navigator.pop(sheetContext, ''),
+            ),
+            for (final entry in [
+              ('en', l10n.english),
+              ('it', l10n.italian),
+              ('es', l10n.spanish),
+              ('fr', l10n.french),
+              ('de', l10n.german),
+              ('pt', l10n.portuguese),
+            ])
+              ListTile(
+                title: Text(entry.$2),
+                trailing: controller.localeOverride?.languageCode == entry.$1
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                onTap: () => Navigator.pop(sheetContext, entry.$1),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (selected != null) {
+      await controller.setLocaleOverride(
+        selected.isEmpty ? null : selected,
+      );
+    }
   }
 
   Future<void> _chooseTarget(

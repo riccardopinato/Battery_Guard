@@ -1,0 +1,163 @@
+{
+  "@@locale": "it",
+  "appTitle": "Battery Guard",
+  "navBattery": "Batteria",
+  "navInsights": "Insights",
+  "navHistory": "Storico",
+  "navSettings": "Impostazioni",
+  "protectionActive": "Protezione attiva",
+  "protectionInactive": "Protezione disattivata",
+  "notConnected": "Non collegato",
+  "healthInline": "salute {health}",
+  "@healthInline": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "batterySaverActive": "Risparmio energetico attivo",
+  "notifyAt": "Avvisami al",
+  "temperature": "Temperatura",
+  "aboveThreshold": "Sopra la soglia impostata",
+  "thresholdValue": "Soglia {value} °C",
+  "@thresholdValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dataUnavailable": "Non disponibile",
+  "dataNotExposed": "Dato non esposto dal dispositivo",
+  "estimatedPower": "Potenza stimata",
+  "currentNotExposed": "Corrente non esposta dal dispositivo",
+  "voltage": "Tensione",
+  "health": "Salute",
+  "currentSession": "Sessione attuale",
+  "calculating": "Calcolo…",
+  "speed": "Velocità",
+  "averagePower": "Potenza media",
+  "atTarget": "Al {target}%",
+  "@atTarget": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "allowNotificationsToAlert": "Consenti le notifiche per ricevere gli avvisi anche a schermo spento.",
+  "allow": "Consenti",
+  "protectCharging": "Proteggi la ricarica",
+  "introBody": "Battery Guard controlla livello, temperatura e sessioni di ricarica. Ti avvisa alla soglia scelta, senza account e senza cloud.",
+  "allowAlerts": "Consenti gli avvisi",
+  "allowAlertsBody": "Le notifiche servono per soglia, temperatura e anomalie anche quando Battery Guard non è aperta.",
+  "permissionGranted": "Permesso concesso",
+  "keepOperational": "Mantienilo operativo",
+  "openBatterySettings": "Apri impostazioni batteria",
+  "protectionAlreadyActive": "Protezione già attiva",
+  "activateProtection": "Attiva protezione",
+  "start": "Inizia",
+  "continueLabel": "Continua",
+  "skipSetup": "Salta configurazione",
+  "historyTitle": "Storico",
+  "deleteHistory": "Cancella storico",
+  "historySubtitle": "Sessioni, campioni e avvisi salvati solo sul dispositivo.",
+  "chargingSessions": "Sessioni di ricarica",
+  "recentSamples": "Ultimi campioni",
+  "recentAlerts": "Avvisi recenti",
+  "noAlerts": "Nessun avviso registrato",
+  "batteryAlert": "Avviso batteria",
+  "clearHistoryTitle": "Cancellare lo storico?",
+  "clearHistoryBody": "Verranno rimossi sessioni concluse, campioni e avvisi salvati localmente. La sessione in corso resterà attiva.",
+  "cancel": "Annulla",
+  "delete": "Cancella",
+  "qualityActive": "In corso",
+  "qualityCompleted": "Completa",
+  "qualityInterrupted": "Interrotta",
+  "qualityUncertain": "Da verificare",
+  "insightsSubtitle": "Statistiche basate solo sulle sessioni osservate sul dispositivo.",
+  "days7": "7 giorni",
+  "days30": "30 giorni",
+  "noSessionsPeriod": "Non ci sono ancora sessioni concluse nel periodo selezionato.",
+  "sessions": "Sessioni",
+  "averageDuration": "Media {duration}",
+  "@averageDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "averageSpeed": "Velocità media",
+  "measurableSessions": "Sessioni con incremento misurabile",
+  "averageMaxTemp": "Temp. media max",
+  "peakValue": "Picco {value} °C",
+  "@peakValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "averagePowerMetric": "Potenza media",
+  "androidEstimate": "Stima dai dati esposti da Android",
+  "chargingFrequency": "Frequenza ricariche",
+  "averageMaxTemperature": "Temperatura massima media",
+  "exposure": "Esposizione",
+  "sessionsAbove40": "Sessioni ≥ 40 °C",
+  "sessionsAbove42": "Sessioni ≥ 42 °C",
+  "endingAbove90": "Finale ≥ 90%",
+  "ending100": "Finale 100%",
+  "averageTimeAbove80": "Tempo medio sopra 80%",
+  "chargingSources": "Sorgenti di ricarica",
+  "observedHabits": "Abitudini osservate",
+  "settingsTitle": "Impostazioni",
+  "protection": "Protezione",
+  "batteryGuardActive": "Battery Guard attivo",
+  "monitoringScreenOff": "Mantiene il monitoraggio anche con schermo spento.",
+  "chargingThreshold": "Soglia di ricarica",
+  "alertAt": "Avviso al {level}%",
+  "@alertAt": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "maxTemperature": "Temperatura massima",
+  "notifyAt100": "Avvisa al 100%",
+  "fullChargeExtraAlert": "Avviso aggiuntivo quando la carica è completa.",
+  "notifyCableUnplugged": "Avvisa se il cavo viene scollegato",
+  "reliability": "Affidabilità",
+  "monitoringStatus": "Stato monitoraggio",
+  "notifications": "Notifiche",
+  "batteryOptimization": "Ottimizzazione batteria",
+  "unrestrictedDoze": "Battery Guard non è limitata da Doze",
+  "androidMayLimit": "Android può limitare il lavoro in background",
+  "recheckReliability": "Ricontrolla affidabilità",
+  "testAlert": "Prova avviso",
+  "sendTestNotification": "Invia una notifica di test.",
+  "testAlertSent": "Avviso inviato al sistema Android.",
+  "testAlertBlocked": "Avviso non inviabile: controlla permessi e canali.",
+  "nightMode": "Modalità notte",
+  "silenceNightAlerts": "Silenzia gli avvisi di notte",
+  "nightAlertsVisible": "Le notifiche restano visibili, ma senza suono o vibrazione.",
+  "begin": "Inizio",
+  "end": "Fine",
+  "information": "Informazioni",
+  "localOnly": "Solo dati locali",
+  "localOnlyBody": "Nessun account, cloud o invio dei dati della batteria.",
+  "whatBatteryGuardDoes": "Cosa fa Battery Guard",
+  "whatBatteryGuardDoesBody": "Ti avvisa quando raggiungi la soglia scelta. Android non consente a una normale app di interrompere fisicamente la ricarica.",
+  "version": "Versione",
+  "language": "Lingua",
+  "systemLanguage": "Lingua di sistema",
+  "english": "English",
+  "italian": "Italiano",
+  "spanish": "Spagnolo",
+  "french": "Francese",
+  "german": "Tedesco",
+  "portuguese": "Portoghese",
+  "webPreviewNotice": "Web Preview: dati batteria e monitoraggio Android sono simulati."
+}

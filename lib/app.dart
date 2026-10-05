@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/generated/app_localizations.dart';
 import 'screens/history_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/insights_screen.dart';
@@ -50,6 +51,9 @@ class _BatteryGuardAppState extends State<BatteryGuardApp>
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
+      locale: _controller.localeOverride,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
@@ -82,6 +86,7 @@ class _MainShellState extends State<_MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final pages = [
       HomeScreen(controller: widget.controller),
       InsightsScreen(controller: widget.controller),
@@ -98,24 +103,24 @@ class _MainShellState extends State<_MainShell> {
         selectedIndex: _index,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.battery_5_bar_outlined),
-            selectedIcon: Icon(Icons.battery_5_bar_rounded),
-            label: 'Batteria',
+            icon: const Icon(Icons.battery_5_bar_outlined),
+            selectedIcon: const Icon(Icons.battery_5_bar_rounded),
+            label: l10n.navBattery,
           ),
           NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights_rounded),
-            label: 'Insights',
+            icon: const Icon(Icons.insights_outlined),
+            selectedIcon: const Icon(Icons.insights_rounded),
+            label: l10n.navInsights,
           ),
           NavigationDestination(
-            icon: Icon(Icons.show_chart_rounded),
-            label: 'Storico',
+            icon: const Icon(Icons.show_chart_rounded),
+            label: l10n.navHistory,
           ),
           NavigationDestination(
-            icon: Icon(Icons.tune_rounded),
-            label: 'Impostazioni',
+            icon: const Icon(Icons.tune_rounded),
+            label: l10n.navSettings,
           ),
         ],
       ),

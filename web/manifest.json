@@ -1,0 +1,9 @@
+{
+  "name": "Battery Guard",
+  "short_name": "Battery Guard",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#151a17",
+  "theme_color": "#151a17",
+  "description": "Battery Guard UI Web Preview"
+}
