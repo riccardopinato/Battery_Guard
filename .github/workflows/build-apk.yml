@@ -19,7 +19,7 @@ concurrency:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 55
 
     steps:
       - name: Checkout
@@ -59,25 +59,39 @@ jobs:
           fi
           chmod +x android/gradlew
 
-      - name: Prepare optional production signing
+      - name: Require persistent INTERNAL signing
         shell: bash
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_CERT_SHA256: "CB:6C:7D:05:C3:43:0F:34:31:F3:22:82:48:E2:14:C6:4B:0B:50:EA:E1:6D:8C:D1:0F:63:5C:32:AF:3D:E2:91"
         run: |
           set -euo pipefail
-          if [ -n "${KEYSTORE_BASE64:-}" ]; then
-            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/battery-guard-release.jks"
-            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/battery-guard-release.jks" >> "$GITHUB_ENV"
-            echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
-            echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
-            echo "PRODUCTION_SIGNING_READY=true" >> "$GITHUB_ENV"
-          else
-            echo "PRODUCTION_SIGNING_READY=false" >> "$GITHUB_ENV"
-          fi
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+
+          KEYSTORE_PATH="$RUNNER_TEMP/battery-guard-internal.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          ACTUAL_CERT_SHA256="$(
+            keytool -list -v               -keystore "$KEYSTORE_PATH"               -storepass "$KEYSTORE_PASSWORD"               -alias "$KEY_ALIAS" |
+            sed -n 's/^[[:space:]]*SHA256: //p' |
+            head -n 1
+          )"
+
+          test -n "$ACTUAL_CERT_SHA256"
+          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
+
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "SIGNING_LANE=internal" >> "$GITHUB_ENV"
+          echo "SIGNING_CERT_SHA256=$ACTUAL_CERT_SHA256" >> "$GITHUB_ENV"
 
       - name: Flutter environment
         run: |
@@ -118,51 +132,106 @@ jobs:
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages
 
-      - name: Build split APKs
-        run: |
-          rm -rf build/symbols
-          mkdir -p build/symbols
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols
-
-      - name: Build universal APK
-        run: flutter build apk --release --split-debug-info=build/symbols
-
-      - name: Build AAB
-        run: flutter build appbundle --release --split-debug-info=build/symbols
-
-      - name: Prepare immutable CI bundle
+      - name: Build FREE APKs and AAB
         shell: bash
         run: |
           set -euxo pipefail
-          VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          rm -rf build/symbols-free /tmp/battery_guard_free
+          mkdir -p build/symbols-free /tmp/battery_guard_free
+
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols-free
+          flutter build apk --release --split-debug-info=build/symbols-free
+          flutter build appbundle --release --split-debug-info=build/symbols-free
+
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk /tmp/battery_guard_free/app-arm64-v8a-release.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk /tmp/battery_guard_free/app-armeabi-v7a-release.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk /tmp/battery_guard_free/app-x86_64-release.apk
+          cp build/app/outputs/flutter-apk/app-release.apk /tmp/battery_guard_free/app-release.apk
+          cp build/app/outputs/bundle/release/app-release.aab /tmp/battery_guard_free/app-release.aab
+
+      - name: Build PREMIUM TEST APKs
+        shell: bash
+        run: |
+          set -euxo pipefail
+          flutter clean
+          flutter pub get
+          flutter gen-l10n
+          rm -rf build/symbols-premium
+          mkdir -p build/symbols-premium
+
+          flutter build apk             --release             --split-per-abi             --split-debug-info=build/symbols-premium             --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
+
+          flutter build apk             --release             --split-debug-info=build/symbols-premium             --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
+
+      - name: Prepare and verify immutable INTERNAL bundle
+        shell: bash
+        run: |
+          set -euxo pipefail
+          VERSION_META="$(awk '/^version:/ {print $2}' pubspec.yaml)"
+          VERSION="$(printf '%s' "$VERSION_META" | cut -d+ -f1)"
+          VERSION_CODE="$(printf '%s' "$VERSION_META" | cut -d+ -f2)"
           SHORT_SHA="${GITHUB_SHA:0:12}"
+
+          rm -rf release
           mkdir -p release
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-arm64-v8a.apk"
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-armeabi-v7a.apk"
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-x86_64.apk"
-          cp build/app/outputs/flutter-apk/app-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-universal.apk"
-          cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-${VERSION}-${SHORT_SHA}.aab"
+
+          cp /tmp/battery_guard_free/app-arm64-v8a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-arm64-v8a.apk"
+          cp /tmp/battery_guard_free/app-armeabi-v7a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-armeabi-v7a.apk"
+          cp /tmp/battery_guard_free/app-x86_64-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-x86_64.apk"
+          cp /tmp/battery_guard_free/app-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-universal.apk"
+          cp /tmp/battery_guard_free/app-release.aab             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE.aab"
+
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-arm64-v8a.apk"
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-armeabi-v7a.apk"
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-x86_64.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-universal.apk"
+
           cp pubspec.lock release/pubspec.lock
-          (
-            cd release
-            sha256sum * > SHA256SUMS.txt
-          )
+
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+
+          EXPECTED_DIGEST="$(printf '%s' "$SIGNING_CERT_SHA256" | tr -d ':' | tr '[:lower:]' '[:upper:]')"
+
+          for APK in release/*.apk; do
+            VERIFY_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK")"
+            ACTUAL_DIGEST="$(
+              printf '%s\n' "$VERIFY_OUTPUT" |
+              sed -n 's/^Signer #1 certificate SHA-256 digest: //p' |
+              head -n 1 |
+              tr '[:lower:]' '[:upper:]'
+            )"
+            test -n "$ACTUAL_DIGEST"
+            test "$ACTUAL_DIGEST" = "$EXPECTED_DIGEST"
+          done
+
           {
             echo "version=$VERSION"
+            echo "versionCode=$VERSION_CODE"
+            echo "packageId=com.riccardopinato.batteryguard"
             echo "sourceSha=$GITHUB_SHA"
-            echo "productionSigningReady=$PRODUCTION_SIGNING_READY"
             echo "flutter=3.47.5"
-            echo "webPreviewBranch=gh-pages"
-            echo "admob=test-ids-in-ci"
+            echo "signingLane=$SIGNING_LANE"
+            echo "signingCertSha256=$SIGNING_CERT_SHA256"
+            echo "admobFree=test-ids"
+            echo "premiumTestOverride=true"
+            echo "premiumTestAds=disabled-by-pro-entitlement"
             echo "proProduct=battery_guard_pro_lifetime"
+            echo "launcherIcon=refined-shield-battery-v1"
           } > release/BUILD_EVIDENCE.txt
 
-      - name: Upload immutable CI artifact
+          (
+            cd release
+            sha256sum               Battery-Guard-*               pubspec.lock               BUILD_EVIDENCE.txt               > SHA256SUMS.txt
+          )
+
+      - name: Upload immutable INTERNAL artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Battery-Guard-${{ github.sha }}
+          name: Battery-Guard-INTERNAL-${{ github.sha }}
           path: |
             release/*
-            build/symbols/**
+            build/symbols-free/**
+            build/symbols-premium/**
           if-no-files-found: error
           retention-days: 7
