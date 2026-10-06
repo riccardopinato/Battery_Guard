@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.2
+- replaced fixed-size `AdSize.banner` with Google Large Anchored Adaptive banner sizing based on the actual available layout width;
+- moved the persistent Free banner out of the Bottom Navigation container and into a dedicated top content slot;
+- isolated NavigationBar from advertising to reduce accidental-click risk and removed the previous banner/navigation sandwich;
+- adaptive slot reserves the Google-computed height while loading and collapses after load failure/no-fill;
+- added local diagnostic callbacks for banner load, failure, impression and click without sending Battery Guard telemetry;
+- updated Google Test Banner IDs and forced test ads outside an explicitly configured production release;
+- production artifacts now require an explicit `ADMOB_USE_LIVE_ADS=true` opt-in in addition to the real banner ID;
+- preserved UMP consent gating, Privacy Options and Pro ad-free behavior;
+- bumped source version to 1.1.2+14.
+
 ## 1.1.1
 - fixed duplicate 100% notifications when the upper target itself is 100%;
 - localized native/background notification channels, alert titles and alert messages;
@@ -11,7 +22,6 @@
 - fixed adaptive temperature baseline so it requires actual historical temperature samples;
 - added explicit network permissions for the ad-supported Free build;
 - CI artifact now exports the generated dependency lockfile for reproducibility hardening.
-
 
 ## 1.1.0
 - added configurable lower battery threshold (default 20%) in addition to the upper charging threshold;
@@ -25,14 +35,12 @@
 - existing Pro lifetime entitlement now removes ads and includes Health Lab;
 - production workflow now requires real AdMob identifiers in addition to production signing.
 
-
 ## 1.0.0
 - feature freeze: no new product scope after 0.9;
 - final source version aligned to 1.0.0+11;
 - remaining Settings strings migrated to localization resources;
 - production-release workflow, privacy/store/FGS documentation and physical acceptance matrix retained as mandatory external gates;
 - v1 source can become PRODUCTION RELEASED only after production signing, Play Internal Testing, purchase/restore, physical-device matrix and Play policy checks pass.
-
 
 ## 0.9.0
 - added Google Play Billing architecture for the non-consumable `battery_guard_pro_lifetime`;
@@ -44,7 +52,6 @@
 - added physical acceptance matrix and explicit production release gate;
 - added production release workflow that refuses missing signing secrets and immutable-release overwrite.
 
-
 ## 0.8.0
 - added Charge Doctor controlled charger/cable tests;
 - local persistent history for up to 50 controlled tests;
@@ -53,7 +60,6 @@
 - personal comparison only against reliable tests using the same source;
 - wording explicitly avoids declaring a cable defective from telemetry alone;
 - Charge Doctor available in Android and simulated Web Preview.
-
 
 ## 0.7.0
 - Flutter localization infrastructure for EN/IT/ES/FR/DE/PT;
