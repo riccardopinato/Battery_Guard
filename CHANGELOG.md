@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.3
+- refreshed the launcher icon with the approved shield + charged battery artwork;
+- moved the visual into the adaptive foreground safe zone and added Android 13+ monochrome/themed support;
+- introduced persistent INTERNAL signing for installable QA APKs;
+- pinned and verified the INTERNAL certificate SHA-256 fingerprint;
+- separated INTERNAL and PRODUCTION signing lanes;
+- production releases now require dedicated `ANDROID_PRODUCTION_*` secrets;
+- added a compile-time Premium Test entitlement override without changing Play production behavior;
+- CI now builds Free and Premium Test APKs from the same source SHA and signing identity;
+- preserved Free and Premium symbol files in the Evidence Bundle;
+- kept analyze/test/Web checks available even when PR signing secrets are unavailable;
+- bumped source version to 1.1.3+15.
+
 ## 1.1.2
 - replaced fixed-size `AdSize.banner` with Google Large Anchored Adaptive banner sizing based on the actual available layout width;
 - moved the persistent Free banner out of the Bottom Navigation container and into a dedicated top content slot;
