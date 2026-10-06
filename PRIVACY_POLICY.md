@@ -24,6 +24,8 @@ The Free version can display Google AdMob banner advertising. Google Mobile Ads 
 
 Battery Guard does not use battery telemetry or Charge Doctor results to target advertisements.
 
+When Google's privacy configuration requires it, Battery Guard exposes a visible "Privacy choices" entry in Settings so the user can review or change advertising privacy choices.
+
 ## Pro
 Battery Guard Pro is a one-time Google Play purchase. Pro removes Battery Guard advertising and unlocks additional features including Battery Health Lab, Charge Doctor and extended Insights.
 

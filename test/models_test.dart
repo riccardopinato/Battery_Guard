@@ -19,6 +19,9 @@ void main() {
       'voltageAvailable': true,
       'currentAvailable': true,
       'powerAvailable': true,
+      'chargeCounterAvailable': true,
+      'chargeCounterMah': 3825.0,
+      'cycleCount': 187,
       'status': 'In carica',
       'health': 'Buona',
       'technology': 'Li-ion',
@@ -34,6 +37,9 @@ void main() {
     expect(snapshot.voltageV, closeTo(4.321, 0.001));
     expect(snapshot.isCharging, isTrue);
     expect(snapshot.powerAvailable, isTrue);
+    expect(snapshot.chargeCounterAvailable, isTrue);
+    expect(snapshot.chargeCounterMah, closeTo(3825, 0.01));
+    expect(snapshot.cycleCount, 187);
 
     final unsupported = BatterySnapshot.fromMap({'level': 50});
     expect(unsupported.powerAvailable, isFalse);
@@ -216,6 +222,26 @@ void main() {
     expect(status.deliveryReady, isFalse);
     expect(status.needsAttention, isTrue);
     expect(status.deliveryLabel, contains('Canale'));
+  });
+
+  test('ReliabilityStatus detects quiet channel failure only in night mode', () {
+    final status = ReliabilityStatus.fromMap({
+      'notificationsGranted': true,
+      'notificationsGloballyEnabled': true,
+      'monitorChannelEnabled': true,
+      'alertChannelEnabled': true,
+      'highChargeChannelEnabled': true,
+      'lowBatteryChannelEnabled': true,
+      'quietChannelEnabled': false,
+      'lowAlertEnabled': true,
+      'nightModeEnabled': true,
+      'monitoringRequested': true,
+      'serviceHealthy': true,
+      'manufacturer': 'Android',
+    });
+
+    expect(status.deliveryReady, isFalse);
+    expect(status.needsAttention, isTrue);
   });
 
   test('ReliabilityStatus accepts disabled monitoring with ready alerts', () {

@@ -31,6 +31,7 @@ object ChargingSessionStore {
 
     private data class Baseline(
         val count: Int,
+        val temperatureCount: Int,
         val averageRate: Double,
         val averageMaxTemperatureC: Double,
     )
@@ -108,7 +109,7 @@ object ChargingSessionStore {
             val adaptiveTemperatureAlert =
                 !active.optBoolean("adaptiveTemperatureAlerted", false) &&
                     temperatureAvailable &&
-                    baseline.count >= 3 &&
+                    baseline.temperatureCount >= 3 &&
                     currentTemp >= 38.0 &&
                     currentTemp >= baseline.averageMaxTemperatureC + 4.0
 
@@ -327,7 +328,7 @@ object ChargingSessionStore {
         plugType: String,
     ): Baseline {
         if (plugType.isBlank() || plugType == "Nessuno") {
-            return Baseline(0, 0.0, 0.0)
+            return Baseline(0, 0, 0.0, 0.0)
         }
 
         val array = parseArray(prefs.getString(COMPLETED, null))
@@ -363,9 +364,10 @@ object ChargingSessionStore {
             count += 1
         }
 
-        if (count == 0) return Baseline(0, 0.0, 0.0)
+        if (count == 0) return Baseline(0, 0, 0.0, 0.0)
         return Baseline(
             count = count,
+            temperatureCount = temperatureCount,
             averageRate = rateSum / count,
             averageMaxTemperatureC =
                 if (temperatureCount > 0) {

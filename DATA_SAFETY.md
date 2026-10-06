@@ -12,7 +12,7 @@ This is a preparation aid. The final declaration must be reconciled with the exa
 ## Advertising SDK
 The Free version includes Google Mobile Ads / AdMob. The final Data Safety declaration must include the data practices of the exact Google Mobile Ads SDK version bundled in the production AAB, including any device identifiers, diagnostics or advertising data required by Google's disclosure documentation.
 
-Consent is requested where required before ad requests. Battery telemetry is not supplied by Battery Guard as ad-targeting input.
+Consent is requested where required before ad requests. When required by Google's UMP status, Settings exposes a visible privacy-options entry point so choices can be revisited. Battery telemetry is not supplied by Battery Guard as ad-targeting input.
 
 ## Pro
 Pro is a non-consumable Google Play purchase. Pro removes Battery Guard ad placements. Google Play processes purchase information required to establish/restore ownership.

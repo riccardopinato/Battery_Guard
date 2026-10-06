@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.1.0+12 — Dual Threshold + Health Lab + AdMob**
+Versione sorgente: **1.1.1+13 — Audit hardening**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -30,7 +30,9 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - Quick Settings Tile;
 - Charge Doctor con test controllati, confidence model e confronto personale A/B;
 - Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Charge Doctor + Insights 30 giorni;
-- AdMob banner nel piano Free con configurazione test in CI e ID reali obbligatori per la release production;
+- AdMob banner nel piano Free con UMP/Privacy Options, configurazione test in CI e ID reali obbligatori per la release production;
+- notifiche native localizzate secondo lingua app/sistema;
+- Battery Health Lab con stima robusta, outlier filtering e confidence basata anche sulla copertura SoC;
 - diagnostica di servizio, permessi e notification channel;
 - gestione sessioni interrotte/non affidabili;
 - storage locale bounded.

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.1
+- fixed duplicate 100% notifications when the upper target itself is 100%;
+- localized native/background notification channels, alert titles and alert messages;
+- localized battery status/health/charging-source labels in Flutter UI;
+- notification reliability now respects disabled low-limit alerts and night-mode quiet channel health;
+- added a visible Google UMP privacy-options entry point when required and consent-change ad reload;
+- improved AdMob initialization retry behavior;
+- hardened Battery Health Lab: discharging-only samples, robust outlier filtering, SoC-spread confidence and health capped at 100%;
+- fixed adaptive temperature baseline so it requires actual historical temperature samples;
+- added explicit network permissions for the ad-supported Free build;
+- CI artifact now exports the generated dependency lockfile for reproducibility hardening.
+
+
 ## 1.1.0
 - added configurable lower battery threshold (default 20%) in addition to the upper charging threshold;
 - added separate Android notification channels/sounds for "charge now" and "unplug now";

@@ -302,5 +302,31 @@
         "type": "int"
       }
     }
-  }
+  },
+  "statusCharging": "Cargando",
+  "statusDischarging": "En uso",
+  "statusFull": "Carga completa",
+  "statusNotCharging": "No cargando",
+  "statusUnknown": "Desconocido",
+  "healthGood": "Buena",
+  "healthOverheat": "Sobrecalentada",
+  "healthCritical": "Crítica",
+  "healthOverVoltage": "Sobretensión",
+  "healthFailure": "Anomalía",
+  "healthCold": "Demasiado fría",
+  "healthUnknown": "Desconocida",
+  "sourceAc": "Cargador AC",
+  "sourceUsb": "USB",
+  "sourceWireless": "Carga inalámbrica",
+  "sourceDock": "Dock",
+  "sourceNone": "Ninguna",
+  "privacyChoices": "Opciones de privacidad",
+  "privacyChoicesBody": "Revisa o cambia las opciones de privacidad de la publicidad.",
+  "highChargeChannelDisabled": "Canal del límite superior desactivado",
+  "lowBatteryChannelDisabled": "Canal del límite inferior desactivado",
+  "quietChannelDisabled": "Canal nocturno desactivado",
+  "monitorChannelDisabled": "Canal de monitorización desactivado",
+  "oemSamsungHint": "En Samsung, evita que Battery Guard esté entre las apps en suspensión profunda.",
+  "oemXiaomiHint": "En Xiaomi/Redmi/Poco, permite inicio automático y batería sin restricciones.",
+  "oemBackgroundHint": "Permite que Battery Guard funcione en segundo plano sin restricciones de batería."
 }

@@ -25,11 +25,8 @@ class QuickSettingsTileService : TileService() {
         qsTile?.apply {
             state = if (enabled) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
             label = "Battery Guard"
-            contentDescription = if (enabled) {
-                "Battery Guard attivo"
-            } else {
-                "Battery Guard disattivato"
-            }
+            contentDescription =
+                NativeUiLabels.tileDescription(this@QuickSettingsTileService, enabled)
             updateTile()
         }
     }

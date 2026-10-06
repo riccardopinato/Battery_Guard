@@ -21,6 +21,7 @@
 4. Complete/review the Google consent message configuration for EEA/UK where applicable.
 5. Upload candidate AAB to Play Internal Testing.
 6. Verify purchase + restore and verify that Pro removes all ad placements with Play test account.
+   - Before production, add a trusted purchase-verification strategy (server-side or equivalent trusted verifier) rather than treating an unverified purchase event as final entitlement evidence.
 7. Complete PHYSICAL_ACCEPTANCE_MATRIX.md on real devices.
 8. Verify foreground-service specialUse declaration in Play Console.
 9. Publish privacy policy at a public URL and add support contact.

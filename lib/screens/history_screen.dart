@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
@@ -233,7 +234,7 @@ class _SessionCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
-          '$dateLabel • ${session.durationLabel} • ${session.plugType}\\n'
+          '$dateLabel • ${session.durationLabel} • ${localizedPlugType(l10n, session.plugType)}\\n'
           '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C • ${session.qualityLabel}',
         ),
         isThreeLine: true,

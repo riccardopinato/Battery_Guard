@@ -115,9 +115,12 @@ class MonitoringService : Service() {
         if (sessionUpdate.adaptiveTemperatureAlert) {
             deliverSessionAlert(
                 type = "adaptiveTemperature",
-                title = "Temperatura sopra la tua media",
-                message =
-                    "Questa ricarica è a ${"%.1f".format(temperature)} °C, circa 4 °C o più sopra la temperatura massima media delle tue sessioni simili (${"%.1f".format(sessionUpdate.baselineMaxTemperatureC)} °C).",
+                title = NativeStrings.adaptiveTemperatureTitle(this),
+                message = NativeStrings.adaptiveTemperatureMessage(
+                    this,
+                    temperature,
+                    sessionUpdate.baselineMaxTemperatureC,
+                ),
                 snapshot = snapshot,
                 notificationId = 2108,
             )
@@ -130,9 +133,12 @@ class MonitoringService : Service() {
                     ?: 0.0
             deliverSessionAlert(
                 type = "adaptiveSlowCharging",
-                title = "Ricarica più lenta del solito",
-                message =
-                    "Velocità attuale circa ${"%.1f".format(rate)} %/h contro una media personale di ${"%.1f".format(sessionUpdate.baselineRate)} %/h con questa sorgente.",
+                title = NativeStrings.adaptiveSlowTitle(this),
+                message = NativeStrings.adaptiveSlowMessage(
+                    this,
+                    rate,
+                    sessionUpdate.baselineRate,
+                ),
                 snapshot = snapshot,
                 notificationId = 2107,
             )
@@ -141,9 +147,11 @@ class MonitoringService : Service() {
         if (sessionUpdate.rapidTemperatureAlert) {
             deliverSessionAlert(
                 type = "rapidTemperature",
-                title = "Temperatura in rapido aumento",
-                message =
-                    "La batteria è salita rapidamente fino a ${"%.1f".format(temperature)} °C durante questa ricarica.",
+                title = NativeStrings.rapidTemperatureTitle(this),
+                message = NativeStrings.rapidTemperatureMessage(
+                    this,
+                    temperature,
+                ),
                 snapshot = snapshot,
                 notificationId = 2105,
             )
@@ -156,9 +164,8 @@ class MonitoringService : Service() {
                     ?: 0.0
             deliverSessionAlert(
                 type = "slowCharging",
-                title = "Ricarica insolitamente lenta",
-                message =
-                    "Velocità media circa ${"%.1f".format(rate)} %/h. Verifica cavo e alimentatore; alcuni dispositivi possono limitare volontariamente la ricarica.",
+                title = NativeStrings.slowChargingTitle(this),
+                message = NativeStrings.slowChargingMessage(this, rate),
                 snapshot = snapshot,
                 notificationId = 2106,
             )
@@ -202,9 +209,8 @@ class MonitoringService : Service() {
         ) {
             val sent = NotificationHelper.showAlert(
                 context = this,
-                title = "Batteria al $level%",
-                message =
-                    "Hai raggiunto il limite inferiore del ${config.lowLevel}%. È un buon momento per mettere il telefono in carica.",
+                title = NativeStrings.lowTitle(this, level),
+                message = NativeStrings.lowMessage(this, config.lowLevel),
                 snapshot = snapshot,
                 notificationId = 2110,
                 kind = NotificationHelper.AlertKind.LOW_BATTERY,
@@ -227,13 +233,11 @@ class MonitoringService : Service() {
         ) {
             val sent = NotificationHelper.showAlert(
                 context = this,
-                title = "Soglia raggiunta: $level%",
-                message =
-                    if (config.targetLevel < 100) {
-                        "La batteria ha raggiunto il ${config.targetLevel}%. Puoi scollegare il caricatore."
-                    } else {
-                        "La batteria ha raggiunto il 100%."
-                    },
+                title = NativeStrings.highTitle(this, level),
+                message = NativeStrings.highMessage(
+                    this,
+                    config.targetLevel,
+                ),
                 snapshot = snapshot,
                 notificationId = 2101,
                 kind = NotificationHelper.AlertKind.HIGH_CHARGE,
@@ -246,6 +250,7 @@ class MonitoringService : Service() {
 
         if (
             config.notifyFull &&
+            config.targetLevel < 100 &&
             isCharging &&
             level >= 100 &&
             !fullAlerted &&
@@ -254,9 +259,8 @@ class MonitoringService : Service() {
             if (
                 NotificationHelper.showAlert(
                     context = this,
-                    title = "Carica completa",
-                    message =
-                        "La batteria è al 100%. Puoi scollegare il caricatore.",
+                    title = NativeStrings.fullTitle(this),
+                    message = NativeStrings.fullMessage(this),
                     snapshot = snapshot,
                     notificationId = 2102,
                 )
@@ -278,9 +282,11 @@ class MonitoringService : Service() {
             if (
                 NotificationHelper.showAlert(
                     context = this,
-                    title = "Temperatura batteria elevata",
-                    message =
-                        "La batteria è a ${"%.1f".format(temperature)} °C. Controlla il telefono e la ricarica.",
+                    title = NativeStrings.temperatureTitle(this),
+                    message = NativeStrings.temperatureMessage(
+                        this,
+                        temperature,
+                    ),
                     snapshot = snapshot,
                     notificationId = 2103,
                 )
@@ -300,9 +306,8 @@ class MonitoringService : Service() {
             if (
                 NotificationHelper.showAlert(
                     context = this,
-                    title = "Cavo scollegato",
-                    message =
-                        "Ricarica interrotta con batteria al $level%.",
+                    title = NativeStrings.unplugTitle(this),
+                    message = NativeStrings.unplugMessage(this, level),
                     snapshot = snapshot,
                     notificationId = 2104,
                 )

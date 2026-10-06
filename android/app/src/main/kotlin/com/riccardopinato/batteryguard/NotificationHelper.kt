@@ -67,30 +67,30 @@ object NotificationHelper {
 
         val monitor = NotificationChannel(
             MONITOR_CHANNEL,
-            "Monitoraggio Battery Guard",
+            NativeStrings.monitorChannelName(context),
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
             description =
-                "Notifica persistente mentre Battery Guard controlla la batteria"
+                NativeStrings.monitorChannelDescription(context)
             setShowBadge(false)
         }
 
         val alerts = NotificationChannel(
             ALERT_CHANNEL,
-            "Avvisi batteria",
+            NativeStrings.alertChannelName(context),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Avvisi generali di temperatura e ricarica"
+            description = NativeStrings.alertChannelDescription(context)
             enableVibration(true)
         }
 
         val highCharge = NotificationChannel(
             HIGH_CHARGE_CHANNEL,
-            "Limite superiore di ricarica",
+            NativeStrings.highChannelName(context),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description =
-                "Suono dedicato quando raggiungi il limite superiore e puoi scollegare il caricatore"
+                NativeStrings.highChannelDescription(context)
             setSound(
                 RingtoneManager.getDefaultUri(
                     RingtoneManager.TYPE_NOTIFICATION,
@@ -102,11 +102,11 @@ object NotificationHelper {
 
         val lowBattery = NotificationChannel(
             LOW_BATTERY_CHANNEL,
-            "Limite inferiore batteria",
+            NativeStrings.lowChannelName(context),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description =
-                "Suono dedicato quando raggiungi il limite inferiore ed è il momento di mettere in carica"
+                NativeStrings.lowChannelDescription(context)
             setSound(
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
                 alarmAudio,
@@ -116,11 +116,11 @@ object NotificationHelper {
 
         val quiet = NotificationChannel(
             QUIET_CHANNEL,
-            "Avvisi silenziosi notturni",
+            NativeStrings.quietChannelName(context),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description =
-                "Avvisi visibili ma silenziosi durante la modalità notte"
+                NativeStrings.quietChannelDescription(context)
             setSound(null, null)
             enableVibration(false)
         }
@@ -191,7 +191,7 @@ object NotificationHelper {
             (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
         val temperatureAvailable =
             snapshot["temperatureAvailable"] as? Boolean ?: false
-        val status = snapshot["status"]?.toString() ?: "Monitoraggio"
+        val status = snapshot["status"]?.toString() ?: NativeStrings.monitoring(context)
         val temperatureText =
             if (temperatureAvailable) {
                 " • ${"%.1f".format(temperature)} °C"
@@ -201,13 +201,13 @@ object NotificationHelper {
 
         return Notification.Builder(context, MONITOR_CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_battery_guard)
-            .setContentTitle("Battery Guard attivo")
+            .setContentTitle(NativeStrings.monitorTitle(context))
             .setContentText("$level%$temperatureText • $status")
             .setContentIntent(openAppIntent(context))
             .addAction(
                 quickAction(
                     context,
-                    "Target 80%",
+                    NativeStrings.target80(context),
                     WidgetActionReceiver.ACTION_SET_TARGET_80,
                     3301,
                 ),
@@ -215,7 +215,7 @@ object NotificationHelper {
             .addAction(
                 quickAction(
                     context,
-                    "Disattiva",
+                    NativeStrings.disable(context),
                     WidgetActionReceiver.ACTION_DISABLE_MONITORING,
                     3302,
                 ),

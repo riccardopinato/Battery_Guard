@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charging_insights.dart';
 import '../services/app_controller.dart';
@@ -225,7 +226,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                             Icons.power_rounded,
                             size: 18,
                           ),
-                          label: Text('${entry.key}: ${entry.value}'),
+                          label: Text('${localizedPlugType(l10n, entry.key)}: ${entry.value}'),
                         ),
                       )
                       .toList(growable: false),

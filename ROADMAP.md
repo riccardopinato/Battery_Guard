@@ -45,3 +45,13 @@
 - Battery Health Lab Pro;
 - AdMob Free / ad-free Pro;
 - updated privacy/Data Safety/production configuration.
+
+
+## 1.1.1 — Heavy Audit Hardening ✅ IMPLEMENTED / CI GATE PENDING
+- duplicate 100% alert fix;
+- adaptive temperature baseline validity;
+- localized native notifications/widget/tile surfaces;
+- exact notification-channel diagnostics;
+- UMP privacy-options entry point;
+- Health Lab robust estimator;
+- dependency lockfile/reproducibility hardening.

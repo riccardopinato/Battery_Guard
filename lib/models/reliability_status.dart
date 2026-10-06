@@ -7,6 +7,8 @@ class ReliabilityStatus {
     required this.highChargeChannelEnabled,
     required this.lowBatteryChannelEnabled,
     required this.quietChannelEnabled,
+    required this.lowAlertEnabled,
+    required this.nightModeEnabled,
     required this.batteryOptimizationIgnored,
     required this.monitoringRequested,
     required this.serviceHealthy,
@@ -34,6 +36,8 @@ class ReliabilityStatus {
       highChargeChannelEnabled: flag('highChargeChannelEnabled'),
       lowBatteryChannelEnabled: flag('lowBatteryChannelEnabled'),
       quietChannelEnabled: flag('quietChannelEnabled'),
+      lowAlertEnabled: flag('lowAlertEnabled', true),
+      nightModeEnabled: flag('nightModeEnabled'),
       batteryOptimizationIgnored: flag('batteryOptimizationIgnored'),
       monitoringRequested: flag('monitoringRequested'),
       serviceHealthy: flag('serviceHealthy'),
@@ -53,6 +57,8 @@ class ReliabilityStatus {
     highChargeChannelEnabled: false,
     lowBatteryChannelEnabled: false,
     quietChannelEnabled: false,
+    lowAlertEnabled: true,
+    nightModeEnabled: false,
     batteryOptimizationIgnored: false,
     monitoringRequested: false,
     serviceHealthy: true,
@@ -70,6 +76,8 @@ class ReliabilityStatus {
   final bool highChargeChannelEnabled;
   final bool lowBatteryChannelEnabled;
   final bool quietChannelEnabled;
+  final bool lowAlertEnabled;
+  final bool nightModeEnabled;
   final bool batteryOptimizationIgnored;
   final bool monitoringRequested;
   final bool serviceHealthy;
@@ -84,7 +92,8 @@ class ReliabilityStatus {
       notificationsGloballyEnabled &&
       alertChannelEnabled &&
       highChargeChannelEnabled &&
-      lowBatteryChannelEnabled;
+      (!lowAlertEnabled || lowBatteryChannelEnabled) &&
+      (!nightModeEnabled || quietChannelEnabled);
 
   bool get monitorDeliveryReady =>
       notificationsGranted &&
@@ -107,8 +116,11 @@ class ReliabilityStatus {
     if (!highChargeChannelEnabled) {
       return 'Canale limite superiore disattivato';
     }
-    if (!lowBatteryChannelEnabled) {
+    if (lowAlertEnabled && !lowBatteryChannelEnabled) {
       return 'Canale limite inferiore disattivato';
+    }
+    if (nightModeEnabled && !quietChannelEnabled) {
+      return 'Canale notte disattivato';
     }
     if (!alertChannelEnabled) return 'Canale avvisi disattivato';
     return 'Avvisi pronti';

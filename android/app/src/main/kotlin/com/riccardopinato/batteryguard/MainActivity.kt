@@ -116,6 +116,7 @@ class MainActivity : FlutterActivity() {
                             editor.putString("localeOverride", code)
                         }
                         editor.apply()
+                        NotificationHelper.createChannels(this)
                         result.success(null)
                     }
                     "getProEntitlement" ->
@@ -155,8 +156,8 @@ class MainActivity : FlutterActivity() {
                         val snapshot = BatteryInfoReader.read(this)
                         val sent = NotificationHelper.showAlert(
                             context = this,
-                            title = "Battery Guard funziona",
-                            message = "Questo è un avviso di prova.",
+                            title = NativeStrings.testGeneralTitle(this),
+                            message = NativeStrings.testGeneralMessage(this),
                             snapshot = snapshot,
                             notificationId = 2199,
                             saveToHistory = false,
@@ -167,8 +168,8 @@ class MainActivity : FlutterActivity() {
                         val snapshot = BatteryInfoReader.read(this)
                         val sent = NotificationHelper.showAlert(
                             context = this,
-                            title = "Suono limite superiore",
-                            message = "Questo è il suono usato quando puoi scollegare il caricatore.",
+                            title = NativeStrings.testHighTitle(this),
+                            message = NativeStrings.testHighMessage(this),
                             snapshot = snapshot,
                             notificationId = 2200,
                             saveToHistory = false,
@@ -180,8 +181,8 @@ class MainActivity : FlutterActivity() {
                         val snapshot = BatteryInfoReader.read(this)
                         val sent = NotificationHelper.showAlert(
                             context = this,
-                            title = "Suono limite inferiore",
-                            message = "Questo è il suono usato quando è il momento di mettere in carica.",
+                            title = NativeStrings.testLowTitle(this),
+                            message = NativeStrings.testLowMessage(this),
                             snapshot = snapshot,
                             notificationId = 2201,
                             saveToHistory = false,
@@ -228,6 +229,8 @@ class MainActivity : FlutterActivity() {
             "highChargeChannelEnabled" to delivery.highChargeChannelEnabled,
             "lowBatteryChannelEnabled" to delivery.lowBatteryChannelEnabled,
             "quietChannelEnabled" to delivery.quietChannelEnabled,
+            "lowAlertEnabled" to config.notifyLow,
+            "nightModeEnabled" to config.nightMode,
             "batteryOptimizationIgnored" to optimizationIgnored,
             "monitoringRequested" to config.enabled,
             "serviceHealthy" to (!config.enabled || isMonitoringServiceRunning()),

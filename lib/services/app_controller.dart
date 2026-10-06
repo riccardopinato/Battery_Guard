@@ -384,8 +384,9 @@ class AppController extends ChangeNotifier {
       batteryHealthReport = BatteryHealthReport(
         nominalCapacityMah: value,
         estimatedFullCapacityMah: estimate,
-        estimatedHealthPercent:
-            value > 0 && estimate > 0 ? estimate / value * 100 : 0,
+        estimatedHealthPercent: value > 0 && estimate > 0
+            ? (estimate / value * 100).clamp(0, 100).toDouble()
+            : 0,
         confidence: current.confidence,
         sampleCount: current.sampleCount,
         cycleCount: current.cycleCount,

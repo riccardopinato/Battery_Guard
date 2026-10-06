@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
 import '../screens/health_lab_screen.dart';
@@ -105,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               snapshot.isPlugged
-                                  ? snapshot.plugType
+                                  ? localizedPlugType(l10n, snapshot.plugType)
                                   : l10n.notConnected,
                               style: Theme.of(context)
                                   .textTheme
@@ -113,7 +114,7 @@ class HomeScreen extends StatelessWidget {
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             Text(
-                              '${snapshot.status} • ${l10n.healthInline(snapshot.health.toLowerCase())}',
+                              '${localizedBatteryStatus(l10n, snapshot.status)} • ${localizedBatteryHealth(l10n, snapshot.health)}',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -299,8 +300,8 @@ class HomeScreen extends StatelessWidget {
               MetricCard(
                 icon: Icons.favorite_outline_rounded,
                 label: l10n.health,
-                value: snapshot.health,
-                caption: snapshot.status,
+                value: localizedBatteryHealth(l10n, snapshot.health),
+                caption: localizedBatteryStatus(l10n, snapshot.status),
               ),
             ],
           ),
@@ -381,7 +382,7 @@ class _ChargingSessionCard extends StatelessWidget {
                                 ),
                       ),
                       Text(
-                        '${session.plugType} • ${session.durationLabel}',
+                        '${localizedPlugType(l10n, session.plugType)} • ${session.durationLabel}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),

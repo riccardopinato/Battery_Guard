@@ -10,7 +10,7 @@ object BatteryHealthStore {
     private const val SAMPLES = "capacity_samples"
     private const val NOMINAL = "nominal_capacity_mah"
     private const val LAST_CYCLE = "last_cycle_count"
-    private const val MAX_SAMPLES = 60
+    private const val MAX_SAMPLES = 1500
     private const val MIN_SAMPLE_GAP_MS = 6 * 60 * 60 * 1000L
     private val lock = Any()
 
@@ -38,7 +38,18 @@ object BatteryHealthStore {
             val level = (snapshot["level"] as? Number)?.toInt() ?: 0
             val chargeCounterMah =
                 (snapshot["chargeCounterMah"] as? Number)?.toDouble() ?: 0.0
-            if (!available || level !in 15..95 || chargeCounterMah <= 0.0) {
+            val isPlugged = snapshot["isPlugged"] as? Boolean ?: false
+            val isCharging = snapshot["isCharging"] as? Boolean ?: false
+
+            // Capacity estimation is intentionally sampled while discharging:
+            // this reduces transient lag between charge counter and rounded SoC.
+            if (
+                !available ||
+                isPlugged ||
+                isCharging ||
+                level !in 20..90 ||
+                chargeCounterMah <= 0.0
+            ) {
                 return
             }
 
@@ -98,42 +109,85 @@ object BatteryHealthStore {
             val cycleCount = prefs.getInt(LAST_CYCLE, -1)
             val array = parseArray(prefs.getString(SAMPLES, null))
 
-            val estimates = mutableListOf<Double>()
-            val temperatures = mutableListOf<Double>()
+            data class Sample(
+                val estimateMah: Double,
+                val level: Int,
+                val temperatureC: Double,
+            )
+
+            val samples = mutableListOf<Sample>()
             for (index in 0 until array.length()) {
                 val item = array.optJSONObject(index) ?: continue
                 val estimate = item.optDouble("estimateMah", 0.0)
-                if (estimate > 0) estimates.add(estimate)
-                val temperature = item.optDouble("temperatureC", 0.0)
-                if (temperature > 0) temperatures.add(temperature)
+                val level = item.optInt("level", 0)
+                if (estimate <= 0 || level !in 20..90) continue
+                samples.add(
+                    Sample(
+                        estimateMah = estimate,
+                        level = level,
+                        temperatureC =
+                            item.optDouble("temperatureC", 0.0),
+                    ),
+                )
             }
 
-            val recent = estimates.takeLast(12)
-            val estimated = median(recent)
+            val recent = samples.takeLast(24)
+            val rawMedian = median(recent.map { it.estimateMah })
+            val filtered =
+                if (rawMedian > 0) {
+                    recent.filter {
+                        abs(it.estimateMah - rawMedian) / rawMedian <= 0.18
+                    }
+                } else {
+                    emptyList()
+                }
+
+            val estimated = median(filtered.map { it.estimateMah })
             val health =
                 if (nominal > 0 && estimated > 0) {
-                    (estimated / nominal * 100.0).coerceIn(0.0, 120.0)
+                    (estimated / nominal * 100.0).coerceIn(0.0, 100.0)
                 } else {
                     0.0
                 }
 
+            val levelSpread =
+                if (filtered.isEmpty()) {
+                    0
+                } else {
+                    (filtered.maxOf { it.level } -
+                        filtered.minOf { it.level })
+                }
+
+            val relativeRange =
+                if (estimated > 0 && filtered.size >= 2) {
+                    (
+                        filtered.maxOf { it.estimateMah } -
+                            filtered.minOf { it.estimateMah }
+                        ) / estimated
+                } else {
+                    Double.POSITIVE_INFINITY
+                }
+
             val confidence = when {
-                recent.size >= 8 -> "high"
-                recent.size >= 3 -> "medium"
+                filtered.size >= 8 &&
+                    levelSpread >= 40 &&
+                    relativeRange <= 0.18 -> "high"
+                filtered.size >= 4 &&
+                    levelSpread >= 20 &&
+                    relativeRange <= 0.30 -> "medium"
                 else -> "low"
             }
 
+            val allEstimates = samples.map { it.estimateMah }
             val trend =
-                if (estimates.size >= 6) {
-                    val window = (estimates.size / 3).coerceAtLeast(2)
-                    val oldAverage = estimates
-                        .take(window)
-                        .average()
-                    val newAverage = estimates
-                        .takeLast(window)
-                        .average()
-                    if (oldAverage > 0) {
-                        ((newAverage - oldAverage) / oldAverage) * 100.0
+                if (allEstimates.size >= 12) {
+                    val window =
+                        (allEstimates.size / 6)
+                            .coerceIn(4, 30)
+                    val oldMedian = median(allEstimates.take(window))
+                    val newMedian = median(allEstimates.takeLast(window))
+                    if (oldMedian > 0) {
+                        ((newMedian - oldMedian) / oldMedian) * 100.0
                     } else {
                         0.0
                     }
@@ -141,12 +195,15 @@ object BatteryHealthStore {
                     0.0
                 }
 
+            val temperatures =
+                samples.map { it.temperatureC }.filter { it > 0 }
+
             return mapOf(
                 "nominalCapacityMah" to nominal,
                 "estimatedFullCapacityMah" to estimated,
                 "estimatedHealthPercent" to health,
                 "confidence" to confidence,
-                "sampleCount" to estimates.size,
+                "sampleCount" to filtered.size,
                 "cycleCount" to cycleCount,
                 "trendPercent" to trend,
                 "averageTemperatureC" to

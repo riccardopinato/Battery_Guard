@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../ads/privacy_options_tile.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/monitoring_config.dart';
 import '../services/app_controller.dart';
@@ -124,7 +125,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 title: Text(l10n.monitoringStatus),
                 subtitle: Text(
-                  '${reliability.serviceLabel} • ${reliability.batteryEventLabel}',
+                  '${_serviceLabel(l10n)} • ${_batteryEventLabel(l10n)}',
                 ),
                 trailing: reliability.monitoringRequested &&
                         !reliability.serviceHealthy
@@ -139,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
                 leading: const Icon(Icons.notifications_active_outlined),
                 title: Text(l10n.notifications),
                 subtitle: Text(
-                  reliability.deliveryReady ? l10n.permissionGranted : l10n.testAlertBlocked,
+                  _deliveryLabel(l10n),
                 ),
                 trailing: reliability.deliveryReady
                     ? const Icon(Icons.check_circle_outline_rounded)
@@ -171,7 +172,7 @@ class SettingsScreen extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.phone_android_rounded),
                 title: Text(reliability.manufacturer),
-                subtitle: Text(reliability.oemHint),
+                subtitle: Text(_oemHint(l10n)),
               ),
               const Divider(height: 1),
               ListTile(
@@ -278,6 +279,8 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(l10n.localOnly),
                 subtitle: Text(l10n.localOnlyBody),
               ),
+              if (!controller.premium.isPro)
+                const PrivacyOptionsTile(),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.info_outline_rounded),
@@ -287,13 +290,68 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 title: Text(l10n.version),
-                trailing: const Text('1.1.0'),
+                trailing: const Text('1.1.1'),
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  String _serviceLabel(AppLocalizations l10n) {
+    final reliability = controller.reliability;
+    if (!reliability.monitoringRequested) return l10n.monitorNotRequested;
+    return reliability.serviceHealthy
+        ? l10n.monitorOperational
+        : l10n.monitorCheck;
+  }
+
+  String _batteryEventLabel(AppLocalizations l10n) {
+    final value = controller.reliability.lastBatteryEventAt;
+    if (value == null) return l10n.noBatteryEvent;
+    final elapsed = DateTime.now().difference(value);
+    if (elapsed.inMinutes < 1) return l10n.lastEventNow;
+    if (elapsed.inMinutes < 60) {
+      return l10n.lastEventMinutes(elapsed.inMinutes);
+    }
+    return l10n.lastEventHours(elapsed.inHours);
+  }
+
+  String _deliveryLabel(AppLocalizations l10n) {
+    final reliability = controller.reliability;
+    if (!reliability.notificationsGranted) return l10n.permissionMissing;
+    if (!reliability.notificationsGloballyEnabled) {
+      return l10n.notificationsDisabled;
+    }
+    if (!reliability.monitorChannelEnabled &&
+        reliability.monitoringRequested) {
+      return l10n.monitorChannelDisabled;
+    }
+    if (!reliability.alertChannelEnabled) return l10n.alertChannelDisabled;
+    if (!reliability.highChargeChannelEnabled) {
+      return l10n.highChargeChannelDisabled;
+    }
+    if (reliability.lowAlertEnabled &&
+        !reliability.lowBatteryChannelEnabled) {
+      return l10n.lowBatteryChannelDisabled;
+    }
+    if (reliability.nightModeEnabled &&
+        !reliability.quietChannelEnabled) {
+      return l10n.quietChannelDisabled;
+    }
+    return l10n.deliveryReady;
+  }
+
+  String _oemHint(AppLocalizations l10n) {
+    final name = controller.reliability.manufacturer.toLowerCase();
+    if (name.contains('xiaomi') ||
+        name.contains('redmi') ||
+        name.contains('poco')) {
+      return l10n.oemXiaomiHint;
+    }
+    if (name.contains('samsung')) return l10n.oemSamsungHint;
+    return l10n.oemBackgroundHint;
   }
 
   String _languageLabel(BuildContext context) {

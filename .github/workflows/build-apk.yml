@@ -139,6 +139,7 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-x86_64.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "release/Battery-Guard-${VERSION}-${SHORT_SHA}-universal.apk"
           cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-${VERSION}-${SHORT_SHA}.aab"
+          cp pubspec.lock release/pubspec.lock
           (
             cd release
             sha256sum * > SHA256SUMS.txt

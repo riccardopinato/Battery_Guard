@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charge_test.dart';
 import '../services/app_controller.dart';
@@ -468,7 +469,7 @@ class _TestCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '${l10n.sourceLabel(test.source)} • ${l10n.resultDuration(duration)}',
+              '${l10n.sourceLabel(localizedPlugType(l10n, test.source))} • ${l10n.resultDuration(duration)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),

@@ -302,5 +302,31 @@
         "type": "int"
       }
     }
-  }
+  },
+  "statusCharging": "Wird geladen",
+  "statusDischarging": "In Benutzung",
+  "statusFull": "Voll geladen",
+  "statusNotCharging": "Wird nicht geladen",
+  "statusUnknown": "Unbekannt",
+  "healthGood": "Gut",
+  "healthOverheat": "Überhitzt",
+  "healthCritical": "Kritisch",
+  "healthOverVoltage": "Überspannung",
+  "healthFailure": "Anomalie",
+  "healthCold": "Zu kalt",
+  "healthUnknown": "Unbekannt",
+  "sourceAc": "Netzladegerät",
+  "sourceUsb": "USB",
+  "sourceWireless": "Kabelloses Laden",
+  "sourceDock": "Dock",
+  "sourceNone": "Keine",
+  "privacyChoices": "Datenschutzoptionen",
+  "privacyChoicesBody": "Werbe-Datenschutzoptionen prüfen oder ändern.",
+  "highChargeChannelDisabled": "Kanal für obere Grenze deaktiviert",
+  "lowBatteryChannelDisabled": "Kanal für untere Grenze deaktiviert",
+  "quietChannelDisabled": "Nachtkanal deaktiviert",
+  "monitorChannelDisabled": "Überwachungskanal deaktiviert",
+  "oemSamsungHint": "Auf Samsung Battery Guard nicht in den Tiefschlaf-Apps ablegen.",
+  "oemXiaomiHint": "Auf Xiaomi/Redmi/Poco Autostart und uneingeschränkte Akkunutzung erlauben.",
+  "oemBackgroundHint": "Battery Guard Hintergrundbetrieb ohne Akku-Einschränkungen erlauben."
 }

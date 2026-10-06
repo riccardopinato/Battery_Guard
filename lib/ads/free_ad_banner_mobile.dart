@@ -13,47 +13,67 @@ class FreeAdBanner extends StatefulWidget {
 class _FreeAdBannerState extends State<FreeAdBanner> {
   BannerAd? _banner;
   bool _loaded = false;
+  bool _preparing = false;
 
   @override
   void initState() {
     super.initState();
+    AdService.consentRevision.addListener(_handleConsentChanged);
     _prepare();
   }
 
-  Future<void> _prepare() async {
-    await AdService.initialize();
-    if (!mounted || !AdService.ready) return;
+  void _handleConsentChanged() {
+    _disposeBanner();
+    _prepare();
+  }
 
-    final banner = BannerAd(
-      size: AdSize.banner,
-      adUnitId: AdService.bannerUnitId,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          if (!mounted) {
+  void _disposeBanner() {
+    _banner?.dispose();
+    _banner = null;
+    _loaded = false;
+  }
+
+  Future<void> _prepare() async {
+    if (_preparing) return;
+    _preparing = true;
+    try {
+      await AdService.initialize();
+      if (!mounted || !AdService.ready) return;
+
+      final banner = BannerAd(
+        size: AdSize.banner,
+        adUnitId: AdService.bannerUnitId,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            if (!mounted) {
+              ad.dispose();
+              return;
+            }
+            setState(() => _loaded = true);
+          },
+          onAdFailedToLoad: (ad, error) {
             ad.dispose();
-            return;
-          }
-          setState(() => _loaded = true);
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          if (mounted) {
-            setState(() {
-              _banner = null;
-              _loaded = false;
-            });
-          }
-        },
-      ),
-    );
-    _banner = banner;
-    await banner.load();
+            if (mounted) {
+              setState(() {
+                _banner = null;
+                _loaded = false;
+              });
+            }
+          },
+        ),
+      );
+      _banner = banner;
+      await banner.load();
+    } finally {
+      _preparing = false;
+    }
   }
 
   @override
   void dispose() {
-    _banner?.dispose();
+    AdService.consentRevision.removeListener(_handleConsentChanged);
+    _disposeBanner();
     super.dispose();
   }
 

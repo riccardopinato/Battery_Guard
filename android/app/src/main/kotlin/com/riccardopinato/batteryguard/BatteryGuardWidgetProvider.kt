@@ -78,8 +78,14 @@ class BatteryGuardWidgetProvider : AppWidgetProvider() {
             val level = (snapshot["level"] as? Number)?.toInt() ?: 0
             val temperature =
                 (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
-            val status = snapshot["status"]?.toString() ?: "Sconosciuto"
-            val plugType = snapshot["plugType"]?.toString() ?: "Nessuno"
+            val status = NativeUiLabels.status(
+                context,
+                snapshot["status"]?.toString().orEmpty(),
+            )
+            val plugType = NativeUiLabels.plugType(
+                context,
+                snapshot["plugType"]?.toString().orEmpty(),
+            )
             val isPlugged = snapshot["isPlugged"] as? Boolean ?: false
 
             val views = RemoteViews(
@@ -100,11 +106,11 @@ class BatteryGuardWidgetProvider : AppWidgetProvider() {
             )
             views.setTextViewText(
                 R.id.widget_monitor_button,
-                if (config.enabled) "Protezione ON" else "Protezione OFF",
+                NativeUiLabels.protection(context, config.enabled),
             )
             views.setTextViewText(
                 R.id.widget_target_button,
-                "Target ${config.targetLevel}%",
+                NativeUiLabels.target(context, config.targetLevel),
             )
 
             views.setOnClickPendingIntent(
