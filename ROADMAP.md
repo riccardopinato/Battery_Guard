@@ -65,3 +65,16 @@
 - require `ADMOB_USE_LIVE_ADS=true` plus a real banner ID for production artifacts;
 - keep Pro ad-free by not constructing the ad placement;
 - retain local-only diagnostic callbacks for load/failure/impression/click without battery telemetry.
+
+
+## 1.1.3 — Persistent Signing & Icon Refresh ✅ IMPLEMENTED / PHYSICAL UPDATE QA PENDING
+- refined shield + battery launcher artwork;
+- adaptive foreground safe-zone handling;
+- Android 13+ themed monochrome icon;
+- persistent INTERNAL signing required for installable CI artifacts;
+- pinned INTERNAL certificate fingerprint validation;
+- Free + Premium Test APKs from the same source SHA/signing identity;
+- Premium Test compile-time entitlement override only for the QA artifact;
+- INTERNAL and PRODUCTION signing lanes separated;
+- dedicated `ANDROID_PRODUCTION_*` secrets for production;
+- physical in-place update verification remains required before CERTIFIED update compatibility.
