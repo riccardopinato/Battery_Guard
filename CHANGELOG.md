@@ -11,6 +11,7 @@
 - CI now builds Free and Premium Test APKs from the same source SHA and signing identity;
 - preserved Free and Premium symbol files in the Evidence Bundle;
 - kept analyze/test/Web checks available even when PR signing secrets are unavailable;
+- hardened the final PR after automated review: release signing no longer blocks debug/sync, adaptive icon safe-zone handling is corrected, and Free symbols survive the Premium rebuild;
 - bumped source version to 1.1.3+15.
 
 ## 1.1.2
