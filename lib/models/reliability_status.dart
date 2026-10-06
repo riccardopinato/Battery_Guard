@@ -4,6 +4,8 @@ class ReliabilityStatus {
     required this.notificationsGloballyEnabled,
     required this.monitorChannelEnabled,
     required this.alertChannelEnabled,
+    required this.highChargeChannelEnabled,
+    required this.lowBatteryChannelEnabled,
     required this.quietChannelEnabled,
     required this.batteryOptimizationIgnored,
     required this.monitoringRequested,
@@ -29,6 +31,8 @@ class ReliabilityStatus {
       notificationsGloballyEnabled: flag('notificationsGloballyEnabled'),
       monitorChannelEnabled: flag('monitorChannelEnabled'),
       alertChannelEnabled: flag('alertChannelEnabled'),
+      highChargeChannelEnabled: flag('highChargeChannelEnabled'),
+      lowBatteryChannelEnabled: flag('lowBatteryChannelEnabled'),
       quietChannelEnabled: flag('quietChannelEnabled'),
       batteryOptimizationIgnored: flag('batteryOptimizationIgnored'),
       monitoringRequested: flag('monitoringRequested'),
@@ -46,6 +50,8 @@ class ReliabilityStatus {
     notificationsGloballyEnabled: false,
     monitorChannelEnabled: false,
     alertChannelEnabled: false,
+    highChargeChannelEnabled: false,
+    lowBatteryChannelEnabled: false,
     quietChannelEnabled: false,
     batteryOptimizationIgnored: false,
     monitoringRequested: false,
@@ -61,6 +67,8 @@ class ReliabilityStatus {
   final bool notificationsGloballyEnabled;
   final bool monitorChannelEnabled;
   final bool alertChannelEnabled;
+  final bool highChargeChannelEnabled;
+  final bool lowBatteryChannelEnabled;
   final bool quietChannelEnabled;
   final bool batteryOptimizationIgnored;
   final bool monitoringRequested;
@@ -74,7 +82,9 @@ class ReliabilityStatus {
   bool get deliveryReady =>
       notificationsGranted &&
       notificationsGloballyEnabled &&
-      alertChannelEnabled;
+      alertChannelEnabled &&
+      highChargeChannelEnabled &&
+      lowBatteryChannelEnabled;
 
   bool get monitorDeliveryReady =>
       notificationsGranted &&
@@ -94,6 +104,12 @@ class ReliabilityStatus {
   String get deliveryLabel {
     if (!notificationsGranted) return 'Permesso notifiche mancante';
     if (!notificationsGloballyEnabled) return 'Notifiche app disattivate';
+    if (!highChargeChannelEnabled) {
+      return 'Canale limite superiore disattivato';
+    }
+    if (!lowBatteryChannelEnabled) {
+      return 'Canale limite inferiore disattivato';
+    }
     if (!alertChannelEnabled) return 'Canale avvisi disattivato';
     return 'Avvisi pronti';
   }

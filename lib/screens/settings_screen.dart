@@ -50,7 +50,22 @@ class SettingsScreen extends StatelessWidget {
               ),
               const Divider(height: 1),
               ListTile(
-                title: Text(l10n.chargingThreshold),
+                title: Text(l10n.lowerLimit),
+                subtitle: Text(l10n.alertAt(config.lowLevel)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => _chooseLowLevel(context, config),
+              ),
+              SwitchListTile.adaptive(
+                title: Text(l10n.notifyLowBattery),
+                subtitle: Text(l10n.notifyLowBatteryBody),
+                value: config.notifyLow,
+                onChanged: (value) => controller.updateConfig(
+                  config.copyWith(notifyLow: value),
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                title: Text(l10n.upperLimit),
                 subtitle: Text(l10n.alertAt(config.targetLevel)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _chooseTarget(context, config),
@@ -184,6 +199,39 @@ class SettingsScreen extends StatelessWidget {
                   await controller.refreshReliability();
                 },
               ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.south_rounded),
+                title: Text(l10n.lowSound),
+                onTap: () async {
+                  final delivered = await controller.testLowAlert();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        delivered ? l10n.testAlertSent : l10n.testAlertBlocked,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.north_rounded),
+                title: Text(l10n.highSound),
+                subtitle: Text(l10n.soundChannelsHint),
+                onTap: () async {
+                  final delivered = await controller.testHighAlert();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        delivered ? l10n.testAlertSent : l10n.testAlertBlocked,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -239,7 +287,7 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 title: Text(l10n.version),
-                trailing: const Text('1.0.0'),
+                trailing: const Text('1.1.0'),
               ),
             ],
           ),
@@ -298,6 +346,45 @@ class SettingsScreen extends StatelessWidget {
         selected.isEmpty ? null : selected,
       );
     }
+  }
+
+  Future<void> _chooseLowLevel(
+    BuildContext context,
+    MonitoringConfig config,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final value = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.lowerLimit,
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 14),
+              for (final level in const [10, 15, 20, 25, 30, 35, 40])
+                ListTile(
+                  title: Text('$level%'),
+                  trailing: level == config.lowLevel
+                      ? const Icon(Icons.check_circle_rounded)
+                      : const Icon(Icons.circle_outlined),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pop(sheetContext, level);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (value != null) await controller.setLowLevel(value);
   }
 
   Future<void> _chooseTarget(

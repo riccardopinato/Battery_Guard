@@ -103,6 +103,7 @@ class MonitoringService : Service() {
         )
 
         HistoryStore.addSample(this, snapshot)
+        BatteryHealthStore.record(this, snapshot)
         BatteryGuardWidgetProvider.updateAll(this, snapshot = snapshot)
 
         val sessionUpdate = ChargingSessionStore.update(
@@ -163,6 +164,8 @@ class MonitoringService : Service() {
             )
         }
 
+        var lowAlerted =
+            runtimePrefs.getBoolean("lowAlerted", false)
         var targetAlerted =
             runtimePrefs.getBoolean("targetAlerted", false)
         var fullAlerted =
@@ -170,6 +173,9 @@ class MonitoringService : Service() {
         var temperatureAlerted =
             runtimePrefs.getBoolean("temperatureAlerted", false)
 
+        if (isPlugged || level >= config.lowLevel + 3) {
+            lowAlerted = false
+        }
         if (!isPlugged || level <= config.targetLevel - 3) {
             targetAlerted = false
         }
@@ -184,10 +190,40 @@ class MonitoringService : Service() {
         }
 
         if (
+            config.notifyLow &&
+            !isPlugged &&
+            level <= config.lowLevel &&
+            !lowAlerted &&
+            canAttemptAlert(
+                "lastLowAlertAt",
+                60 * 60 * 1000L,
+                NotificationHelper.AlertKind.LOW_BATTERY,
+            )
+        ) {
+            val sent = NotificationHelper.showAlert(
+                context = this,
+                title = "Batteria al $level%",
+                message =
+                    "Hai raggiunto il limite inferiore del ${config.lowLevel}%. È un buon momento per mettere il telefono in carica.",
+                snapshot = snapshot,
+                notificationId = 2110,
+                kind = NotificationHelper.AlertKind.LOW_BATTERY,
+            )
+            if (sent) {
+                recordAlertSent("lastLowAlertAt")
+                lowAlerted = true
+            }
+        }
+
+        if (
             isCharging &&
             level >= config.targetLevel &&
             !targetAlerted &&
-            canAttemptAlert("lastTargetAlertAt", 10 * 60 * 1000L)
+            canAttemptAlert(
+                "lastTargetAlertAt",
+                10 * 60 * 1000L,
+                NotificationHelper.AlertKind.HIGH_CHARGE,
+            )
         ) {
             val sent = NotificationHelper.showAlert(
                 context = this,
@@ -200,6 +236,7 @@ class MonitoringService : Service() {
                     },
                 snapshot = snapshot,
                 notificationId = 2101,
+                kind = NotificationHelper.AlertKind.HIGH_CHARGE,
             )
             if (sent) {
                 recordAlertSent("lastTargetAlertAt")
@@ -276,6 +313,7 @@ class MonitoringService : Service() {
         previousPlugged = isPlugged
 
         runtimePrefs.edit()
+            .putBoolean("lowAlerted", lowAlerted)
             .putBoolean("targetAlerted", targetAlerted)
             .putBoolean("fullAlerted", fullAlerted)
             .putBoolean("temperatureAlerted", temperatureAlerted)
@@ -305,8 +343,10 @@ class MonitoringService : Service() {
     private fun canAttemptAlert(
         key: String,
         cooldownMs: Long,
+        kind: NotificationHelper.AlertKind =
+            NotificationHelper.AlertKind.GENERAL,
     ): Boolean {
-        if (!NotificationHelper.canDeliverAlert(this)) return false
+        if (!NotificationHelper.canDeliverAlert(this, kind)) return false
         val now = System.currentTimeMillis()
         val last = runtimePrefs.getLong(key, 0L)
         return last <= 0L || now - last >= cooldownMs

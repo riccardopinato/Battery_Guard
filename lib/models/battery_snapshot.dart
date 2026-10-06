@@ -9,6 +9,9 @@ class BatterySnapshot {
     required this.voltageAvailable,
     required this.currentAvailable,
     required this.powerAvailable,
+    required this.chargeCounterAvailable,
+    required this.chargeCounterMah,
+    required this.cycleCount,
     required this.status,
     required this.health,
     required this.technology,
@@ -29,12 +32,15 @@ class BatterySnapshot {
         voltageAvailable: false,
         currentAvailable: false,
         powerAvailable: false,
-        status: 'Sconosciuto',
-        health: 'Sconosciuta',
+        chargeCounterAvailable: false,
+        chargeCounterMah: 0,
+        cycleCount: -1,
+        status: 'Unknown',
+        health: 'Unknown',
         technology: '—',
         isCharging: false,
         isPlugged: false,
-        plugType: 'Nessuno',
+        plugType: 'None',
         isPowerSaveMode: false,
         timestamp: DateTime.now(),
       );
@@ -65,12 +71,15 @@ class BatterySnapshot {
       voltageAvailable: boolean('voltageAvailable'),
       currentAvailable: boolean('currentAvailable'),
       powerAvailable: boolean('powerAvailable'),
-      status: text('status', 'Sconosciuto'),
-      health: text('health', 'Sconosciuta'),
+      chargeCounterAvailable: boolean('chargeCounterAvailable'),
+      chargeCounterMah: number('chargeCounterMah').toDouble(),
+      cycleCount: number('cycleCount', -1).round(),
+      status: text('status', 'Unknown'),
+      health: text('health', 'Unknown'),
       technology: text('technology'),
       isCharging: boolean('isCharging'),
       isPlugged: boolean('isPlugged'),
-      plugType: text('plugType', 'Nessuno'),
+      plugType: text('plugType', 'None'),
       isPowerSaveMode: boolean('isPowerSaveMode'),
       timestamp: DateTime.fromMillisecondsSinceEpoch(
         number('timestamp', DateTime.now().millisecondsSinceEpoch).round(),
@@ -87,6 +96,9 @@ class BatterySnapshot {
   final bool voltageAvailable;
   final bool currentAvailable;
   final bool powerAvailable;
+  final bool chargeCounterAvailable;
+  final double chargeCounterMah;
+  final int cycleCount;
   final String status;
   final String health;
   final String technology;
@@ -97,4 +109,5 @@ class BatterySnapshot {
   final DateTime timestamp;
 
   double get voltageV => voltageMv / 1000;
+  bool get cycleCountAvailable => cycleCount >= 0;
 }

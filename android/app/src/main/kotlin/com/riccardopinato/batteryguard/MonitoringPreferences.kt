@@ -9,8 +9,10 @@ object MonitoringPreferences {
 
     data class Config(
         val enabled: Boolean,
+        val lowLevel: Int,
         val targetLevel: Int,
         val temperatureThresholdC: Double,
+        val notifyLow: Boolean,
         val notifyFull: Boolean,
         val notifyUnplugged: Boolean,
         val nightMode: Boolean,
@@ -22,11 +24,13 @@ object MonitoringPreferences {
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         return Config(
             enabled = prefs.getBoolean("enabled", false),
+            lowLevel = prefs.getInt("lowLevel", 20).coerceIn(5, 45),
             targetLevel = prefs.getInt("targetLevel", 80).coerceIn(50, 100),
             temperatureThresholdC = prefs
                 .getFloat("temperatureThresholdC", 42f)
                 .toDouble()
                 .coerceIn(35.0, 60.0),
+            notifyLow = prefs.getBoolean("notifyLow", true),
             notifyFull = prefs.getBoolean("notifyFull", true),
             notifyUnplugged = prefs.getBoolean("notifyUnplugged", true),
             nightMode = prefs.getBoolean("nightMode", false),
@@ -43,8 +47,10 @@ object MonitoringPreferences {
         val config = get(context)
         return mapOf(
             "enabled" to config.enabled,
+            "lowLevel" to config.lowLevel,
             "targetLevel" to config.targetLevel,
             "temperatureThresholdC" to config.temperatureThresholdC,
+            "notifyLow" to config.notifyLow,
             "notifyFull" to config.notifyFull,
             "notifyUnplugged" to config.notifyUnplugged,
             "nightMode" to config.nightMode,
@@ -62,6 +68,13 @@ object MonitoringPreferences {
                 values["enabled"] as? Boolean ?: current.enabled,
             )
             .putInt(
+                "lowLevel",
+                (values["lowLevel"] as? Number)
+                    ?.toInt()
+                    ?.coerceIn(5, 45)
+                    ?: current.lowLevel,
+            )
+            .putInt(
                 "targetLevel",
                 (values["targetLevel"] as? Number)
                     ?.toInt()
@@ -74,6 +87,10 @@ object MonitoringPreferences {
                     ?.toFloat()
                     ?.coerceIn(35f, 60f)
                     ?: current.temperatureThresholdC.toFloat(),
+            )
+            .putBoolean(
+                "notifyLow",
+                values["notifyLow"] as? Boolean ?: current.notifyLow,
             )
             .putBoolean(
                 "notifyFull",

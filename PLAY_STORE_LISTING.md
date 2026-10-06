@@ -37,13 +37,14 @@ Smart Charging:
 - thermal trends and 7-day Insights;
 - adaptive comparisons against your own previous charging sessions.
 
-Battery Guard Pro is a one-time purchase, not a subscription. It unlocks:
+Battery Guard Pro is a one-time purchase, not a subscription. It removes Battery Guard advertising and unlocks:
+- Battery Health Lab with estimated capacity/health, cycle count where available and degradation trend;
 - Charge Doctor controlled charger/cable tests;
 - personal power comparisons;
 - 30-day Insights.
 
 Battery Guard does not claim to physically stop charging and does not invent a battery-health percentage. Measurements depend on what each Android device exposes.
 
-No Battery Guard account. No Battery Guard cloud telemetry. No ads in v1.
+No Battery Guard account. No Battery Guard cloud telemetry. The Free version can show consent-gated AdMob banners; Pro removes them.
 
 Status: DRAFT — screenshots, support email, privacy URL and final Play review text still required.

@@ -264,5 +264,43 @@
     }
   },
   "repairMonitoring": "Réparer",
-  "openSystemSettings": "Système"
+  "openSystemSettings": "Système",
+  "chargeWindow": "Fenêtre de charge",
+  "chargeWindowBody": "Un son quand il faut charger et un autre quand il faut débrancher.",
+  "lowerLimit": "Limite basse",
+  "upperLimit": "Limite haute",
+  "notifyLowBattery": "Alerter lorsqu'il faut charger",
+  "notifyLowBatteryBody": "Utilise le son dédié de limite basse.",
+  "highSound": "Tester le son de limite haute",
+  "lowSound": "Tester le son de limite basse",
+  "soundChannelsHint": "Android gère les deux sons dans des canaux de notification séparés.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Estime la capacité à long terme à partir des données réellement exposées par l'appareil.",
+  "openHealthLab": "Ouvrir Battery Health Lab",
+  "estimatedHealth": "Santé estimée",
+  "estimatedCapacity": "Capacité pleine estimée",
+  "nominalCapacity": "Capacité nominale",
+  "setNominalCapacity": "Définir la capacité nominale",
+  "nominalCapacityHint": "Saisissez la capacité nominale indiquée dans les spécifications, par ex. 5000 mAh.",
+  "cycleCount": "Cycles batterie",
+  "cycleUnavailable": "Donnée non exposée par cet appareil",
+  "trend": "Tendance de capacité",
+  "thermalProfile": "Profil thermique",
+  "averageTemperature": "Température moyenne observée",
+  "maximumTemperature": "Température maximale observée",
+  "healthDataUnavailable": "L'appareil n'expose pas encore assez de données du compteur de charge.",
+  "healthNeedNominal": "Définissez la capacité nominale pour calculer une santé estimée.",
+  "healthDisclaimer": "Il s'agit d'une estimation Battery Guard, pas d'un pourcentage officiel du fabricant.",
+  "proFeatureHealth": "Battery Health Lab et tendance de dégradation",
+  "proFeatureNoAds": "Suppression définitive de la publicité",
+  "adsFree": "Sans publicité",
+  "freeWithAds": "Gratuit avec publicité",
+  "samplesUsed": "Samples used: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -31,7 +31,15 @@ Charge Doctor compares observed telemetry under controlled conditions. It never 
 
 ## Monetization v1
 
-Free keeps all core monitoring/protection behavior. Pro is a one-time Google Play purchase and unlocks Charge Doctor plus 30-day Insights. No subscription and no ads in v1.
+Free keeps all core monitoring/protection behavior, including the lower/upper charge window and their distinct alerts. Free can display consent-gated AdMob banners. Pro is a one-time Google Play purchase that removes ads and unlocks Battery Health Lab, Charge Doctor and 30-day Insights. No subscription.
+
+## Battery Health Lab guardrails
+
+Battery Health Lab may estimate full-charge capacity and a health percentage only when the device exposes compatible charge-counter data and the user provides/has a nominal design capacity. The value must always be labelled as an estimate, carry a confidence level and never be presented as an official OEM/Apple-equivalent state-of-health value.
+
+## Advertising guardrails
+
+Free ads must never receive Battery Guard battery telemetry, charging history, Health Lab data or Charge Doctor results as targeting input. Pro must remove Battery Guard ad placements.
 
 ## Non-goal v1
 

@@ -264,5 +264,43 @@
     }
   },
   "repairMonitoring": "Reparar",
-  "openSystemSettings": "Sistema"
+  "openSystemSettings": "Sistema",
+  "chargeWindow": "Ventana de carga",
+  "chargeWindowBody": "Un sonido cuando toca cargar y otro diferente cuando toca desconectar.",
+  "lowerLimit": "Límite inferior",
+  "upperLimit": "Límite superior",
+  "notifyLowBattery": "Avisar cuando toca cargar",
+  "notifyLowBatteryBody": "Usa el sonido dedicado del límite inferior.",
+  "highSound": "Probar sonido del límite superior",
+  "lowSound": "Probar sonido del límite inferior",
+  "soundChannelsHint": "Android gestiona los dos sonidos en canales de notificación separados.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Estima la capacidad a largo plazo con los datos que realmente expone el dispositivo.",
+  "openHealthLab": "Abrir Battery Health Lab",
+  "estimatedHealth": "Salud estimada",
+  "estimatedCapacity": "Capacidad completa estimada",
+  "nominalCapacity": "Capacidad nominal",
+  "setNominalCapacity": "Definir capacidad nominal",
+  "nominalCapacityHint": "Introduce la capacidad de diseño de las especificaciones del teléfono, por ejemplo 5000 mAh.",
+  "cycleCount": "Ciclos de batería",
+  "cycleUnavailable": "El dispositivo no expone este dato",
+  "trend": "Tendencia de capacidad",
+  "thermalProfile": "Perfil térmico",
+  "averageTemperature": "Temperatura media observada",
+  "maximumTemperature": "Temperatura máxima observada",
+  "healthDataUnavailable": "El dispositivo aún no expone suficientes datos del contador de carga.",
+  "healthNeedNominal": "Define la capacidad nominal para calcular una salud estimada.",
+  "healthDisclaimer": "Es una estimación de Battery Guard, no un porcentaje oficial del fabricante.",
+  "proFeatureHealth": "Battery Health Lab y tendencia de degradación",
+  "proFeatureNoAds": "Eliminar publicidad permanentemente",
+  "adsFree": "Sin publicidad",
+  "freeWithAds": "Gratis con publicidad",
+  "samplesUsed": "Samples used: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

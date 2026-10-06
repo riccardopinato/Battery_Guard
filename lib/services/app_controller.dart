@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../models/battery_snapshot.dart';
+import '../models/battery_health_report.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
@@ -27,6 +28,7 @@ class AppController extends ChangeNotifier {
   Timer? _chargeDoctorTimer;
 
   BatterySnapshot snapshot = BatterySnapshot.empty();
+  BatteryHealthReport batteryHealthReport = BatteryHealthReport.empty;
   MonitoringConfig config = MonitoringConfig.defaults();
   List<HistoryEntry> history = const [];
   List<ChargingSession> chargingSessions = const [];
@@ -64,6 +66,7 @@ class AppController extends ChangeNotifier {
         _platform.isOnboardingComplete(),
         _platform.getLocaleOverride(),
         _platform.getChargeTests(),
+        _platform.getBatteryHealthReport(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       config = values[1] as MonitoringConfig;
@@ -77,6 +80,7 @@ class AppController extends ChangeNotifier {
       localeOverride =
           language == null || language.isEmpty ? null : Locale(language);
       chargeTests = values[9] as List<ChargeTest>;
+      batteryHealthReport = values[10] as BatteryHealthReport;
       lastError = null;
 
       await _subscription?.cancel();
@@ -121,12 +125,29 @@ class AppController extends ChangeNotifier {
       'isPowerSaveMode': false,
       'timestamp': now.millisecondsSinceEpoch,
     });
-    config = MonitoringConfig.defaults().copyWith(enabled: true);
+    config = MonitoringConfig.defaults().copyWith(
+      enabled: true,
+      lowLevel: 20,
+      targetLevel: 80,
+    );
+    batteryHealthReport = const BatteryHealthReport(
+      nominalCapacityMah: 5000,
+      estimatedFullCapacityMah: 4560,
+      estimatedHealthPercent: 91.2,
+      confidence: 'high',
+      sampleCount: 12,
+      cycleCount: 187,
+      trendPercent: -2.8,
+      averageTemperatureC: 32.4,
+      maxTemperatureC: 41.1,
+    );
     reliability = ReliabilityStatus.fromMap({
       'notificationsGranted': true,
       'notificationsGloballyEnabled': true,
       'monitorChannelEnabled': true,
       'alertChannelEnabled': true,
+      'highChargeChannelEnabled': true,
+      'lowBatteryChannelEnabled': true,
       'quietChannelEnabled': true,
       'batteryOptimizationIgnored': true,
       'monitoringRequested': true,
@@ -202,9 +223,11 @@ class AppController extends ChangeNotifier {
       final values = await Future.wait<Object?>([
         _platform.getSnapshot(),
         _platform.getCurrentChargingSession(),
+        _platform.getBatteryHealthReport(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       currentSession = values[1] as ChargingSession?;
+      batteryHealthReport = values[2] as BatteryHealthReport;
       notifyListeners();
     } catch (error) {
       lastError = error.toString();
@@ -275,6 +298,9 @@ class AppController extends ChangeNotifier {
   Future<void> setEnabled(bool value) =>
       updateConfig(config.copyWith(enabled: value));
 
+  Future<void> setLowLevel(int value) =>
+      updateConfig(config.copyWith(lowLevel: value));
+
   Future<void> setTargetLevel(int value) =>
       updateConfig(config.copyWith(targetLevel: value));
 
@@ -325,6 +351,53 @@ class AppController extends ChangeNotifier {
   Future<bool> testAlert() async {
     if (kIsWeb) return true;
     return _platform.testAlert();
+  }
+
+  Future<bool> testHighAlert() async {
+    if (kIsWeb) return true;
+    return _platform.testHighAlert();
+  }
+
+  Future<bool> testLowAlert() async {
+    if (kIsWeb) return true;
+    return _platform.testLowAlert();
+  }
+
+  Future<void> refreshBatteryHealth() async {
+    if (kIsWeb) {
+      notifyListeners();
+      return;
+    }
+    try {
+      batteryHealthReport = await _platform.getBatteryHealthReport();
+      notifyListeners();
+    } catch (error) {
+      lastError = error.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> setNominalCapacityMah(int value) async {
+    if (kIsWeb) {
+      final current = batteryHealthReport;
+      final estimate = current.estimatedFullCapacityMah;
+      batteryHealthReport = BatteryHealthReport(
+        nominalCapacityMah: value,
+        estimatedFullCapacityMah: estimate,
+        estimatedHealthPercent:
+            value > 0 && estimate > 0 ? estimate / value * 100 : 0,
+        confidence: current.confidence,
+        sampleCount: current.sampleCount,
+        cycleCount: current.cycleCount,
+        trendPercent: current.trendPercent,
+        averageTemperatureC: current.averageTemperatureC,
+        maxTemperatureC: current.maxTemperatureC,
+      );
+      notifyListeners();
+      return;
+    }
+    batteryHealthReport = await _platform.setNominalCapacityMah(value);
+    notifyListeners();
   }
 
   Future<String?> startChargeDoctorTest(String label) async {

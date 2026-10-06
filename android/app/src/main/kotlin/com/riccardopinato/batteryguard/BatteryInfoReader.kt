@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.os.Build
 import android.os.PowerManager
 import kotlin.math.abs
 
@@ -83,6 +84,29 @@ object BatteryInfoReader {
         val currentAvailable = currentUa != Int.MIN_VALUE
         val currentMa =
             if (currentAvailable) currentUa / 1000.0 else 0.0
+
+        val chargeCounterUaH = try {
+            manager.getIntProperty(
+                BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER,
+            )
+        } catch (_: Throwable) {
+            Int.MIN_VALUE
+        }
+        val chargeCounterAvailable =
+            chargeCounterUaH != Int.MIN_VALUE && chargeCounterUaH > 0
+        val chargeCounterMah =
+            if (chargeCounterAvailable) chargeCounterUaH / 1000.0 else 0.0
+
+        val cycleCount =
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                batteryIntent.hasExtra(BatteryManager.EXTRA_CYCLE_COUNT)
+            ) {
+                batteryIntent.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1)
+            } else {
+                -1
+            }
+
         val powerAvailable =
             currentAvailable && voltageAvailable && voltageMv > 0
         val powerW =
@@ -105,6 +129,9 @@ object BatteryInfoReader {
             "voltageAvailable" to voltageAvailable,
             "currentAvailable" to currentAvailable,
             "powerAvailable" to powerAvailable,
+            "chargeCounterAvailable" to chargeCounterAvailable,
+            "chargeCounterMah" to chargeCounterMah,
+            "cycleCount" to cycleCount,
             "status" to statusLabel(statusCode),
             "health" to healthLabel(healthCode),
             "technology" to technology,
@@ -126,6 +153,9 @@ object BatteryInfoReader {
         "voltageAvailable" to false,
         "currentAvailable" to false,
         "powerAvailable" to false,
+        "chargeCounterAvailable" to false,
+        "chargeCounterMah" to 0.0,
+        "cycleCount" to -1,
         "status" to "Sconosciuto",
         "health" to "Sconosciuta",
         "technology" to "—",

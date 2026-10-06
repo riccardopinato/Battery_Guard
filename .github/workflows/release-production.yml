@@ -33,24 +33,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Require production signing secrets
+      - name: Require production signing and AdMob configuration
         shell: bash
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
         run: |
           set -euo pipefail
           test -n "$KEYSTORE_BASE64"
           test -n "$KEYSTORE_PASSWORD"
           test -n "$KEY_ALIAS"
           test -n "$KEY_PASSWORD"
+          test -n "$ADMOB_APP_ID"
+          test -n "$ADMOB_BANNER_ID"
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/battery-guard-release.jks"
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/battery-guard-release.jks" >> "$GITHUB_ENV"
           echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "ADMOB_APP_ID=$ADMOB_APP_ID" >> "$GITHUB_ENV"
+          echo "ADMOB_BANNER_ID=$ADMOB_BANNER_ID" >> "$GITHUB_ENV"
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -95,8 +101,8 @@ jobs:
           set -euxo pipefail
           rm -rf build/symbols release
           mkdir -p build/symbols release
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols
-          flutter build appbundle --release --split-debug-info=build/symbols
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+          flutter build appbundle --release --split-debug-info=build/symbols --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
           VERSION="${{ inputs.version }}"
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-$VERSION-arm64-v8a.apk"
           cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-$VERSION.aab"
@@ -110,6 +116,8 @@ jobs:
             echo "flutter=3.47.5"
             echo "signing=production-secret"
             echo "artifactPolicy=immutable"
+            echo "admob=production-configured"
+            echo "proProduct=battery_guard_pro_lifetime"
           } > release/BUILD_EVIDENCE.txt
 
       - name: Create immutable GitHub Release

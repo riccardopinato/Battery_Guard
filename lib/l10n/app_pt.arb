@@ -264,5 +264,43 @@
     }
   },
   "repairMonitoring": "Reparar",
-  "openSystemSettings": "Sistema"
+  "openSystemSettings": "Sistema",
+  "chargeWindow": "Janela de carregamento",
+  "chargeWindowBody": "Um som quando é hora de carregar e outro quando é hora de desligar.",
+  "lowerLimit": "Limite inferior",
+  "upperLimit": "Limite superior",
+  "notifyLowBattery": "Avisar quando é hora de carregar",
+  "notifyLowBatteryBody": "Usa o som dedicado do limite inferior.",
+  "highSound": "Testar som do limite superior",
+  "lowSound": "Testar som do limite inferior",
+  "soundChannelsHint": "O Android gere os dois sons em canais de notificação separados.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Estima a capacidade a longo prazo com os dados realmente expostos pelo dispositivo.",
+  "openHealthLab": "Abrir Battery Health Lab",
+  "estimatedHealth": "Saúde estimada",
+  "estimatedCapacity": "Capacidade total estimada",
+  "nominalCapacity": "Capacidade nominal",
+  "setNominalCapacity": "Definir capacidade nominal",
+  "nominalCapacityHint": "Introduza a capacidade de projeto das especificações, por exemplo 5000 mAh.",
+  "cycleCount": "Ciclos da bateria",
+  "cycleUnavailable": "Dado não exposto pelo dispositivo",
+  "trend": "Tendência de capacidade",
+  "thermalProfile": "Perfil térmico",
+  "averageTemperature": "Temperatura média observada",
+  "maximumTemperature": "Temperatura máxima observada",
+  "healthDataUnavailable": "O dispositivo ainda não expõe dados suficientes do contador de carga.",
+  "healthNeedNominal": "Defina a capacidade nominal para calcular uma saúde estimada.",
+  "healthDisclaimer": "É uma estimativa do Battery Guard, não uma percentagem oficial do fabricante.",
+  "proFeatureHealth": "Battery Health Lab e tendência de degradação",
+  "proFeatureNoAds": "Remover publicidade permanentemente",
+  "adsFree": "Sem publicidade",
+  "freeWithAds": "Grátis com publicidade",
+  "samplesUsed": "Samples used: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

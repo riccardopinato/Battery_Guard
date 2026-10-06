@@ -1,8 +1,10 @@
 class MonitoringConfig {
   const MonitoringConfig({
     required this.enabled,
+    required this.lowLevel,
     required this.targetLevel,
     required this.temperatureThresholdC,
+    required this.notifyLow,
     required this.notifyFull,
     required this.notifyUnplugged,
     required this.nightMode,
@@ -12,8 +14,10 @@ class MonitoringConfig {
 
   factory MonitoringConfig.defaults() => const MonitoringConfig(
         enabled: false,
+        lowLevel: 20,
         targetLevel: 80,
         temperatureThresholdC: 42,
+        notifyLow: true,
         notifyFull: true,
         notifyUnplugged: true,
         nightMode: false,
@@ -25,10 +29,15 @@ class MonitoringConfig {
     final defaults = MonitoringConfig.defaults();
     return MonitoringConfig(
       enabled: map['enabled'] as bool? ?? defaults.enabled,
-      targetLevel: (map['targetLevel'] as num?)?.round() ?? defaults.targetLevel,
+      lowLevel: ((map['lowLevel'] as num?)?.round() ?? defaults.lowLevel)
+          .clamp(5, 45),
+      targetLevel: ((map['targetLevel'] as num?)?.round() ??
+              defaults.targetLevel)
+          .clamp(50, 100),
       temperatureThresholdC:
           (map['temperatureThresholdC'] as num?)?.toDouble() ??
               defaults.temperatureThresholdC,
+      notifyLow: map['notifyLow'] as bool? ?? defaults.notifyLow,
       notifyFull: map['notifyFull'] as bool? ?? defaults.notifyFull,
       notifyUnplugged:
           map['notifyUnplugged'] as bool? ?? defaults.notifyUnplugged,
@@ -42,8 +51,10 @@ class MonitoringConfig {
   }
 
   final bool enabled;
+  final int lowLevel;
   final int targetLevel;
   final double temperatureThresholdC;
+  final bool notifyLow;
   final bool notifyFull;
   final bool notifyUnplugged;
   final bool nightMode;
@@ -52,8 +63,10 @@ class MonitoringConfig {
 
   MonitoringConfig copyWith({
     bool? enabled,
+    int? lowLevel,
     int? targetLevel,
     double? temperatureThresholdC,
+    bool? notifyLow,
     bool? notifyFull,
     bool? notifyUnplugged,
     bool? nightMode,
@@ -62,9 +75,11 @@ class MonitoringConfig {
   }) {
     return MonitoringConfig(
       enabled: enabled ?? this.enabled,
+      lowLevel: lowLevel ?? this.lowLevel,
       targetLevel: targetLevel ?? this.targetLevel,
       temperatureThresholdC:
           temperatureThresholdC ?? this.temperatureThresholdC,
+      notifyLow: notifyLow ?? this.notifyLow,
       notifyFull: notifyFull ?? this.notifyFull,
       notifyUnplugged: notifyUnplugged ?? this.notifyUnplugged,
       nightMode: nightMode ?? this.nightMode,
@@ -75,8 +90,10 @@ class MonitoringConfig {
 
   Map<String, dynamic> toMap() => {
         'enabled': enabled,
+        'lowLevel': lowLevel,
         'targetLevel': targetLevel,
         'temperatureThresholdC': temperatureThresholdC,
+        'notifyLow': notifyLow,
         'notifyFull': notifyFull,
         'notifyUnplugged': notifyUnplugged,
         'nightMode': nightMode,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import '../models/battery_snapshot.dart';
+import '../models/battery_health_report.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
@@ -86,6 +87,20 @@ class NativeBatteryService {
   Future<void> clearChargeTests() =>
       _control.invokeMethod<void>('clearChargeTests');
 
+  Future<BatteryHealthReport> getBatteryHealthReport() async {
+    final raw = await _control
+        .invokeMethod<Map<dynamic, dynamic>>('getBatteryHealthReport');
+    return BatteryHealthReport.fromMap(raw ?? const {});
+  }
+
+  Future<BatteryHealthReport> setNominalCapacityMah(int value) async {
+    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>(
+      'setNominalCapacityMah',
+      value,
+    );
+    return BatteryHealthReport.fromMap(raw ?? const {});
+  }
+
   Future<bool> requestNotificationPermission() async =>
       await _control.invokeMethod<bool>('requestNotificationPermission') ??
       false;
@@ -128,4 +143,10 @@ class NativeBatteryService {
 
   Future<bool> testAlert() async =>
       await _control.invokeMethod<bool>('testAlert') ?? false;
+
+  Future<bool> testHighAlert() async =>
+      await _control.invokeMethod<bool>('testHighAlert') ?? false;
+
+  Future<bool> testLowAlert() async =>
+      await _control.invokeMethod<bool>('testLowAlert') ?? false;
 }

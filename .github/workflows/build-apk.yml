@@ -149,6 +149,8 @@ jobs:
             echo "productionSigningReady=$PRODUCTION_SIGNING_READY"
             echo "flutter=3.47.5"
             echo "webPreviewBranch=gh-pages"
+            echo "admob=test-ids-in-ci"
+            echo "proProduct=battery_guard_pro_lifetime"
           } > release/BUILD_EVIDENCE.txt
 
       - name: Upload immutable CI artifact

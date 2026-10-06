@@ -264,5 +264,43 @@
   "purchaseError": "Impossibile completare l'acquisto.",
   "proSection": "Pro",
   "repairMonitoring": "Ripristina",
-  "openSystemSettings": "Sistema"
+  "openSystemSettings": "Sistema",
+  "chargeWindow": "Finestra di ricarica",
+  "chargeWindowBody": "Un suono quando è il momento di caricare e un suono diverso quando è il momento di scollegare.",
+  "lowerLimit": "Limite inferiore",
+  "upperLimit": "Limite superiore",
+  "notifyLowBattery": "Avvisa quando è il momento di caricare",
+  "notifyLowBatteryBody": "Usa il suono dedicato del limite inferiore.",
+  "highSound": "Prova suono limite superiore",
+  "lowSound": "Prova suono limite inferiore",
+  "soundChannelsHint": "Android gestisce i due suoni in canali di notifica separati. Puoi personalizzarli anche dalle impostazioni notifiche di sistema.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Stima la capacità nel tempo usando solo i dati realmente esposti dal dispositivo.",
+  "openHealthLab": "Apri Battery Health Lab",
+  "estimatedHealth": "Salute stimata",
+  "estimatedCapacity": "Capacità piena stimata",
+  "nominalCapacity": "Capacità nominale",
+  "setNominalCapacity": "Imposta capacità nominale",
+  "nominalCapacityHint": "Inserisci la capacità di progetto dalle specifiche del telefono, ad esempio 5000 mAh.",
+  "cycleCount": "Cicli batteria",
+  "cycleUnavailable": "Dato non esposto dal dispositivo",
+  "trend": "Trend capacità",
+  "thermalProfile": "Profilo termico",
+  "averageTemperature": "Temperatura media osservata",
+  "maximumTemperature": "Temperatura massima osservata",
+  "healthDataUnavailable": "Il dispositivo non espone ancora abbastanza dati del charge counter. Battery Guard continuerà a raccogliere localmente i campioni compatibili.",
+  "healthNeedNominal": "Imposta la capacità nominale della batteria per calcolare una percentuale di salute stimata.",
+  "healthDisclaimer": "È una stima Battery Guard, non la percentuale ufficiale del produttore. La precisione dipende dai dati Android/OEM e migliora con più campioni.",
+  "samplesUsed": "Campioni usati: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proFeatureHealth": "Battery Health Lab e trend di degrado",
+  "proFeatureNoAds": "Rimozione permanente della pubblicità",
+  "adsFree": "Senza pubblicità",
+  "freeWithAds": "Free con pubblicità"
 }

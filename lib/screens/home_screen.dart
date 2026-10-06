@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
+import '../screens/health_lab_screen.dart';
 import '../services/app_controller.dart';
 import '../widgets/battery_ring.dart';
 import '../widgets/metric_card.dart';
@@ -132,11 +133,50 @@ class HomeScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      l10n.notifyAt,
-                      style: Theme.of(context).textTheme.labelLarge,
+                      l10n.chargeWindow,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      l10n.chargeWindowBody,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(child: Text(l10n.lowerLimit)),
+                      DropdownButton<int>(
+                        value: config.lowLevel,
+                        items: const [10, 15, 20, 25, 30, 35, 40]
+                            .map(
+                              (level) => DropdownMenuItem(
+                                value: level,
+                                child: Text('$level%'),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value == null) return;
+                          HapticFeedback.selectionClick();
+                          controller.setLowLevel(value);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(l10n.upperLimit),
+                  ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<int>(
@@ -158,6 +198,61 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 14),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => HealthLabScreen(controller: controller),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: scheme.primaryContainer,
+                      foregroundColor: scheme.onPrimaryContainer,
+                      child: const Icon(Icons.monitor_heart_outlined),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.healthLab,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          Text(
+                            controller.premium.isPro &&
+                                    controller.batteryHealthReport.hasEstimate
+                                ? '${controller.batteryHealthReport.estimatedHealthPercent.toStringAsFixed(0)}% • ${l10n.estimatedHealth}'
+                                : l10n.healthLabSubtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      controller.premium.isPro
+                          ? Icons.chevron_right_rounded
+                          : Icons.lock_outline_rounded,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           if (session != null && snapshot.isPlugged) ...[
             const SizedBox(height: 14),
             _ChargingSessionCard(session: session),
@@ -176,7 +271,7 @@ class HomeScreen extends StatelessWidget {
                 label: l10n.temperature,
                 value: snapshot.temperatureAvailable
                     ? '${snapshot.temperatureC.toStringAsFixed(1)} °C'
-                    : 'Non disponibile',
+                    : l10n.dataUnavailable,
                 caption: snapshot.temperatureAvailable
                     ? (snapshot.temperatureC >= config.temperatureThresholdC
                         ? l10n.aboveThreshold
@@ -188,7 +283,7 @@ class HomeScreen extends StatelessWidget {
                 label: l10n.estimatedPower,
                 value: snapshot.powerAvailable
                     ? '${snapshot.powerW.abs().toStringAsFixed(1)} W'
-                    : 'Non disponibile',
+                    : l10n.dataUnavailable,
                 caption: snapshot.currentAvailable
                     ? '${snapshot.currentMa.abs().toStringAsFixed(0)} mA'
                     : l10n.currentNotExposed,
@@ -198,7 +293,7 @@ class HomeScreen extends StatelessWidget {
                 label: l10n.voltage,
                 value: snapshot.voltageAvailable
                     ? '${snapshot.voltageV.toStringAsFixed(2)} V'
-                    : 'Non disponibile',
+                    : l10n.dataUnavailable,
                 caption: snapshot.technology,
               ),
               MetricCard(

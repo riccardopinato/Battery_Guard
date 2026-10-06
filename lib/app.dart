@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'ads/free_ad_banner.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'screens/charge_doctor_screen.dart';
 import 'screens/history_screen.dart';
@@ -101,35 +102,43 @@ class _MainShellState extends State<_MainShell> {
         bottom: false,
         child: IndexedStack(index: _index, children: pages),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        labelBehavior: MediaQuery.sizeOf(context).width < 480
-            ? NavigationDestinationLabelBehavior.onlyShowSelected
-            : NavigationDestinationLabelBehavior.alwaysShow,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.battery_5_bar_outlined),
-            selectedIcon: const Icon(Icons.battery_5_bar_rounded),
-            label: l10n.navBattery,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.science_outlined),
-            selectedIcon: const Icon(Icons.science_rounded),
-            label: l10n.navDoctor,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.insights_outlined),
-            selectedIcon: const Icon(Icons.insights_rounded),
-            label: l10n.navInsights,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.show_chart_rounded),
-            label: l10n.navHistory,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.tune_rounded),
-            label: l10n.navSettings,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!widget.controller.premium.loading &&
+              !widget.controller.premium.isPro)
+            const Center(child: FreeAdBanner()),
+          NavigationBar(
+            selectedIndex: _index,
+            labelBehavior: MediaQuery.sizeOf(context).width < 480
+                ? NavigationDestinationLabelBehavior.onlyShowSelected
+                : NavigationDestinationLabelBehavior.alwaysShow,
+            onDestinationSelected: (value) => setState(() => _index = value),
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.battery_5_bar_outlined),
+                selectedIcon: const Icon(Icons.battery_5_bar_rounded),
+                label: l10n.navBattery,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.science_outlined),
+                selectedIcon: const Icon(Icons.science_rounded),
+                label: l10n.navDoctor,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.insights_outlined),
+                selectedIcon: const Icon(Icons.insights_rounded),
+                label: l10n.navInsights,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.show_chart_rounded),
+                label: l10n.navHistory,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.tune_rounded),
+                label: l10n.navSettings,
+              ),
+            ],
           ),
         ],
       ),

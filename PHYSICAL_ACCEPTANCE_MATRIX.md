@@ -18,7 +18,12 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | Widget controls | — | — | target/toggle/refresh | NOT RUN |
 | Quick Settings Tile | — | — | synchronized ON/OFF | NOT RUN |
 | Charge Doctor 5-minute test | — | — | stored result/confidence | NOT RUN |
-| Pro purchase Internal Testing | — | — | buy + restore | NOT RUN |
+| Lower threshold alert | — | — | dedicated low-limit sound + one-shot hysteresis | NOT RUN |
+| Upper threshold alert | — | — | dedicated high-limit sound + one-shot hysteresis | NOT RUN |
+| Notification-channel sound customization | — | — | low/high channels visible independently | NOT RUN |
+| Battery Health Lab | — | — | charge counter/cycles/estimate correctly unavailable or plausible | NOT RUN |
+| AdMob consent + banner Free | — | — | consent flow + banner only when allowed | NOT RUN |
+| Pro purchase Internal Testing | — | — | buy + restore + all ads disappear | NOT RUN |
 
 ## Pass rule
 No v1 production rollout until all core rows pass on at least one Samsung and one Xiaomi/Redmi/Poco-class device, or an explicit documented exception is accepted.

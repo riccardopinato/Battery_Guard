@@ -264,5 +264,43 @@
   "purchaseError": "Purchase could not be completed.",
   "proSection": "Pro",
   "repairMonitoring": "Repair",
-  "openSystemSettings": "System"
+  "openSystemSettings": "System",
+  "chargeWindow": "Charging window",
+  "chargeWindowBody": "Get one sound when it is time to charge and a different sound when it is time to unplug.",
+  "lowerLimit": "Lower limit",
+  "upperLimit": "Upper limit",
+  "notifyLowBattery": "Notify when it is time to charge",
+  "notifyLowBatteryBody": "Uses the dedicated lower-limit notification sound.",
+  "highSound": "Test upper-limit sound",
+  "lowSound": "Test lower-limit sound",
+  "soundChannelsHint": "Android keeps the two sounds in separate notification channels. You can customize them in system notification settings.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Estimate long-term battery capacity from data the device actually exposes.",
+  "openHealthLab": "Open Battery Health Lab",
+  "estimatedHealth": "Estimated health",
+  "estimatedCapacity": "Estimated full capacity",
+  "nominalCapacity": "Nominal capacity",
+  "setNominalCapacity": "Set nominal capacity",
+  "nominalCapacityHint": "Enter the design capacity from your phone specifications, e.g. 5000 mAh.",
+  "cycleCount": "Cycle count",
+  "cycleUnavailable": "Not exposed by this device",
+  "trend": "Capacity trend",
+  "thermalProfile": "Thermal profile",
+  "averageTemperature": "Average observed temperature",
+  "maximumTemperature": "Maximum observed temperature",
+  "healthDataUnavailable": "This device does not expose enough charge-counter data yet. Battery Guard will keep collecting compatible samples locally.",
+  "healthNeedNominal": "Set the nominal battery capacity to calculate an estimated health percentage.",
+  "healthDisclaimer": "This is a Battery Guard estimate, not an official manufacturer health percentage. Accuracy depends on Android/OEM telemetry and improves with more samples.",
+  "samplesUsed": "Samples used: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proFeatureHealth": "Battery Health Lab and degradation trend",
+  "proFeatureNoAds": "Remove advertising permanently",
+  "adsFree": "Ad-free",
+  "freeWithAds": "Free with ads"
 }

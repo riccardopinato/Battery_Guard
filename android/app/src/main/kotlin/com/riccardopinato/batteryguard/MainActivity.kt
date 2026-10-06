@@ -75,6 +75,18 @@ class MainActivity : FlutterActivity() {
                         ChargeTestStore.clear(this)
                         result.success(null)
                     }
+                    "getBatteryHealthReport" -> {
+                        val snapshot = BatteryInfoReader.read(this)
+                        BatteryHealthStore.record(this, snapshot)
+                        result.success(BatteryHealthStore.report(this))
+                    }
+                    "setNominalCapacityMah" -> {
+                        val value = (call.arguments as? Number)?.toInt() ?: 0
+                        BatteryHealthStore.setNominalCapacity(this, value)
+                        val snapshot = BatteryInfoReader.read(this)
+                        BatteryHealthStore.record(this, snapshot)
+                        result.success(BatteryHealthStore.report(this))
+                    }
                     "hasNotificationPermission" ->
                         result.success(hasNotificationPermission())
                     "requestNotificationPermission" ->
@@ -151,6 +163,32 @@ class MainActivity : FlutterActivity() {
                         )
                         result.success(sent)
                     }
+                    "testHighAlert" -> {
+                        val snapshot = BatteryInfoReader.read(this)
+                        val sent = NotificationHelper.showAlert(
+                            context = this,
+                            title = "Suono limite superiore",
+                            message = "Questo è il suono usato quando puoi scollegare il caricatore.",
+                            snapshot = snapshot,
+                            notificationId = 2200,
+                            saveToHistory = false,
+                            kind = NotificationHelper.AlertKind.HIGH_CHARGE,
+                        )
+                        result.success(sent)
+                    }
+                    "testLowAlert" -> {
+                        val snapshot = BatteryInfoReader.read(this)
+                        val sent = NotificationHelper.showAlert(
+                            context = this,
+                            title = "Suono limite inferiore",
+                            message = "Questo è il suono usato quando è il momento di mettere in carica.",
+                            snapshot = snapshot,
+                            notificationId = 2201,
+                            saveToHistory = false,
+                            kind = NotificationHelper.AlertKind.LOW_BATTERY,
+                        )
+                        result.success(sent)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -187,6 +225,8 @@ class MainActivity : FlutterActivity() {
             "notificationsGloballyEnabled" to delivery.globallyEnabled,
             "monitorChannelEnabled" to delivery.monitorChannelEnabled,
             "alertChannelEnabled" to delivery.alertChannelEnabled,
+            "highChargeChannelEnabled" to delivery.highChargeChannelEnabled,
+            "lowBatteryChannelEnabled" to delivery.lowBatteryChannelEnabled,
             "quietChannelEnabled" to delivery.quietChannelEnabled,
             "batteryOptimizationIgnored" to optimizationIgnored,
             "monitoringRequested" to config.enabled,

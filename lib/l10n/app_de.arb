@@ -264,5 +264,43 @@
     }
   },
   "repairMonitoring": "Reparieren",
-  "openSystemSettings": "System"
+  "openSystemSettings": "System",
+  "chargeWindow": "Ladefenster",
+  "chargeWindowBody": "Ein Ton zum Aufladen und ein anderer Ton zum Abstecken.",
+  "lowerLimit": "Untere Grenze",
+  "upperLimit": "Obere Grenze",
+  "notifyLowBattery": "Benachrichtigen, wenn geladen werden sollte",
+  "notifyLowBatteryBody": "Verwendet den eigenen Ton der unteren Grenze.",
+  "highSound": "Ton der oberen Grenze testen",
+  "lowSound": "Ton der unteren Grenze testen",
+  "soundChannelsHint": "Android verwaltet beide Töne in getrennten Benachrichtigungskanälen.",
+  "healthLab": "Battery Health Lab",
+  "healthLabSubtitle": "Schätzt die langfristige Kapazität aus tatsächlich verfügbaren Gerätedaten.",
+  "openHealthLab": "Battery Health Lab öffnen",
+  "estimatedHealth": "Geschätzter Zustand",
+  "estimatedCapacity": "Geschätzte Vollkapazität",
+  "nominalCapacity": "Nennkapazität",
+  "setNominalCapacity": "Nennkapazität festlegen",
+  "nominalCapacityHint": "Nennkapazität aus den Telefonspezifikationen eingeben, z. B. 5000 mAh.",
+  "cycleCount": "Batteriezyklen",
+  "cycleUnavailable": "Vom Gerät nicht bereitgestellt",
+  "trend": "Kapazitätstrend",
+  "thermalProfile": "Temperaturprofil",
+  "averageTemperature": "Durchschnittliche beobachtete Temperatur",
+  "maximumTemperature": "Maximal beobachtete Temperatur",
+  "healthDataUnavailable": "Das Gerät liefert noch nicht genügend Charge-Counter-Daten.",
+  "healthNeedNominal": "Lege die Nennkapazität fest, um den geschätzten Zustand zu berechnen.",
+  "healthDisclaimer": "Dies ist eine Battery-Guard-Schätzung und kein offizieller Herstellerwert.",
+  "proFeatureHealth": "Battery Health Lab und Alterungstrend",
+  "proFeatureNoAds": "Werbung dauerhaft entfernen",
+  "adsFree": "Werbefrei",
+  "freeWithAds": "Kostenlos mit Werbung",
+  "samplesUsed": "Samples used: {count}",
+  "@samplesUsed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

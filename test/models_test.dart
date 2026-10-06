@@ -1,4 +1,5 @@
 import 'package:battery_guard/models/battery_snapshot.dart';
+import 'package:battery_guard/models/battery_health_report.dart';
 import 'package:battery_guard/models/charge_test.dart';
 import 'package:battery_guard/models/charging_insights.dart';
 import 'package:battery_guard/models/charging_session.dart';
@@ -39,6 +40,24 @@ void main() {
     expect(unsupported.currentAvailable, isFalse);
   });
 
+  test('BatteryHealthReport parses estimated health evidence', () {
+    final report = BatteryHealthReport.fromMap({
+      'nominalCapacityMah': 5000,
+      'estimatedFullCapacityMah': 4550.0,
+      'estimatedHealthPercent': 91.0,
+      'confidence': 'high',
+      'sampleCount': 10,
+      'cycleCount': 180,
+      'trendPercent': -2.4,
+      'averageTemperatureC': 32.0,
+      'maxTemperatureC': 40.2,
+    });
+
+    expect(report.hasEstimate, isTrue);
+    expect(report.hasCycleCount, isTrue);
+    expect(report.estimatedHealthPercent, closeTo(91, 0.01));
+  });
+
   test('ChargeTest parses controlled test evidence', () {
     final test = ChargeTest.fromMap({
       'id': 'doctor-1',
@@ -64,7 +83,9 @@ void main() {
 
   test('MonitoringConfig defaults are battery-friendly', () {
     final config = MonitoringConfig.defaults();
+    expect(config.lowLevel, 20);
     expect(config.targetLevel, 80);
+    expect(config.notifyLow, isTrue);
     expect(config.temperatureThresholdC, 42);
     expect(config.notifyFull, isTrue);
     expect(config.notifyUnplugged, isTrue);
@@ -183,6 +204,8 @@ void main() {
       'notificationsGloballyEnabled': true,
       'monitorChannelEnabled': true,
       'alertChannelEnabled': false,
+      'highChargeChannelEnabled': true,
+      'lowBatteryChannelEnabled': true,
       'quietChannelEnabled': true,
       'batteryOptimizationIgnored': false,
       'monitoringRequested': true,
@@ -201,6 +224,8 @@ void main() {
       'notificationsGloballyEnabled': true,
       'monitorChannelEnabled': true,
       'alertChannelEnabled': true,
+      'highChargeChannelEnabled': true,
+      'lowBatteryChannelEnabled': true,
       'quietChannelEnabled': true,
       'batteryOptimizationIgnored': false,
       'monitoringRequested': false,

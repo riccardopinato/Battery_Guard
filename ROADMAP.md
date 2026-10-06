@@ -37,3 +37,11 @@
 - final regression hardening
 - exact-artifact evidence
 - publish only when signing + physical/device + distribution gates are satisfied
+
+
+## 1.1 — Longevity & Monetization ✅ IMPLEMENTED / EXTERNAL AD + PLAY GATES PENDING
+- dual lower/upper charge thresholds;
+- distinct lower/upper notification sounds;
+- Battery Health Lab Pro;
+- AdMob Free / ad-free Pro;
+- updated privacy/Data Safety/production configuration.

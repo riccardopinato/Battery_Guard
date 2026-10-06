@@ -1,12 +1,16 @@
-# Battery Guard 1.0 — Certification Status
+# Battery Guard 1.1 — Certification Status
 
-Source version: **1.0.0+11**
+Source target: **1.1.0+12**
 
-## Source scope
-The v1 product scope is frozen. No additional feature work is required before distribution testing.
+## Scope
+v1.1 adds:
+- dual lower/upper battery thresholds;
+- distinct lower/upper Android notification sounds;
+- Battery Health Lab Pro;
+- AdMob banners in Free;
+- Pro lifetime ad removal.
 
-## Automated gates
-These must be supplied by the final main-branch CI run for the exact v1 source SHA:
+## Automated gates required on the exact source SHA
 - flutter gen-l10n
 - flutter analyze
 - flutter test
@@ -16,23 +20,21 @@ These must be supplied by the final main-branch CI run for the exact v1 source S
 - AAB build
 - immutable SHA-bound artifact bundle
 
-## External gates
-The following cannot be truthfully certified by repository CI alone:
-- production signing key configured;
-- Google Play product `battery_guard_pro_lifetime` active;
-- Play Internal Testing installation/update;
-- real purchase and restore using a Play test account;
-- Samsung physical acceptance matrix;
-- Xiaomi/Redmi/Poco physical acceptance matrix;
-- real foreground-service persistence/reboot/OEM behavior;
-- real notification-channel delivery behavior;
-- Google Play `specialUse` review/declaration;
-- public privacy-policy URL and support contact;
-- final Data Safety reconciliation.
+## External gates still required
+- production Android signing secrets;
+- real AdMob App ID / Banner Unit ID;
+- Google consent configuration review;
+- Google Play product `battery_guard_pro_lifetime`;
+- Play Internal Testing install/update;
+- real purchase + restore + ad-removal verification;
+- Samsung and Xiaomi/Redmi/Poco physical acceptance rows;
+- real foreground-service and notification-channel sound behavior;
+- Battery Health Lab plausibility checks on devices exposing and not exposing charge-counter/cycle data;
+- Play `specialUse` declaration;
+- hosted privacy policy + support contact;
+- final Data Safety reconciliation including Google Mobile Ads SDK.
 
-## Current valid verdict
-Until the external gates above are completed:
+## Valid verdict
+Until the external gates pass:
 
-**SOURCE COMPLETE / CI-CERTIFIABLE, NOT CERTIFIED FOR PRODUCTION.**
-
-Do not relabel this state as STORE READY or PRODUCTION RELEASED from a green CI run alone.
+**SOURCE IMPLEMENTED / CI-CERTIFIABLE, NOT CERTIFIED FOR PRODUCTION.**

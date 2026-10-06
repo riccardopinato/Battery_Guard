@@ -1,25 +1,26 @@
-# Google Play Data Safety — Draft
+# Google Play Data Safety — Draft for v1.1
 
-This file is a preparation aid. The final declaration must be verified against the exact production AAB and Play Console wording.
+This is a preparation aid. The final declaration must be reconciled with the exact production AAB and the current Play Console questionnaire.
 
-## Developer-collected data
-- Battery telemetry: not collected by developer.
-- Charging history: not collected by developer.
-- Charge Doctor test data: not collected by developer.
-- Account data: no Battery Guard account.
-- Analytics: none.
-- Advertising identifiers: none.
+## Battery / app data
+- Battery telemetry: processed locally; not sent to Battery Guard backend.
+- Charging history: local.
+- Charge Doctor results: local.
+- Battery Health Lab capacity samples: local.
+- Battery Guard account: none.
+
+## Advertising SDK
+The Free version includes Google Mobile Ads / AdMob. The final Data Safety declaration must include the data practices of the exact Google Mobile Ads SDK version bundled in the production AAB, including any device identifiers, diagnostics or advertising data required by Google's disclosure documentation.
+
+Consent is requested where required before ad requests. Battery telemetry is not supplied by Battery Guard as ad-targeting input.
+
+## Pro
+Pro is a non-consumable Google Play purchase. Pro removes Battery Guard ad placements. Google Play processes purchase information required to establish/restore ownership.
 
 ## Sharing
-Battery Guard does not share battery/charging data with third parties.
+Battery Guard does not intentionally share battery history, Battery Health Lab estimates or Charge Doctor measurements with advertisers.
 
-## Purchase handling
-The optional Battery Guard Pro lifetime purchase uses Google Play Billing. Purchase processing is performed by Google Play. Only entitlement state needed for unlocking Pro is handled by the app.
+## Backup
+Android Auto Backup is disabled.
 
-## Storage
-Battery Guard app data is local-only. Android Auto Backup is disabled.
-
-## Security / deletion
-The user can clear local history and controlled-test results in-app and can remove all application data by uninstalling/clearing app storage.
-
-Status: DRAFT — must be reconciled with Play Console and the exact production dependencies before submission.
+Status: **DRAFT — NOT FINAL PLAY DECLARATION**.

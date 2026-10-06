@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0
+- added configurable lower battery threshold (default 20%) in addition to the upper charging threshold;
+- added separate Android notification channels/sounds for "charge now" and "unplug now";
+- added dedicated sound-test actions in Settings;
+- added Android charge-counter and cycle-count telemetry when exposed by the OEM;
+- added Pro Battery Health Lab with estimated full capacity, estimated health percentage, confidence, cycle count, capacity trend and thermal profile;
+- health percentage is explicitly labelled as an estimate, never an official OEM value;
+- added Google AdMob banner advertising to Free;
+- added Google consent flow before requesting ads where required;
+- existing Pro lifetime entitlement now removes ads and includes Health Lab;
+- production workflow now requires real AdMob identifiers in addition to production signing.
+
+
 ## 1.0.0
 - feature freeze: no new product scope after 0.9;
 - final source version aligned to 1.0.0+11;
