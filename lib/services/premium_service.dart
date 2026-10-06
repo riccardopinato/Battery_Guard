@@ -16,8 +16,6 @@ class PremiumService {
 
   static const productId = 'battery_guard_pro_lifetime';
 
-  final NativeBatteryService platform;
-  final VoidCallback onChanged;
   final InAppPurchase _iap = InAppPurchase.instance;
 
   StreamSubscription<List<PurchaseDetails>>? _subscription;
