@@ -122,13 +122,13 @@ jobs:
         run: |
           rm -rf build/symbols
           mkdir -p build/symbols
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
 
       - name: Build universal APK
-        run: flutter build apk --release --split-debug-info=build/symbols
+        run: flutter build apk --release --split-debug-info=build/symbols --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
 
       - name: Build AAB
-        run: flutter build appbundle --release --split-debug-info=build/symbols
+        run: flutter build appbundle --release --split-debug-info=build/symbols --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
 
       - name: Prepare immutable CI bundle
         shell: bash
@@ -153,8 +153,9 @@ jobs:
             echo "productionSigningReady=$PRODUCTION_SIGNING_READY"
             echo "flutter=3.47.5"
             echo "webPreviewBranch=gh-pages"
-            echo "admob=test-ids-in-ci"
+            echo "admob=disabled-by-forced-pro-test"
             echo "proProduct=battery_guard_pro_lifetime"
+            echo "premiumTestOverride=true"
           } > release/BUILD_EVIDENCE.txt
 
       - name: Upload immutable CI artifact
