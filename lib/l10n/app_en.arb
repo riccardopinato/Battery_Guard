@@ -159,5 +159,90 @@
   "french": "French",
   "german": "German",
   "portuguese": "Portuguese",
-  "webPreviewNotice": "Web Preview: Android battery data and background monitoring are simulated."
+  "webPreviewNotice": "Web Preview: Android battery data and background monitoring are simulated.",
+  "navDoctor": "Doctor",
+  "chargeDoctorTitle": "Charge Doctor",
+  "chargeDoctorSubtitle": "Run a controlled charging test and compare observed power with your own previous tests.",
+  "testName": "Test name",
+  "testNameHint": "e.g. USB-C 65 W",
+  "startTest": "Start test",
+  "stopTest": "Stop test",
+  "activeTest": "Test in progress",
+  "elapsed": "Elapsed",
+  "samplesCount": "Samples: {count}",
+  "@samplesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confidence": "Confidence",
+  "confidenceLow": "Low",
+  "confidenceMedium": "Medium",
+  "confidenceHigh": "High",
+  "observedPower": "Observed power",
+  "observedCurrent": "Observed current",
+  "observedVoltage": "Observed voltage",
+  "temperatureRise": "Temperature rise",
+  "savedTests": "Saved tests",
+  "noChargeTests": "No Charge Doctor tests saved yet.",
+  "testRequiresPlug": "Connect a charger before starting the test.",
+  "testPowerUnavailable": "This device does not expose enough charging telemetry for Charge Doctor.",
+  "baselineComparison": "Personal comparison",
+  "aboveBaseline": "About {value}% above your comparable-test average.",
+  "@aboveBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "similarBaseline": "Similar to your comparable-test average.",
+  "belowBaseline": "About {value}% below your comparable-test average. This is an observation, not a cable-failure diagnosis.",
+  "@belowBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "baselineNeedsTests": "Run at least two reliable tests with the same source for a personal comparison.",
+  "clearTests": "Clear tests",
+  "clearTestsTitle": "Clear Charge Doctor tests?",
+  "clearTestsBody": "Saved controlled-test results will be removed from this device.",
+  "testGuidance": "For a useful comparison, keep the screen use and battery level similar and let the test run for about 5 minutes.",
+  "sourceLabel": "Source: {source}",
+  "@sourceLabel": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "resultDuration": "Duration: {duration}",
+  "@resultDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementUnavailable": "Unavailable",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsShort": "{seconds} s",
+  "@secondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -159,5 +159,90 @@
   "french": "Francés",
   "german": "Alemán",
   "portuguese": "Portugués",
-  "webPreviewNotice": "Vista web: los datos de batería y la monitorización Android son simulados."
+  "webPreviewNotice": "Vista web: los datos de batería y la monitorización Android son simulados.",
+  "navDoctor": "Doctor",
+  "chargeDoctorTitle": "Charge Doctor",
+  "chargeDoctorSubtitle": "Realiza una prueba controlada de carga y compara la potencia observada con tus pruebas anteriores.",
+  "testName": "Nombre de la prueba",
+  "testNameHint": "p. ej. USB-C 65 W",
+  "startTest": "Iniciar prueba",
+  "stopTest": "Detener prueba",
+  "activeTest": "Prueba en curso",
+  "elapsed": "Duración",
+  "confidence": "Confianza",
+  "confidenceLow": "Baja",
+  "confidenceMedium": "Media",
+  "confidenceHigh": "Alta",
+  "observedPower": "Potencia observada",
+  "observedCurrent": "Corriente observada",
+  "observedVoltage": "Voltaje observado",
+  "temperatureRise": "Aumento de temperatura",
+  "savedTests": "Pruebas guardadas",
+  "noChargeTests": "Aún no hay pruebas de Charge Doctor.",
+  "testRequiresPlug": "Conecta un cargador antes de iniciar la prueba.",
+  "testPowerUnavailable": "Este dispositivo no expone suficiente telemetría de carga para Charge Doctor.",
+  "baselineComparison": "Comparación personal",
+  "similarBaseline": "Similar a la media de tus pruebas comparables.",
+  "baselineNeedsTests": "Realiza al menos dos pruebas fiables con la misma fuente para obtener una comparación personal.",
+  "clearTests": "Borrar pruebas",
+  "clearTestsTitle": "¿Borrar las pruebas de Charge Doctor?",
+  "clearTestsBody": "Se eliminarán del dispositivo los resultados guardados.",
+  "testGuidance": "Para comparar bien, mantén similares el uso de pantalla y el nivel de batería y deja la prueba unos 5 minutos.",
+  "measurementUnavailable": "No disponible",
+  "samplesCount": "Samples: {count}",
+  "@samplesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aboveBaseline": "About {value}% above your comparable-test average.",
+  "@aboveBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "belowBaseline": "About {value}% below your comparable-test average. This is an observation, not a cable-failure diagnosis.",
+  "@belowBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceLabel": "Source: {source}",
+  "@sourceLabel": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "resultDuration": "Duration: {duration}",
+  "@resultDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsShort": "{seconds} s",
+  "@secondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

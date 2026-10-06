@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'l10n/generated/app_localizations.dart';
+import 'screens/charge_doctor_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/insights_screen.dart';
@@ -89,6 +90,7 @@ class _MainShellState extends State<_MainShell> {
     final l10n = AppLocalizations.of(context);
     final pages = [
       HomeScreen(controller: widget.controller),
+      ChargeDoctorScreen(controller: widget.controller),
       InsightsScreen(controller: widget.controller),
       HistoryScreen(controller: widget.controller),
       SettingsScreen(controller: widget.controller),
@@ -101,13 +103,20 @@ class _MainShellState extends State<_MainShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        labelBehavior: MediaQuery.sizeOf(context).width < 480
+            ? NavigationDestinationLabelBehavior.onlyShowSelected
+            : NavigationDestinationLabelBehavior.alwaysShow,
         onDestinationSelected: (value) => setState(() => _index = value),
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.battery_5_bar_outlined),
             selectedIcon: const Icon(Icons.battery_5_bar_rounded),
             label: l10n.navBattery,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.science_outlined),
+            selectedIcon: const Icon(Icons.science_rounded),
+            label: l10n.navDoctor,
           ),
           NavigationDestination(
             icon: const Icon(Icons.insights_outlined),

@@ -18,13 +18,13 @@
 - runtime/emulator evidence where possible
 - physical acceptance matrix ready
 
-## 0.8 — Charge Doctor
+## 0.8 — Charge Doctor ✅ IMPLEMENTED
 - controlled charger/cable test
 - measurement confidence
 - saved test history
 - A/B comparison without unsupported defect claims
 
-## 0.9 — Store & Monetization RC
+## 0.9 — Store & Monetization RC — NEXT
 - one-time Pro architecture
 - Play Billing integration
 - privacy/data safety/store docs

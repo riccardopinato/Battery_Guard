@@ -63,6 +63,18 @@ class MainActivity : FlutterActivity() {
                         ChargingSessionStore.clearCompleted(this)
                         result.success(null)
                     }
+                    "getChargeTests" ->
+                        result.success(ChargeTestStore.getAll(this))
+                    "saveChargeTest" -> {
+                        val values =
+                            call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
+                        ChargeTestStore.add(this, values)
+                        result.success(null)
+                    }
+                    "clearChargeTests" -> {
+                        ChargeTestStore.clear(this)
+                        result.success(null)
+                    }
                     "hasNotificationPermission" ->
                         result.success(hasNotificationPermission())
                     "requestNotificationPermission" ->

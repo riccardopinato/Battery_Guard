@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import '../models/battery_snapshot.dart';
+import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
@@ -69,6 +70,21 @@ class NativeBatteryService {
   }
 
   Future<void> clearHistory() => _control.invokeMethod<void>('clearHistory');
+
+  Future<List<ChargeTest>> getChargeTests() async {
+    final raw =
+        await _control.invokeMethod<List<dynamic>>('getChargeTests') ?? const [];
+    return raw
+        .whereType<Map<dynamic, dynamic>>()
+        .map(ChargeTest.fromMap)
+        .toList(growable: false);
+  }
+
+  Future<void> saveChargeTest(ChargeTest test) =>
+      _control.invokeMethod<void>('saveChargeTest', test.toMap());
+
+  Future<void> clearChargeTests() =>
+      _control.invokeMethod<void>('clearChargeTests');
 
   Future<bool> requestNotificationPermission() async =>
       await _control.invokeMethod<bool>('requestNotificationPermission') ??

@@ -23,7 +23,11 @@ Ridurre l'incertezza durante la ricarica del telefono con dati osservabili e avv
 - History
 - Insights
 - Quick Controls
-- Charge Doctor (roadmap 0.8)
+- Charge Doctor controlled tests
+
+## Charge Doctor guardrails
+
+Charge Doctor compares observed telemetry under controlled conditions. It never labels a charger or cable as defective from one measurement. Personal comparison requires reliable prior tests using the same charging source.
 
 ## Non-goal v1
 

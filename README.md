@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **0.7.0+8 — Factory Compliance & Web Preview**
+Versione sorgente: **0.8.0+9 — Charge Doctor**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -27,6 +27,7 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - Insights 7/30 giorni;
 - widget Home;
 - Quick Settings Tile;
+- Charge Doctor con test controllati, confidence model e confronto personale A/B;
 - diagnostica di servizio, permessi e notification channel;
 - gestione sessioni interrotte/non affidabili;
 - storage locale bounded.

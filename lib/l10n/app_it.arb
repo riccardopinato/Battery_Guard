@@ -159,5 +159,90 @@
   "french": "Francese",
   "german": "Tedesco",
   "portuguese": "Portoghese",
-  "webPreviewNotice": "Web Preview: dati batteria e monitoraggio Android sono simulati."
+  "webPreviewNotice": "Web Preview: dati batteria e monitoraggio Android sono simulati.",
+  "navDoctor": "Doctor",
+  "chargeDoctorTitle": "Charge Doctor",
+  "chargeDoctorSubtitle": "Esegui un test controllato di ricarica e confronta la potenza osservata con i tuoi test precedenti.",
+  "testName": "Nome test",
+  "testNameHint": "es. USB-C 65 W",
+  "startTest": "Avvia test",
+  "stopTest": "Termina test",
+  "activeTest": "Test in corso",
+  "elapsed": "Durata",
+  "samplesCount": "Campioni: {count}",
+  "@samplesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confidence": "Affidabilità",
+  "confidenceLow": "Bassa",
+  "confidenceMedium": "Media",
+  "confidenceHigh": "Alta",
+  "observedPower": "Potenza osservata",
+  "observedCurrent": "Corrente osservata",
+  "observedVoltage": "Tensione osservata",
+  "temperatureRise": "Aumento temperatura",
+  "savedTests": "Test salvati",
+  "noChargeTests": "Nessun test Charge Doctor salvato.",
+  "testRequiresPlug": "Collega un caricatore prima di avviare il test.",
+  "testPowerUnavailable": "Questo dispositivo non espone abbastanza telemetria di ricarica per Charge Doctor.",
+  "baselineComparison": "Confronto personale",
+  "aboveBaseline": "Circa {value}% sopra la media dei tuoi test comparabili.",
+  "@aboveBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "similarBaseline": "In linea con la media dei tuoi test comparabili.",
+  "belowBaseline": "Circa {value}% sotto la media dei tuoi test comparabili. È un'osservazione, non una diagnosi di cavo guasto.",
+  "@belowBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "baselineNeedsTests": "Esegui almeno due test affidabili con la stessa sorgente per ottenere un confronto personale.",
+  "clearTests": "Cancella test",
+  "clearTestsTitle": "Cancellare i test Charge Doctor?",
+  "clearTestsBody": "I risultati dei test controllati salvati verranno rimossi dal dispositivo.",
+  "testGuidance": "Per un confronto utile, mantieni simili uso dello schermo e livello batteria e lascia il test attivo per circa 5 minuti.",
+  "sourceLabel": "Sorgente: {source}",
+  "@sourceLabel": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "resultDuration": "Durata: {duration}",
+  "@resultDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementUnavailable": "Non disponibile",
+  "minutesShort": "{minutes} min",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsShort": "{seconds} s",
+  "@secondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

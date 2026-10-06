@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0
+- added Charge Doctor controlled charger/cable tests;
+- local persistent history for up to 50 controlled tests;
+- power/current/voltage/temperature sampling while the test is open;
+- low/medium/high measurement confidence based on duration and sample count;
+- personal comparison only against reliable tests using the same source;
+- wording explicitly avoids declaring a cable defective from telemetry alone;
+- Charge Doctor available in Android and simulated Web Preview.
+
+
 ## 0.7.0
 - Flutter localization infrastructure for EN/IT/ES/FR/DE/PT;
 - system-language default with persistent manual override;

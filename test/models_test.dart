@@ -1,4 +1,5 @@
 import 'package:battery_guard/models/battery_snapshot.dart';
+import 'package:battery_guard/models/charge_test.dart';
 import 'package:battery_guard/models/charging_insights.dart';
 import 'package:battery_guard/models/charging_session.dart';
 import 'package:battery_guard/models/monitoring_config.dart';
@@ -36,6 +37,29 @@ void main() {
     final unsupported = BatterySnapshot.fromMap({'level': 50});
     expect(unsupported.powerAvailable, isFalse);
     expect(unsupported.currentAvailable, isFalse);
+  });
+
+  test('ChargeTest parses controlled test evidence', () {
+    final test = ChargeTest.fromMap({
+      'id': 'doctor-1',
+      'label': 'USB-C 65 W',
+      'startedAt': 1000,
+      'endedAt': 301000,
+      'startLevel': 40,
+      'endLevel': 46,
+      'averagePowerW': 18.2,
+      'averageCurrentMa': 4100.0,
+      'averageVoltageV': 4.25,
+      'startTemperatureC': 30.0,
+      'maxTemperatureC': 34.0,
+      'samples': 15,
+      'source': 'AC charger',
+      'confidence': 'high',
+    });
+
+    expect(test.reliable, isTrue);
+    expect(test.averagePowerW, closeTo(18.2, 0.01));
+    expect(test.temperatureRiseC, closeTo(4.0, 0.01));
   });
 
   test('MonitoringConfig defaults are battery-friendly', () {

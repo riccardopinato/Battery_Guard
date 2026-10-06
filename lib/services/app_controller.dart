@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import '../models/battery_snapshot.dart';
+import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
@@ -16,11 +17,14 @@ class AppController extends ChangeNotifier {
 
   final NativeBatteryService _platform;
   StreamSubscription<BatterySnapshot>? _subscription;
+  Timer? _chargeDoctorTimer;
 
   BatterySnapshot snapshot = BatterySnapshot.empty();
   MonitoringConfig config = MonitoringConfig.defaults();
   List<HistoryEntry> history = const [];
   List<ChargingSession> chargingSessions = const [];
+  List<ChargeTest> chargeTests = const [];
+  ActiveChargeTest? activeChargeTest;
   ChargingSession? currentSession;
   ReliabilityStatus reliability = ReliabilityStatus.unknown;
   Locale? localeOverride;
@@ -51,6 +55,7 @@ class AppController extends ChangeNotifier {
         _platform.getReliabilityStatus(),
         _platform.isOnboardingComplete(),
         _platform.getLocaleOverride(),
+        _platform.getChargeTests(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       config = values[1] as MonitoringConfig;
@@ -63,6 +68,7 @@ class AppController extends ChangeNotifier {
       final language = values[8] as String?;
       localeOverride =
           language == null || language.isEmpty ? null : Locale(language);
+      chargeTests = values[9] as List<ChargeTest>;
       lastError = null;
 
       await _subscription?.cancel();
@@ -146,6 +152,26 @@ class AppController extends ChangeNotifier {
     });
     history = const [];
     currentSession = null;
+    chargeTests = List.generate(3, (index) {
+      final end = now.subtract(Duration(days: index + 1));
+      final start = end.subtract(const Duration(minutes: 5));
+      return ChargeTest(
+        id: 'web-test-$index',
+        label: index == 0 ? 'USB-C 65 W' : 'Charger ${index + 1}',
+        startedAt: start,
+        endedAt: end,
+        startLevel: 35 + index * 5,
+        endLevel: 39 + index * 5,
+        averagePowerW: 17.8 - index * 2.1,
+        averageCurrentMa: 4100 - index * 400,
+        averageVoltageV: 4.28,
+        startTemperatureC: 30.0,
+        maxTemperatureC: 33.4 + index,
+        samples: 15,
+        source: index == 2 ? 'USB' : 'AC charger',
+        confidence: ChargeTestConfidence.high,
+      );
+    });
     loading = false;
     notifyListeners();
   }
@@ -292,8 +318,115 @@ class AppController extends ChangeNotifier {
     return _platform.testAlert();
   }
 
+  Future<String?> startChargeDoctorTest(String label) async {
+    if (activeChargeTest != null) return null;
+
+    final first = kIsWeb ? snapshot : await _platform.getSnapshot();
+    if (!first.isPlugged) return 'not_plugged';
+    if (!first.powerAvailable || !first.currentAvailable) {
+      return 'power_unavailable';
+    }
+
+    activeChargeTest = ActiveChargeTest(
+      label: label.trim().isEmpty ? 'Charge Test' : label.trim(),
+      startedAt: DateTime.now(),
+      startLevel: first.level,
+      startTemperatureC:
+          first.temperatureAvailable ? first.temperatureC : 0,
+      source: first.plugType,
+    );
+    _addChargeDoctorSample(first);
+    notifyListeners();
+
+    _chargeDoctorTimer?.cancel();
+    _chargeDoctorTimer = Timer.periodic(
+      Duration(seconds: kIsWeb ? 5 : 20),
+      (_) => unawaited(_sampleChargeDoctor()),
+    );
+    return null;
+  }
+
+  Future<void> _sampleChargeDoctor() async {
+    final active = activeChargeTest;
+    if (active == null) return;
+
+    final value = kIsWeb ? snapshot : await _platform.getSnapshot();
+    if (!value.isPlugged) {
+      await stopChargeDoctorTest();
+      return;
+    }
+    _addChargeDoctorSample(value);
+    notifyListeners();
+  }
+
+  void _addChargeDoctorSample(BatterySnapshot value) {
+    final active = activeChargeTest;
+    if (active == null) return;
+    if (value.powerAvailable) active.powers.add(value.powerW.abs());
+    if (value.currentAvailable) active.currents.add(value.currentMa.abs());
+    if (value.voltageAvailable) active.voltages.add(value.voltageV);
+    if (value.temperatureAvailable) {
+      active.temperatures.add(value.temperatureC);
+    }
+  }
+
+  Future<ChargeTest?> stopChargeDoctorTest() async {
+    final active = activeChargeTest;
+    if (active == null) return null;
+    _chargeDoctorTimer?.cancel();
+    _chargeDoctorTimer = null;
+
+    final finalSnapshot = kIsWeb ? snapshot : await _platform.getSnapshot();
+    _addChargeDoctorSample(finalSnapshot);
+    final endedAt = DateTime.now();
+    final duration = endedAt.difference(active.startedAt);
+
+    final confidence = duration.inMinutes >= 5 && active.samples >= 10
+        ? ChargeTestConfidence.high
+        : duration.inMinutes >= 2 && active.samples >= 4
+            ? ChargeTestConfidence.medium
+            : ChargeTestConfidence.low;
+
+    final temperatures = active.temperatures;
+    final test = ChargeTest(
+      id: endedAt.microsecondsSinceEpoch.toString(),
+      label: active.label,
+      startedAt: active.startedAt,
+      endedAt: endedAt,
+      startLevel: active.startLevel,
+      endLevel: finalSnapshot.level,
+      averagePowerW: active.average(active.powers),
+      averageCurrentMa: active.average(active.currents),
+      averageVoltageV: active.average(active.voltages),
+      startTemperatureC: active.startTemperatureC,
+      maxTemperatureC: temperatures.isEmpty
+          ? 0
+          : temperatures.reduce((a, b) => a > b ? a : b),
+      samples: active.samples,
+      source: active.source,
+      confidence: confidence,
+    );
+
+    activeChargeTest = null;
+    chargeTests = [test, ...chargeTests].take(50).toList(growable: false);
+    notifyListeners();
+
+    if (!kIsWeb) await _platform.saveChargeTest(test);
+    return test;
+  }
+
+  Future<void> clearChargeTests() async {
+    _chargeDoctorTimer?.cancel();
+    _chargeDoctorTimer = null;
+    activeChargeTest = null;
+    chargeTests = const [];
+    notifyListeners();
+    if (!kIsWeb) await _platform.clearChargeTests();
+  }
+
   @override
   void dispose() {
+    _chargeDoctorTimer?.cancel();
     _subscription?.cancel();
     super.dispose();
   }
