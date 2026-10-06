@@ -8,7 +8,8 @@ val releaseStorePath = System.getenv("ANDROID_KEYSTORE_PATH")
 val releaseStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
 val releaseKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
-val releaseSigningReady =
+
+val persistentSigningReady =
     !releaseStorePath.isNullOrBlank() &&
         !releaseStorePassword.isNullOrBlank() &&
         !releaseKeyAlias.isNullOrBlank() &&
@@ -42,8 +43,8 @@ android {
     }
 
     signingConfigs {
-        create("production") {
-            if (releaseSigningReady) {
+        create("persistent") {
+            if (persistentSigningReady) {
                 storeFile = file(releaseStorePath!!)
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
@@ -54,11 +55,13 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (releaseSigningReady) {
-                signingConfigs.getByName("production")
-            } else {
-                signingConfigs.getByName("debug")
+            if (!persistentSigningReady) {
+                throw GradleException(
+                    "Persistent signing is required for Battery Guard release artifacts.",
+                )
             }
+
+            signingConfig = signingConfigs.getByName("persistent")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

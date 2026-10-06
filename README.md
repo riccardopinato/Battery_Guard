@@ -4,16 +4,18 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.1.2+14 — AdMob Adaptive & Policy-Safe Layout**
+Versione sorgente: **1.1.3+15 — Persistent Signing & Icon Refresh**
 
 Evidence attuale:
 - IMPLEMENTED
-- STATICALLY CHECKED: required by final CI
-- TESTED: required by final CI
-- PHYSICAL DEVICE VERIFIED: **NO**
-- STORE READY: **NO — external gates pending**
+- persistent INTERNAL signing configured in CI
+- Free + Premium Test artifacts generated from the same source SHA/signing identity
+- STATICALLY CHECKED: required by CI
+- TESTED: required by CI
+- PHYSICAL UPDATE VERIFIED: **PENDING**
+- STORE READY: **NO — external production gates pending**
 
-Non considerare una build verde equivalente a validazione fisica del foreground service, della consegna notifiche o del layout pubblicitario su device reali.
+Non considerare una build verde equivalente a validazione fisica del foreground service, delle notifiche, del layout pubblicitario o dell'aggiornamento in-place su device reale.
 
 ## Funzioni
 
@@ -30,8 +32,11 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - Quick Settings Tile;
 - Charge Doctor con test controllati, confidence model e confronto personale A/B;
 - Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Charge Doctor + Insights 30 giorni;
-- AdMob Free con UMP/Privacy Options e **Large Anchored Adaptive Banner** full-width nello spazio contenuti superiore, separato dalla NavigationBar;
-- test AdMob obbligatori nelle build non-production; gli ID reali richiedono esplicita pipeline production;
+- AdMob Free con UMP/Privacy Options e Large Anchored Adaptive Banner, separato dalla NavigationBar;
+- Test Ads obbligatori nelle build INTERNAL/QA;
+- nuova icona launcher adaptive con variante themed/monochrome Android 13+;
+- APK INTERNAL firmati con identità persistente verificata via fingerprint SHA-256;
+- build Premium Test compile-time separata dalla logica Play production;
 - notifiche native localizzate secondo lingua app/sistema;
 - Battery Health Lab con stima robusta, outlier filtering e confidence basata anche sulla copertura SoC;
 - diagnostica di servizio, permessi e notification channel;
@@ -42,12 +47,16 @@ Battery Guard **non interrompe fisicamente la ricarica** e non inventa una perce
 
 ## Privacy
 
-La v0.7 mantiene disabilitato Android Auto Backup per mantenere coerente la promessa local-only. Dati e configurazioni restano sul dispositivo salvo azioni future esplicite dell'utente.
+Android Auto Backup resta disabilitato per mantenere coerente la promessa local-only. Dati e configurazioni restano sul dispositivo salvo azioni future esplicite dell'utente.
 
 AdMob non riceve la telemetria batteria come input di targeting. Dove richiesto, UMP viene completato prima che Battery Guard possa richiedere annunci e le Privacy Options restano riapribili quando richiesto dal framework Google.
 
-## Build
+## Build e signing
 
-Toolchain CI fissata a Flutter 3.47.5. La Web Preview usa dati simulati e non certifica le capability native. Le build CI senza credenziali di produzione usano signing di test e **Test Ads**, e non sono store-ready. La pipeline production richiede firma reale, AdMob App ID/Banner ID reali e abilita esplicitamente gli annunci live.
+Toolchain CI fissata a Flutter 3.47.5.
+
+La lane INTERNAL usa i secret `ANDROID_KEYSTORE_*` come keystore persistente, rifiuta fingerprint diversi da quello atteso e produce Free + Premium Test firmati con la stessa identity. La Free usa esclusivamente Test Ads.
+
+La lane PRODUCTION usa secret separati `ANDROID_PRODUCTION_*` e richiede configurazione AdMob reale. La Web Preview usa dati simulati e non certifica capability native.
 
 Vedi `PRODUCT_BIBLE.md`, `ROADMAP.md`, `CHANGELOG.md`, `MONETIZATION.md`, `RELEASE_GATE.md` e la documentazione Play/Privacy.

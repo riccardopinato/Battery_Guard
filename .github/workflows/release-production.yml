@@ -33,13 +33,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Require production signing and AdMob configuration
+      - name: Require PRODUCTION signing and AdMob configuration
         shell: bash
         env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_PRODUCTION_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_PRODUCTION_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_PRODUCTION_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_PRODUCTION_KEY_PASSWORD }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
           ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
         run: |
@@ -50,13 +50,17 @@ jobs:
           test -n "$KEY_PASSWORD"
           test -n "$ADMOB_APP_ID"
           test -n "$ADMOB_BANNER_ID"
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/battery-guard-release.jks"
-          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/battery-guard-release.jks" >> "$GITHUB_ENV"
+
+          KEYSTORE_PATH="$RUNNER_TEMP/battery-guard-production.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
           echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
           echo "ADMOB_APP_ID=$ADMOB_APP_ID" >> "$GITHUB_ENV"
           echo "ADMOB_BANNER_ID=$ADMOB_BANNER_ID" >> "$GITHUB_ENV"
+          echo "SIGNING_LANE=production" >> "$GITHUB_ENV"
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -101,24 +105,29 @@ jobs:
           set -euxo pipefail
           rm -rf build/symbols release
           mkdir -p build/symbols release
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols --dart-define=ADMOB_USE_LIVE_ADS=true --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
-          flutter build appbundle --release --split-debug-info=build/symbols --dart-define=ADMOB_USE_LIVE_ADS=true --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+
+          flutter build apk             --release             --split-per-abi             --split-debug-info=build/symbols             --dart-define=ADMOB_USE_LIVE_ADS=true             --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+
+          flutter build appbundle             --release             --split-debug-info=build/symbols             --dart-define=ADMOB_USE_LIVE_ADS=true             --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+
           VERSION="${{ inputs.version }}"
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-$VERSION-arm64-v8a.apk"
           cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-$VERSION.aab"
-          (
-            cd release
-            sha256sum * > SHA256SUMS.txt
-          )
+
           {
             echo "version=$VERSION"
             echo "sourceSha=$GITHUB_SHA"
             echo "flutter=3.47.5"
-            echo "signing=production-secret"
+            echo "signingLane=$SIGNING_LANE"
             echo "artifactPolicy=immutable"
             echo "admob=production-configured-adaptive"
             echo "proProduct=battery_guard_pro_lifetime"
           } > release/BUILD_EVIDENCE.txt
+
+          (
+            cd release
+            sha256sum Battery-Guard-* BUILD_EVIDENCE.txt > SHA256SUMS.txt
+          )
 
       - name: Create immutable GitHub Release
         env:
