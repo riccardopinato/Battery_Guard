@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/monitoring_config.dart';
 import '../services/app_controller.dart';
+import '../widgets/premium_card.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({required this.controller, super.key});
@@ -36,6 +37,8 @@ class SettingsScreen extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 18),
+          PremiumCard(controller: controller),
+          const SizedBox(height: 14),
           _Section(
             title: l10n.protection,
             children: [
@@ -236,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 title: Text(l10n.version),
-                trailing: const Text('0.8.0'),
+                trailing: const Text('0.9.0'),
               ),
             ],
           ),

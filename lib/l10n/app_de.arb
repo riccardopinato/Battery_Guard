@@ -244,5 +244,23 @@
         "type": "int"
       }
     }
+  },
+  "proTitle": "Battery Guard Pro",
+  "proSubtitle": "Einmalig freischalten. Kein Abo.",
+  "proOwned": "Pro freigeschaltet",
+  "unlockPro": "Pro freischalten",
+  "restorePurchases": "Käufe wiederherstellen",
+  "storeUnavailable": "Google-Play-Käufe sind in diesem Build oder auf diesem Gerät nicht verfügbar.",
+  "proFeatureDoctor": "Kontrollierte Charge-Doctor-Tests",
+  "proFeatureInsights30": "30-Tage-Insights",
+  "purchaseError": "Kauf konnte nicht abgeschlossen werden.",
+  "proSection": "Pro",
+  "unlockForPrice": "Unlock for {price}",
+  "@unlockForPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
   }
 }

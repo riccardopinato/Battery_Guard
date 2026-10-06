@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charge_test.dart';
 import '../services/app_controller.dart';
+import '../widgets/premium_card.dart';
 
 class ChargeDoctorScreen extends StatefulWidget {
   const ChargeDoctorScreen({
@@ -45,6 +46,29 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
     final active = widget.controller.activeChargeTest;
     final tests = widget.controller.chargeTests;
     final scheme = Theme.of(context).colorScheme;
+
+    if (!widget.controller.premium.isPro) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        children: [
+          Text(
+            l10n.chargeDoctorTitle,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.chargeDoctorSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 18),
+          PremiumCard(controller: widget.controller),
+        ],
+      );
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),

@@ -10,12 +10,19 @@ import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
 import 'native_battery_service.dart';
+import 'premium_service.dart';
 
 class AppController extends ChangeNotifier {
   AppController({NativeBatteryService? platform})
-      : _platform = platform ?? NativeBatteryService.instance;
+      : _platform = platform ?? NativeBatteryService.instance {
+    premium = PremiumService(
+      platform: _platform,
+      onChanged: notifyListeners,
+    );
+  }
 
   final NativeBatteryService _platform;
+  late final PremiumService premium;
   StreamSubscription<BatterySnapshot>? _subscription;
   Timer? _chargeDoctorTimer;
 
@@ -41,6 +48,7 @@ class AppController extends ChangeNotifier {
 
     if (kIsWeb) {
       _initializeWebPreview();
+      unawaited(premium.initialize(webPreview: true));
       return;
     }
 
@@ -83,6 +91,7 @@ class AppController extends ChangeNotifier {
           notifyListeners();
         },
       );
+      unawaited(premium.initialize(webPreview: false));
     } catch (error) {
       lastError = error.toString();
     } finally {
@@ -428,6 +437,7 @@ class AppController extends ChangeNotifier {
   void dispose() {
     _chargeDoctorTimer?.cancel();
     _subscription?.cancel();
+    premium.dispose();
     super.dispose();
   }
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0
+- added Google Play Billing architecture for the non-consumable `battery_guard_pro_lifetime`;
+- cached offline Pro entitlement with purchase/restore synchronization;
+- free core remains fully functional;
+- Pro gates Charge Doctor and 30-day Insights;
+- store price is read from Google Play ProductDetails, never hardcoded;
+- added privacy, Data Safety, foreground-service declaration, Play listing and monetization drafts;
+- added physical acceptance matrix and explicit production release gate;
+- added production release workflow that refuses missing signing secrets and immutable-release overwrite.
+
+
 ## 0.8.0
 - added Charge Doctor controlled charger/cable tests;
 - local persistent history for up to 50 controlled tests;

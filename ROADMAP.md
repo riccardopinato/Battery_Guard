@@ -24,7 +24,7 @@
 - saved test history
 - A/B comparison without unsupported defect claims
 
-## 0.9 — Store & Monetization RC — NEXT
+## 0.9 — Store & Monetization RC ✅ IMPLEMENTED / EXTERNAL GATES PENDING
 - one-time Pro architecture
 - Play Billing integration
 - privacy/data safety/store docs
@@ -32,7 +32,7 @@
 - production signing gate
 - internal-testing evidence gate
 
-## 1.0 — Production Candidate
+## 1.0 — Production Candidate — NEXT
 - no new product scope
 - final regression hardening
 - exact-artifact evidence

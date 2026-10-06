@@ -106,6 +106,20 @@ class MainActivity : FlutterActivity() {
                         editor.apply()
                         result.success(null)
                     }
+                    "getProEntitlement" ->
+                        result.success(
+                            appStatePrefs().getBoolean(
+                                "proLifetime",
+                                false,
+                            ),
+                        )
+                    "setProEntitlement" -> {
+                        val value = call.arguments as? Boolean ?: false
+                        appStatePrefs().edit()
+                            .putBoolean("proLifetime", value)
+                            .apply()
+                        result.success(null)
+                    }
                     "setOnboardingComplete" -> {
                         val value = call.arguments as? Boolean ?: true
                         appStatePrefs().edit()

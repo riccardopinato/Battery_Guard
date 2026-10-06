@@ -1,0 +1,122 @@
+name: Battery Guard Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version without v prefix (example: 1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v7
+
+      - name: Verify requested version
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SOURCE_VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          test "$SOURCE_VERSION" = "${{ inputs.version }}"
+          if gh release view "v$SOURCE_VERSION" >/dev/null 2>&1; then
+            echo "Release v$SOURCE_VERSION already exists. Immutable releases are never overwritten."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Require production signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/battery-guard-release.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/battery-guard-release.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Flutter 3.47.5
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.5"
+          channel: stable
+          cache: true
+
+      - name: Complete pinned Android wrapper
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/battery_guard_scaffold
+          flutter create --platforms=android --org com.riccardopinato --project-name battery_guard /tmp/battery_guard_scaffold
+          cp /tmp/battery_guard_scaffold/android/gradlew android/gradlew
+          cp /tmp/battery_guard_scaffold/android/gradlew.bat android/gradlew.bat
+          mkdir -p android/gradle/wrapper
+          cp /tmp/battery_guard_scaffold/android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar
+          cp /tmp/battery_guard_scaffold/android/gradle/wrapper/gradle-wrapper.properties android/gradle/wrapper/gradle-wrapper.properties
+          chmod +x android/gradlew
+
+      - name: Dependencies and localization
+        run: |
+          flutter pub get
+          flutter gen-l10n
+
+      - name: Quality gate
+        run: |
+          flutter analyze
+          flutter test
+
+      - name: Build production artifacts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf build/symbols release
+          mkdir -p build/symbols release
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols
+          flutter build appbundle --release --split-debug-info=build/symbols
+          VERSION="${{ inputs.version }}"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-$VERSION-arm64-v8a.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-$VERSION.aab"
+          (
+            cd release
+            sha256sum * > SHA256SUMS.txt
+          )
+          {
+            echo "version=$VERSION"
+            echo "sourceSha=$GITHUB_SHA"
+            echo "flutter=3.47.5"
+            echo "signing=production-secret"
+            echo "artifactPolicy=immutable"
+          } > release/BUILD_EVIDENCE.txt
+
+      - name: Create immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          VERSION="${{ inputs.version }}"
+          gh release create "v$VERSION"             release/Battery-Guard-$VERSION-arm64-v8a.apk             release/Battery-Guard-$VERSION.aab             release/SHA256SUMS.txt             release/BUILD_EVIDENCE.txt             --target "$GITHUB_SHA"             --title "Battery Guard v$VERSION"             --notes "Production-signed immutable build. Physical-device and Play distribution evidence must still be recorded in RELEASE_GATE.md before production rollout."

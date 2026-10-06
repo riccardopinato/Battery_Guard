@@ -108,6 +108,12 @@ class NativeBatteryService {
   Future<void> setLocaleOverride(String? languageCode) =>
       _control.invokeMethod<void>('setLocaleOverride', languageCode);
 
+  Future<bool> getProEntitlement() async =>
+      await _control.invokeMethod<bool>('getProEntitlement') ?? false;
+
+  Future<void> setProEntitlement(bool value) =>
+      _control.invokeMethod<void>('setProEntitlement', value);
+
   Future<void> setOnboardingComplete(bool value) =>
       _control.invokeMethod<void>('setOnboardingComplete', value);
 

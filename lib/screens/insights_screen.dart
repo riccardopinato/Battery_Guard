@@ -61,7 +61,11 @@ class _InsightsScreenState extends State<InsightsScreen> {
           SegmentedButton<int>(
             segments: [
               ButtonSegment(value: 7, label: Text(l10n.days7)),
-              ButtonSegment(value: 30, label: Text(l10n.days30)),
+              ButtonSegment(
+                value: 30,
+                label: Text(l10n.days30),
+                enabled: widget.controller.premium.isPro,
+              ),
             ],
             selected: {_days},
             showSelectedIcon: false,

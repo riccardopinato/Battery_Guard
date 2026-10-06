@@ -29,6 +29,10 @@ Ridurre l'incertezza durante la ricarica del telefono con dati osservabili e avv
 
 Charge Doctor compares observed telemetry under controlled conditions. It never labels a charger or cable as defective from one measurement. Personal comparison requires reliable prior tests using the same charging source.
 
+## Monetization v1
+
+Free keeps all core monitoring/protection behavior. Pro is a one-time Google Play purchase and unlocks Charge Doctor plus 30-day Insights. No subscription and no ads in v1.
+
 ## Non-goal v1
 
 - AI/LLM
