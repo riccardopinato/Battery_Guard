@@ -59,40 +59,6 @@ jobs:
           fi
           chmod +x android/gradlew
 
-      - name: Require persistent INTERNAL signing
-        shell: bash
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          EXPECTED_CERT_SHA256: "CB:6C:7D:05:C3:43:0F:34:31:F3:22:82:48:E2:14:C6:4B:0B:50:EA:E1:6D:8C:D1:0F:63:5C:32:AF:3D:E2:91"
-        run: |
-          set -euo pipefail
-          test -n "$KEYSTORE_BASE64"
-          test -n "$KEYSTORE_PASSWORD"
-          test -n "$KEY_ALIAS"
-          test -n "$KEY_PASSWORD"
-
-          KEYSTORE_PATH="$RUNNER_TEMP/battery-guard-internal.jks"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
-
-          ACTUAL_CERT_SHA256="$(
-            keytool -list -v               -keystore "$KEYSTORE_PATH"               -storepass "$KEYSTORE_PASSWORD"               -alias "$KEY_ALIAS" |
-            sed -n 's/^[[:space:]]*SHA256: //p' |
-            head -n 1
-          )"
-
-          test -n "$ACTUAL_CERT_SHA256"
-          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
-
-          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
-          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
-          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
-          echo "SIGNING_LANE=internal" >> "$GITHUB_ENV"
-          echo "SIGNING_CERT_SHA256=$ACTUAL_CERT_SHA256" >> "$GITHUB_ENV"
-
       - name: Flutter environment
         run: |
           flutter --version
@@ -132,12 +98,48 @@ jobs:
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages
 
+      - name: Require persistent INTERNAL signing
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_CERT_SHA256: "CB:6C:7D:05:C3:43:0F:34:31:F3:22:82:48:E2:14:C6:4B:0B:50:EA:E1:6D:8C:D1:0F:63:5C:32:AF:3D:E2:91"
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+
+          KEYSTORE_PATH="$RUNNER_TEMP/battery-guard-internal.jks"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          ACTUAL_CERT_SHA256="$(
+            keytool -list -v               -keystore "$KEYSTORE_PATH"               -storepass "$KEYSTORE_PASSWORD"               -alias "$KEY_ALIAS" |
+            sed -n 's/^[[:space:]]*SHA256: //p' |
+            head -n 1
+          )"
+
+          test -n "$ACTUAL_CERT_SHA256"
+          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
+
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "SIGNING_LANE=internal" >> "$GITHUB_ENV"
+          echo "SIGNING_CERT_SHA256=$ACTUAL_CERT_SHA256" >> "$GITHUB_ENV"
+
       - name: Build FREE APKs and AAB
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
-          rm -rf build/symbols-free /tmp/battery_guard_free
-          mkdir -p build/symbols-free /tmp/battery_guard_free
+          rm -rf build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
+          mkdir -p build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
 
           flutter build apk --release --split-per-abi --split-debug-info=build/symbols-free
           flutter build apk --release --split-debug-info=build/symbols-free
@@ -148,8 +150,10 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk /tmp/battery_guard_free/app-x86_64-release.apk
           cp build/app/outputs/flutter-apk/app-release.apk /tmp/battery_guard_free/app-release.apk
           cp build/app/outputs/bundle/release/app-release.aab /tmp/battery_guard_free/app-release.aab
+          cp -R build/symbols-free/. /tmp/battery_guard_free_symbols/
 
       - name: Build PREMIUM TEST APKs
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
@@ -164,6 +168,7 @@ jobs:
           flutter build apk             --release             --split-debug-info=build/symbols-premium             --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
 
       - name: Prepare and verify immutable INTERNAL bundle
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
@@ -173,7 +178,7 @@ jobs:
           SHORT_SHA="${GITHUB_SHA:0:12}"
 
           rm -rf release
-          mkdir -p release
+          mkdir -p release/symbols-free release/symbols-premium
 
           cp /tmp/battery_guard_free/app-arm64-v8a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-arm64-v8a.apk"
           cp /tmp/battery_guard_free/app-armeabi-v7a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-armeabi-v7a.apk"
@@ -186,6 +191,8 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-x86_64.apk"
           cp build/app/outputs/flutter-apk/app-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-universal.apk"
 
+          cp -R /tmp/battery_guard_free_symbols/. release/symbols-free/
+          cp -R build/symbols-premium/. release/symbols-premium/
           cp pubspec.lock release/pubspec.lock
 
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
@@ -197,7 +204,7 @@ jobs:
             VERIFY_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK")"
             ACTUAL_DIGEST="$(
               printf '%s\n' "$VERIFY_OUTPUT" |
-              sed -n 's/^.*Signer: certificate SHA-256 digest: //p' |
+              sed -n 's/^.*certificate SHA-256 digest: //p' |
               head -n 1 |
               tr '[:lower:]' '[:upper:]'
             )"
@@ -222,16 +229,16 @@ jobs:
 
           (
             cd release
-            sha256sum               Battery-Guard-*               pubspec.lock               BUILD_EVIDENCE.txt               > SHA256SUMS.txt
+            find . -type f ! -name SHA256SUMS.txt -print0 |
+              sort -z |
+              xargs -0 sha256sum > SHA256SUMS.txt
           )
 
       - name: Upload immutable INTERNAL artifact
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/upload-artifact@v4
         with:
           name: Battery-Guard-INTERNAL-${{ github.sha }}
-          path: |
-            release/*
-            build/symbols-free/**
-            build/symbols-premium/**
+          path: release/**
           if-no-files-found: error
           retention-days: 7
