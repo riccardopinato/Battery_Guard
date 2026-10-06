@@ -10,13 +10,38 @@ class AdService {
 
   static final ValueNotifier<int> consentRevision = ValueNotifier<int>(0);
 
+  static const bool _liveAdsRequested = bool.fromEnvironment(
+    'ADMOB_USE_LIVE_ADS',
+    defaultValue: false,
+  );
+
+  static const String _configuredBannerUnitId = String.fromEnvironment(
+    'ADMOB_BANNER_ID',
+    defaultValue: '',
+  );
+
+  static const String _androidTestBannerUnitId =
+      'ca-app-pub-3940256099942544/9214589741';
+  static const String _iosTestBannerUnitId =
+      'ca-app-pub-3940256099942544/2435281174';
+
   static bool get ready => _ready;
   static bool get privacyOptionsRequired => _privacyOptionsRequired;
 
-  static String get bannerUnitId => const String.fromEnvironment(
-        'ADMOB_BANNER_ID',
-        defaultValue: 'ca-app-pub-3940256099942544/6300978111',
-      );
+  static bool get usingLiveAds =>
+      kReleaseMode &&
+      _liveAdsRequested &&
+      _configuredBannerUnitId.trim().isNotEmpty;
+
+  static String get bannerUnitId {
+    if (usingLiveAds) {
+      return _configuredBannerUnitId;
+    }
+
+    return defaultTargetPlatform == TargetPlatform.iOS
+        ? _iosTestBannerUnitId
+        : _androidTestBannerUnitId;
+  }
 
   static Future<void> initialize() async {
     final running = _initializing;
@@ -67,7 +92,6 @@ class AdService {
             (formError) async {
               await refreshPrivacyRequirement();
               await updateAdReadiness();
-              consentRevision.value++;
               finish();
             },
           );

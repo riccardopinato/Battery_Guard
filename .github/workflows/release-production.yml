@@ -101,8 +101,8 @@ jobs:
           set -euxo pipefail
           rm -rf build/symbols release
           mkdir -p build/symbols release
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
-          flutter build appbundle --release --split-debug-info=build/symbols --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols --dart-define=ADMOB_USE_LIVE_ADS=true --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+          flutter build appbundle --release --split-debug-info=build/symbols --dart-define=ADMOB_USE_LIVE_ADS=true --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
           VERSION="${{ inputs.version }}"
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-$VERSION-arm64-v8a.apk"
           cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-$VERSION.aab"
@@ -116,7 +116,7 @@ jobs:
             echo "flutter=3.47.5"
             echo "signing=production-secret"
             echo "artifactPolicy=immutable"
-            echo "admob=production-configured"
+            echo "admob=production-configured-adaptive"
             echo "proProduct=battery_guard_pro_lifetime"
           } > release/BUILD_EVIDENCE.txt
 

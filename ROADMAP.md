@@ -38,7 +38,6 @@
 - exact-artifact evidence
 - publish only when signing + physical/device + distribution gates are satisfied
 
-
 ## 1.1 — Longevity & Monetization ✅ IMPLEMENTED / EXTERNAL AD + PLAY GATES PENDING
 - dual lower/upper charge thresholds;
 - distinct lower/upper notification sounds;
@@ -46,8 +45,7 @@
 - AdMob Free / ad-free Pro;
 - updated privacy/Data Safety/production configuration.
 
-
-## 1.1.1 — Heavy Audit Hardening ✅ IMPLEMENTED / CI GATE PENDING
+## 1.1.1 — Heavy Audit Hardening ✅ IMPLEMENTED
 - duplicate 100% alert fix;
 - adaptive temperature baseline validity;
 - localized native notifications/widget/tile surfaces;
@@ -55,3 +53,15 @@
 - UMP privacy-options entry point;
 - Health Lab robust estimator;
 - dependency lockfile/reproducibility hardening.
+
+## 1.1.2 — AdMob Adaptive & Policy-Safe Layout ✅ IMPLEMENTED / CI + DEVICE QA PENDING
+- replace fixed `AdSize.banner` with Google Large Anchored Adaptive sizing;
+- calculate ad width from the real safe layout width;
+- move the persistent banner out of the Bottom Navigation container;
+- keep NavigationBar isolated from the ad placement to reduce accidental-click risk;
+- reserve the adaptive slot while an eligible ad request is loading and collapse it on failure/no-fill;
+- keep UMP consent gating and Privacy Options;
+- enforce Google Test Ad Unit IDs outside an explicitly configured production release;
+- require `ADMOB_USE_LIVE_ADS=true` plus a real banner ID for production artifacts;
+- keep Pro ad-free by not constructing the ad placement;
+- retain local-only diagnostic callbacks for load/failure/impression/click without battery telemetry.
