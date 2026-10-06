@@ -5,6 +5,7 @@ class AdService {
 
   static bool get ready => false;
   static bool get privacyOptionsRequired => false;
+  static bool get usingLiveAds => false;
   static String get bannerUnitId => '';
 
   static Future<void> initialize() async {}
