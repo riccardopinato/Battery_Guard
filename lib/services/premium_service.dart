@@ -7,15 +7,17 @@ import 'native_battery_service.dart';
 
 class PremiumService {
   PremiumService({
-    required NativeBatteryService platform,
-    required VoidCallback onChanged,
-  })  : _platform = platform,
-        _onChanged = onChanged;
+    required this.platform,
+    required this.onChanged,
+  });
+
+  final NativeBatteryService platform;
+  final VoidCallback onChanged;
 
   static const productId = 'battery_guard_pro_lifetime';
 
-  final NativeBatteryService _platform;
-  final VoidCallback _onChanged;
+  final NativeBatteryService platform;
+  final VoidCallback onChanged;
   final InAppPurchase _iap = InAppPurchase.instance;
 
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -33,18 +35,18 @@ class PremiumService {
       isPro = true;
       storeAvailable = false;
       loading = false;
-      _onChanged();
+      onChanged();
       return;
     }
 
-    isPro = await _platform.getProEntitlement();
+    isPro = await platform.getProEntitlement();
 
     _subscription ??= _iap.purchaseStream.listen(
       _handlePurchases,
       onError: (Object value) {
         error = value.toString();
         loading = false;
-        _onChanged();
+        onChanged();
       },
     );
 
@@ -65,7 +67,7 @@ class PremiumService {
       error = value.toString();
     } finally {
       loading = false;
-      _onChanged();
+      onChanged();
     }
   }
 
@@ -74,14 +76,14 @@ class PremiumService {
     if (!storeAvailable || details == null) return false;
 
     error = null;
-    _onChanged();
+    onChanged();
     try {
       return await _iap.buyNonConsumable(
         purchaseParam: PurchaseParam(productDetails: details),
       );
     } catch (value) {
       error = value.toString();
-      _onChanged();
+      onChanged();
       return false;
     }
   }
@@ -89,12 +91,12 @@ class PremiumService {
   Future<void> restore() async {
     if (!storeAvailable) return;
     error = null;
-    _onChanged();
+    onChanged();
     try {
       await _iap.restorePurchases();
     } catch (value) {
       error = value.toString();
-      _onChanged();
+      onChanged();
     }
   }
 
@@ -107,7 +109,7 @@ class PremiumService {
         case PurchaseStatus.restored:
           isPro = true;
           error = null;
-          await _platform.setProEntitlement(true);
+          await platform.setProEntitlement(true);
           break;
         case PurchaseStatus.error:
           error = purchase.error?.message ?? 'Purchase failed';
@@ -122,7 +124,7 @@ class PremiumService {
         await _iap.completePurchase(purchase);
       }
     }
-    _onChanged();
+    onChanged();
   }
 
   void dispose() {
