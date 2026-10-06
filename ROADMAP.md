@@ -1,6 +1,6 @@
 # Battery Guard — Roadmap
 
-## 0.6 — Core Reliability & Release Integrity
+## 0.6 — Core Reliability & Release Integrity ✅ IMPLEMENTED
 - notification channel truth
 - session integrity / interrupted sessions
 - telemetry availability
@@ -10,7 +10,7 @@
 - optional persistent production signing
 - Product Bible / changelog / evidence discipline
 
-## 0.7 — Factory Compliance & Runtime QA
+## 0.7 — Factory Compliance & Runtime QA ✅ IMPLEMENTED / PHYSICAL QA PENDING
 - localization IT/EN/ES/FR/DE/PT
 - system locale + manual override
 - Web Preview con stato simulato
@@ -32,7 +32,7 @@
 - production signing gate
 - internal-testing evidence gate
 
-## 1.0 — Production Candidate — NEXT
+## 1.0 — Production Candidate ✅ SOURCE COMPLETE / EXTERNAL GATES PENDING
 - no new product scope
 - final regression hardening
 - exact-artifact evidence

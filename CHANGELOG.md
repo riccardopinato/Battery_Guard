@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0
+- feature freeze: no new product scope after 0.9;
+- final source version aligned to 1.0.0+11;
+- remaining Settings strings migrated to localization resources;
+- production-release workflow, privacy/store/FGS documentation and physical acceptance matrix retained as mandatory external gates;
+- v1 source can become PRODUCTION RELEASED only after production signing, Play Internal Testing, purchase/restore, physical-device matrix and Play policy checks pass.
+
+
 ## 0.9.0
 - added Google Play Billing architecture for the non-consumable `battery_guard_pro_lifetime`;
 - cached offline Pro entitlement with purchase/restore synchronization;

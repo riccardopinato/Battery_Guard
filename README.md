@@ -4,14 +4,14 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **0.9.0+10 — Store & Monetization RC**
+Versione sorgente: **1.0.0+11 — Production Candidate**
 
 Evidence attuale:
 - IMPLEMENTED
-- STATICALLY CHECKED: in verifica CI
-- TESTED: test unitari in verifica CI
+- STATICALLY CHECKED: required by final CI
+- TESTED: required by final CI
 - PHYSICAL DEVICE VERIFIED: **NO**
-- STORE READY: **NO**
+- STORE READY: **NO — external gates pending**
 
 Non considerare una build verde equivalente a validazione fisica del foreground service o della consegna notifiche.
 

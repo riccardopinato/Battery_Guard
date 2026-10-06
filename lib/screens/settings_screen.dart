@@ -115,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
                         !reliability.serviceHealthy
                     ? FilledButton.tonal(
                         onPressed: controller.repairMonitoring,
-                        child: const Text('Ripristina'),
+                        child: Text(l10n.restore),
                       )
                     : null,
               ),
@@ -134,8 +134,8 @@ class SettingsScreen extends StatelessWidget {
                             : controller.requestNotificationPermission,
                         child: Text(
                           reliability.notificationsGranted
-                              ? 'Sistema'
-                              : 'Consenti',
+                              ? l10n.system
+                              : l10n.allow,
                         ),
                       ),
                 onTap: controller.openNotificationSettings,
@@ -239,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 title: Text(l10n.version),
-                trailing: const Text('0.9.0'),
+                trailing: const Text('1.0.0'),
               ),
             ],
           ),
@@ -315,7 +315,7 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Soglia di ricarica',
+                l10n.chargingThreshold,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
