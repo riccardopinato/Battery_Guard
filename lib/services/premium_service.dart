@@ -16,6 +16,11 @@ class PremiumService {
 
   static const productId = 'battery_guard_pro_lifetime';
 
+  static const bool _forcePremiumTest = bool.fromEnvironment(
+    'BATTERY_GUARD_FORCE_PRO_TEST',
+    defaultValue: false,
+  );
+
   final InAppPurchase _iap = InAppPurchase.instance;
 
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -29,6 +34,16 @@ class PremiumService {
   String? get localizedPrice => product?.price;
 
   Future<void> initialize({required bool webPreview}) async {
+    if (_forcePremiumTest) {
+      isPro = true;
+      storeAvailable = false;
+      loading = false;
+      product = null;
+      error = null;
+      onChanged();
+      return;
+    }
+
     if (webPreview) {
       isPro = true;
       storeAvailable = false;
