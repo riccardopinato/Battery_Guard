@@ -328,5 +328,30 @@
   "monitorChannelDisabled": "Canale monitoraggio disattivato",
   "oemSamsungHint": "Su Samsung evita che Battery Guard venga inserita tra le app in sospensione profonda.",
   "oemXiaomiHint": "Su Xiaomi/Redmi/Poco consenti avvio automatico e batteria senza restrizioni.",
-  "oemBackgroundHint": "Consenti a Battery Guard di funzionare in background senza restrizioni batteria."
+  "oemBackgroundHint": "Consenti a Battery Guard di funzionare in background senza restrizioni batteria.",
+  "monitorNotRequested": "Non richiesto",
+  "monitorOperational": "Operativo",
+  "monitorCheck": "Da verificare",
+  "noBatteryEvent": "Nessun evento batteria registrato",
+  "lastEventNow": "Ultimo evento ora",
+  "lastEventMinutes": "Ultimo evento {count} min fa",
+  "@lastEventMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastEventHours": "Ultimo evento {count} h fa",
+  "@lastEventHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionMissing": "Permesso notifiche mancante",
+  "notificationsDisabled": "Notifiche app disattivate",
+  "alertChannelDisabled": "Canale avvisi batteria disattivato",
+  "deliveryReady": "Avvisi pronti"
 }

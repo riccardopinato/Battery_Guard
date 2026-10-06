@@ -328,5 +328,30 @@
   "monitorChannelDisabled": "Monitoring notification channel disabled",
   "oemSamsungHint": "On Samsung, keep Battery Guard out of Deep sleeping apps.",
   "oemXiaomiHint": "On Xiaomi/Redmi/Poco, allow autostart and unrestricted battery use.",
-  "oemBackgroundHint": "Allow Battery Guard to run in the background without battery restrictions."
+  "oemBackgroundHint": "Allow Battery Guard to run in the background without battery restrictions.",
+  "monitorNotRequested": "Not requested",
+  "monitorOperational": "Operational",
+  "monitorCheck": "Check required",
+  "noBatteryEvent": "No battery event recorded",
+  "lastEventNow": "Last event now",
+  "lastEventMinutes": "Last event {count} min ago",
+  "@lastEventMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastEventHours": "Last event {count} h ago",
+  "@lastEventHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionMissing": "Notification permission missing",
+  "notificationsDisabled": "App notifications disabled",
+  "alertChannelDisabled": "Battery alert channel disabled",
+  "deliveryReady": "Alerts ready"
 }

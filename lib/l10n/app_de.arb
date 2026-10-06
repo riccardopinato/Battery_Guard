@@ -328,5 +328,30 @@
   "monitorChannelDisabled": "Überwachungskanal deaktiviert",
   "oemSamsungHint": "Auf Samsung Battery Guard nicht in den Tiefschlaf-Apps ablegen.",
   "oemXiaomiHint": "Auf Xiaomi/Redmi/Poco Autostart und uneingeschränkte Akkunutzung erlauben.",
-  "oemBackgroundHint": "Battery Guard Hintergrundbetrieb ohne Akku-Einschränkungen erlauben."
+  "oemBackgroundHint": "Battery Guard Hintergrundbetrieb ohne Akku-Einschränkungen erlauben.",
+  "monitorNotRequested": "Nicht angefordert",
+  "monitorOperational": "Betriebsbereit",
+  "monitorCheck": "Prüfung erforderlich",
+  "noBatteryEvent": "Kein Batterieereignis aufgezeichnet",
+  "lastEventNow": "Letztes Ereignis gerade eben",
+  "lastEventMinutes": "Letztes Ereignis vor {count} Min.",
+  "@lastEventMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lastEventHours": "Letztes Ereignis vor {count} Std.",
+  "@lastEventHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionMissing": "Benachrichtigungsberechtigung fehlt",
+  "notificationsDisabled": "App-Benachrichtigungen deaktiviert",
+  "alertChannelDisabled": "Batteriewarnkanal deaktiviert",
+  "deliveryReady": "Warnungen bereit"
 }

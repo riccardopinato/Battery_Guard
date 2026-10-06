@@ -218,6 +218,7 @@ class _SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final speed = session.percentPerHour > 0
         ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
