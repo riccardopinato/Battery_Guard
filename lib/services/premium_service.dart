@@ -29,6 +29,21 @@ class PremiumService {
   String? get localizedPrice => product?.price;
 
   Future<void> initialize({required bool webPreview}) async {
+    const forcePremiumTest = bool.fromEnvironment(
+      'BATTERY_GUARD_FORCE_PRO_TEST',
+      defaultValue: false,
+    );
+
+    if (forcePremiumTest) {
+      isPro = true;
+      storeAvailable = false;
+      loading = false;
+      product = null;
+      error = null;
+      onChanged();
+      return;
+    }
+
     if (webPreview) {
       isPro = true;
       storeAvailable = false;
