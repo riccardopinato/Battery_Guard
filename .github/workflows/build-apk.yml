@@ -197,7 +197,7 @@ jobs:
             VERIFY_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK")"
             ACTUAL_DIGEST="$(
               printf '%s\n' "$VERIFY_OUTPUT" |
-              sed -n 's/^Signer #1 certificate SHA-256 digest: //p' |
+              sed -n 's/^.*Signer: certificate SHA-256 digest: //p' |
               head -n 1 |
               tr '[:lower:]' '[:upper:]'
             )"
