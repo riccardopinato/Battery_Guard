@@ -262,5 +262,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "repairMonitoring": "Reparieren",
+  "openSystemSettings": "System"
 }

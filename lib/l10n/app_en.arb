@@ -262,5 +262,7 @@
   "proFeatureDoctor": "Charge Doctor controlled tests",
   "proFeatureInsights30": "30-day Insights",
   "purchaseError": "Purchase could not be completed.",
-  "proSection": "Pro"
+  "proSection": "Pro",
+  "repairMonitoring": "Repair",
+  "openSystemSettings": "System"
 }

@@ -262,5 +262,7 @@
   "proFeatureDoctor": "Test controllati Charge Doctor",
   "proFeatureInsights30": "Insights a 30 giorni",
   "purchaseError": "Impossibile completare l'acquisto.",
-  "proSection": "Pro"
+  "proSection": "Pro",
+  "repairMonitoring": "Ripristina",
+  "openSystemSettings": "Sistema"
 }

@@ -115,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
                         !reliability.serviceHealthy
                     ? FilledButton.tonal(
                         onPressed: controller.repairMonitoring,
-                        child: Text(l10n.restore),
+                        child: Text(l10n.repairMonitoring),
                       )
                     : null,
               ),
@@ -134,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
                             : controller.requestNotificationPermission,
                         child: Text(
                           reliability.notificationsGranted
-                              ? l10n.system
+                              ? l10n.openSystemSettings
                               : l10n.allow,
                         ),
                       ),
@@ -304,6 +304,7 @@ class SettingsScreen extends StatelessWidget {
     BuildContext context,
     MonitoringConfig config,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final value = await showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
