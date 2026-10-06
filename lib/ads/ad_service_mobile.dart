@@ -92,7 +92,6 @@ class AdService {
             (formError) async {
               await refreshPrivacyRequirement();
               await updateAdReadiness();
-              consentRevision.value++;
               finish();
             },
           );
