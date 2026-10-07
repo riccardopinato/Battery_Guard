@@ -28,17 +28,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   String _dateLabel(BuildContext context, DateTime date) {
-    final l10n = AppLocalizations.of(context);
-    final now = DateTime.now();
+    final material = MaterialLocalizations.of(context);
     final local = date.toLocal();
-    final sameDay = now.year == local.year &&
-        now.month == local.month &&
-        now.day == local.day;
-    final time =
-        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    if (sameDay) return '${l10n.historyTitle == "History" ? "Today" : l10n.historyTitle == "Historial" ? "Hoy" : l10n.historyTitle == "Historique" ? "Aujourd’hui" : l10n.historyTitle == "Verlauf" ? "Heute" : l10n.historyTitle == "Histórico" ? "Hoje" : "Oggi"} - $time';
-    return '${local.day.toString().padLeft(2, '0')}/'
-        '${local.month.toString().padLeft(2, '0')} - $time';
+    final dateText = material.formatShortDate(local);
+    final timeText = material.formatTimeOfDay(
+      TimeOfDay.fromDateTime(local),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+    return '$dateText • $timeText';
   }
 
   IconData _iconFor(HistoryEntry entry) {
@@ -223,6 +220,9 @@ class _SessionCard extends StatelessWidget {
     final speed = session.percentPerHour > 0
         ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
         : '—';
+    final maxTemperature = session.temperatureAvailable
+        ? '${session.maxTemperatureC.toStringAsFixed(1)} °C'
+        : l10n.dataUnavailable;
 
     return Card(
       child: ListTile(
@@ -236,7 +236,7 @@ class _SessionCard extends StatelessWidget {
         ),
         subtitle: Text(
           '$dateLabel • ${session.durationLabel} • ${localizedPlugType(l10n, session.plugType)}\\n'
-          '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max ${session.maxTemperatureC.toStringAsFixed(1)} °C • ${session.qualityLabel}',
+          '$speed • media ${session.averagePowerW.toStringAsFixed(1)} W • max $maxTemperature • ${session.qualityLabel}',
         ),
         isThreeLine: true,
         trailing: Tooltip(
@@ -266,6 +266,9 @@ class _SampleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final level = entry.level.clamp(0, 100);
+    final temperatureText = entry.temperatureAvailable
+        ? '${entry.temperatureC.toStringAsFixed(1)} °C'
+        : '—';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
@@ -289,19 +292,20 @@ class _SampleRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: 58,
+            width: 70,
             child: Text(
-              '${entry.temperatureC.toStringAsFixed(1)} °C',
+              temperatureText,
               textAlign: TextAlign.end,
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: 86,
+            width: 110,
             child: Text(
               dateLabel,
               textAlign: TextAlign.end,
+              maxLines: 2,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
