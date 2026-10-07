@@ -1,7 +1,6 @@
 -keep class com.riccardopinato.batteryguard.MainActivity { *; }
 -keep class com.riccardopinato.batteryguard.MonitoringService { *; }
 -keep class com.riccardopinato.batteryguard.BootReceiver { *; }
--keep class com.riccardopinato.batteryguard.PowerEventReceiver { *; }
 -keep class com.riccardopinato.batteryguard.BatteryGuardWidgetProvider { *; }
 -keep class com.riccardopinato.batteryguard.WidgetActionReceiver { *; }
 -keep class com.riccardopinato.batteryguard.QuickSettingsTileService { *; }
