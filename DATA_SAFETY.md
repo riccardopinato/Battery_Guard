@@ -1,4 +1,4 @@
-# Google Play Data Safety — Draft for v1.1
+# Google Play Data Safety — Draft for v1.1.7
 
 This is a preparation aid. The final declaration must be reconciled with the exact production AAB and the current Play Console questionnaire.
 
@@ -21,6 +21,10 @@ Pro is a non-consumable Google Play purchase. Pro removes Battery Guard ad place
 Battery Guard does not intentionally share battery history, Battery Health Lab estimates or Charge Doctor measurements with advertisers.
 
 ## Backup
-Android Auto Backup is disabled.
+Android Auto Backup is disabled. v1.1.7 also provides explicit legacy backup and Android 12+ data-extraction rules that exclude app files, databases, SharedPreferences, external app data and device-protected equivalents from cloud backup and device transfer.
 
 Status: **DRAFT — NOT FINAL PLAY DECLARATION**.
+
+
+## Purchase entitlement reconciliation
+The Android client can query current Google Play ownership to reconcile the locally cached Pro entitlement. This is not a Battery Guard backend and does not replace trusted server-side purchase verification. Production rollout remains blocked until the final purchase-verification architecture and exact Play disclosure are reconciled.
