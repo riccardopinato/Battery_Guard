@@ -434,6 +434,11 @@ object ChargingSessionStore {
             "startTemperatureC" to item.optDouble("startTemperatureC", 0.0),
             "currentTemperatureC" to item.optDouble("currentTemperatureC", 0.0),
             "maxTemperatureC" to item.optDouble("maxTemperatureC", 0.0),
+            "temperatureAvailable" to
+                item.optBoolean(
+                    "temperatureAvailable",
+                    item.optDouble("maxTemperatureC", 0.0) != 0.0,
+                ),
             "averagePowerW" to averagePower,
             "averageCurrentMa" to averageCurrent,
             "percentPerHour" to rate,
