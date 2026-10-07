@@ -79,6 +79,10 @@ jobs:
       - name: Build Web Preview
         run: flutter build web --release --base-href /Battery_Guard/
 
+      - name: Build Android debug smoke for untrusted PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: flutter build apk --debug
+
       - name: Deploy Web Preview branch
         if: github.ref == 'refs/heads/main'
         env:
