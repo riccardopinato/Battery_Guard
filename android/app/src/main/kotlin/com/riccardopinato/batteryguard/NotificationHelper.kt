@@ -267,7 +267,7 @@ object NotificationHelper {
                 .addAction(
                     quickAction(
                         context,
-                        "Target 80%",
+                        NativeStrings.target80(context),
                         WidgetActionReceiver.ACTION_SET_TARGET_80,
                         3401 + notificationId,
                     ),
@@ -275,7 +275,7 @@ object NotificationHelper {
                 .addAction(
                     quickAction(
                         context,
-                        "Disattiva",
+                        NativeStrings.disable(context),
                         WidgetActionReceiver.ACTION_DISABLE_MONITORING,
                         3501 + notificationId,
                     ),
