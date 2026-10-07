@@ -28,6 +28,19 @@ void main() {
     expect(fast, isNot(slow));
   });
 
+  test('Charge Doctor preserves distinct non-ASCII labels', () {
+    final first = chargeTestGroupKey(
+      label: '充電器一',
+      source: 'AC charger',
+    );
+    final second = chargeTestGroupKey(
+      label: '充電器二',
+      source: 'AC charger',
+    );
+
+    expect(first, isNot(second));
+  });
+
   test('Charge Doctor keeps different Android sources separate', () {
     final ac = chargeTestGroupKey(
       label: 'Same cable',
