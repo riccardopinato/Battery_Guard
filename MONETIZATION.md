@@ -1,4 +1,4 @@
-# Monetization — v1.1.2
+# Monetization — v1.1.7
 
 Product ID: `battery_guard_pro_lifetime`
 
@@ -44,3 +44,12 @@ Type: Google Play non-consumable / one-time purchase.
 
 ## External production configuration
 Create/activate `battery_guard_pro_lifetime` in Play Console and configure real AdMob App ID + Banner Unit ID before production release. The production workflow is the only canonical path that opts into live banner ads.
+
+
+## Purchase entitlement integrity — v1.1.7
+- INTERNAL sideload local-Pro unlock remains compile-time gated and is never enabled in the AAB/production workflow.
+- Android production clients reconcile cached ownership with Google Play current purchases when the store query succeeds.
+- A transient Play error returns an unknown state and does not revoke a previously cached entitlement.
+- A successful Play ownership query that no longer reports the lifetime product clears the local cached entitlement.
+- Client-side purchase data is NOT considered trusted anti-fraud verification.
+- Production rollout remains blocked until purchase tokens are verified by a trusted backend / Google Play Developer API workflow, including refund/revocation handling.
