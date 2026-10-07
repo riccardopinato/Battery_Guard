@@ -1,6 +1,6 @@
 # Battery Guard — Privacy Policy
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 Battery Guard is designed as a local-first battery utility.
 
@@ -29,13 +29,13 @@ When Google's privacy configuration requires it, Battery Guard exposes a visible
 ## Pro
 Battery Guard Pro is a one-time Google Play purchase. Pro removes Battery Guard advertising and unlocks additional features including Battery Health Lab, Charge Doctor and extended Insights.
 
-Purchase processing is performed by Google Play. Battery Guard stores the local entitlement required to unlock Pro and can restore ownership through Google Play.
+Purchase processing is performed by Google Play. Battery Guard stores a local entitlement cache and can reconcile/restore ownership through Google Play. The production release remains blocked until purchase tokens are verified through a trusted server-side Google Play verification flow.
 
 ## Accounts and Battery Guard cloud
 There is no Battery Guard account and no Battery Guard cloud backend in v1.1.
 
 ## Backup
-Android Auto Backup is disabled for Battery Guard so local battery history is not silently copied to cloud backup by the app configuration.
+Android Auto Backup is disabled. Battery Guard also configures explicit Android backup/data-extraction rules to exclude app files, databases, preferences and device-transfer copies from automatic cloud/D2D migration.
 
 ## Analytics
 Battery Guard does not include a separate first-party analytics or behavioural-tracking system.

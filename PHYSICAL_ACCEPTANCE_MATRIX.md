@@ -24,6 +24,11 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | Battery Health Lab | — | — | charge counter/cycles/estimate correctly unavailable or plausible | NOT RUN |
 | AdMob consent + banner Free | — | — | consent flow + banner only when allowed | NOT RUN |
 | Pro purchase Internal Testing | — | — | buy + restore + all ads disappear | NOT RUN |
+| Pro refund/revocation reconciliation | — | — | cached Pro clears after successful Play ownership query | NOT RUN |
+| INTERNAL signed update N→N+1 | — | — | installs without uninstall + data/settings preserved | NOT RUN |
+| Temperature unavailable | — | — | Home/History/session/widget never show fake 0.0 °C | NOT RUN |
+| Charge Doctor while plugged but not charging | — | — | test start blocked with localized message | NOT RUN |
+| Charge Doctor setup grouping | — | — | different named charger/cable setups do not share baseline | NOT RUN |
 
 ## Pass rule
 No v1 production rollout until all core rows pass on at least one Samsung and one Xiaomi/Redmi/Poco-class device, or an explicit documented exception is accepted.

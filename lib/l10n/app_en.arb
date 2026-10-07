@@ -353,5 +353,6 @@
   "permissionMissing": "Notification permission missing",
   "notificationsDisabled": "App notifications disabled",
   "alertChannelDisabled": "Battery alert channel disabled",
-  "deliveryReady": "Alerts ready"
+  "deliveryReady": "Alerts ready",
+  "testRequiresCharging": "Wait until the device is actively charging before starting the test."
 }

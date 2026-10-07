@@ -24,6 +24,7 @@ class ChargingSession {
     required this.startTemperatureC,
     required this.currentTemperatureC,
     required this.maxTemperatureC,
+    required this.temperatureAvailable,
     required this.averagePowerW,
     required this.averageCurrentMa,
     required this.percentPerHour,
@@ -51,8 +52,10 @@ class ChargingSession {
     ).round();
     final estimate = number('estimatedMinutesToTarget', -1).round();
     final quality = ChargingSessionQuality.parse(
-      map['quality'] ?? ((map['completed'] as bool? ?? false) ? 'completed' : 'active'),
+      map['quality'] ??
+          ((map['completed'] as bool? ?? false) ? 'completed' : 'active'),
     );
+    final maxTemperatureC = number('maxTemperatureC').toDouble();
 
     return ChargingSession(
       id: text('id', ''),
@@ -68,7 +71,9 @@ class ChargingSession {
       endLevel: number('endLevel').round().clamp(0, 100),
       startTemperatureC: number('startTemperatureC').toDouble(),
       currentTemperatureC: number('currentTemperatureC').toDouble(),
-      maxTemperatureC: number('maxTemperatureC').toDouble(),
+      maxTemperatureC: maxTemperatureC,
+      temperatureAvailable:
+          map['temperatureAvailable'] as bool? ?? maxTemperatureC != 0,
       averagePowerW: number('averagePowerW').toDouble(),
       averageCurrentMa: number('averageCurrentMa').toDouble(),
       percentPerHour: number('percentPerHour').toDouble(),
@@ -91,6 +96,7 @@ class ChargingSession {
   final double startTemperatureC;
   final double currentTemperatureC;
   final double maxTemperatureC;
+  final bool temperatureAvailable;
   final double averagePowerW;
   final double averageCurrentMa;
   final double percentPerHour;
@@ -106,9 +112,12 @@ class ChargingSession {
   Duration get duration => (endedAt ?? DateTime.now()).difference(startedAt);
 
   int get gainedPercent =>
-      ((endedAt != null ? endLevel : currentLevel) - startLevel).clamp(-100, 100);
+      ((endedAt != null ? endLevel : currentLevel) - startLevel)
+          .clamp(-100, 100);
 
-  double get temperatureRiseC => currentTemperatureC - startTemperatureC;
+  double? get temperatureRiseC => temperatureAvailable
+      ? currentTemperatureC - startTemperatureC
+      : null;
 
   String get qualityLabel => switch (quality) {
         ChargingSessionQuality.active => 'In corso',

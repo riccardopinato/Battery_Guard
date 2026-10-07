@@ -60,6 +60,10 @@ object HistoryStore {
                 put("message", message)
                 put("level", snapshot["level"] ?: 0)
                 put("temperatureC", snapshot["temperatureC"] ?: 0.0)
+                put(
+                    "temperatureAvailable",
+                    snapshot["temperatureAvailable"] as? Boolean ?: false,
+                )
                 put("isCharging", snapshot["isCharging"] ?: false)
                 put("timestamp", System.currentTimeMillis())
             }
@@ -88,6 +92,13 @@ object HistoryStore {
                         "message" to item.optString("message", ""),
                         "level" to item.optInt("level", 0),
                         "temperatureC" to item.optDouble("temperatureC", 0.0),
+                        "temperatureAvailable" to
+                            item.optBoolean(
+                                "temperatureAvailable",
+                                // Legacy entries had no availability flag.
+                                // Do not reinterpret 0 °C as a real reading.
+                                item.optDouble("temperatureC", 0.0) != 0.0,
+                            ),
                         "isCharging" to item.optBoolean("isCharging", false),
                         "timestamp" to item.optLong("timestamp", 0L),
                     ),
@@ -99,7 +110,10 @@ object HistoryStore {
 
     fun clear(context: Context) {
         synchronized(lock) {
-            context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().clear().apply()
+            context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
         }
     }
 

@@ -6,6 +6,7 @@ import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charge_test.dart';
 import '../services/app_controller.dart';
+import '../services/charge_test_group.dart';
 import '../widgets/premium_card.dart';
 
 class ChargeDoctorScreen extends StatefulWidget {
@@ -178,12 +179,20 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
       return const _Comparison.insufficient();
     }
 
+    final currentGroup = chargeTestGroupKey(
+      label: current.label,
+      source: current.source,
+    );
     final comparable = all
         .where(
           (test) =>
               test.id != current.id &&
               test.reliable &&
-              test.source == current.source &&
+              chargeTestGroupKey(
+                    label: test.label,
+                    source: test.source,
+                  ) ==
+                  currentGroup &&
               test.averagePowerW > 0,
         )
         .toList(growable: false);
@@ -265,6 +274,7 @@ class _StartPanel extends StatelessWidget {
             }
             final message = switch (error) {
               'not_plugged' => l10n.testRequiresPlug,
+              'not_charging' => l10n.testRequiresCharging,
               'power_unavailable' => l10n.testPowerUnavailable,
               _ => l10n.testPowerUnavailable,
             };

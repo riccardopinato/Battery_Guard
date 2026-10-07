@@ -78,6 +78,8 @@ class BatteryGuardWidgetProvider : AppWidgetProvider() {
             val level = (snapshot["level"] as? Number)?.toInt() ?: 0
             val temperature =
                 (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
+            val temperatureAvailable =
+                snapshot["temperatureAvailable"] as? Boolean ?: false
             val status = NativeUiLabels.status(
                 context,
                 snapshot["status"]?.toString().orEmpty(),
@@ -99,9 +101,15 @@ class BatteryGuardWidgetProvider : AppWidgetProvider() {
                 level.coerceIn(0, 100),
                 false,
             )
+            val temperatureText =
+                if (temperatureAvailable) {
+                    "${"%.1f".format(temperature)} °C • "
+                } else {
+                    ""
+                }
             views.setTextViewText(
                 R.id.widget_status,
-                "${"%.1f".format(temperature)} °C • $status" +
+                "$temperatureText$status" +
                     if (isPlugged) " • $plugType" else "",
             )
             views.setTextViewText(

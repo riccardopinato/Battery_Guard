@@ -14,9 +14,16 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
+    environment: production
 
     steps:
+      - name: Require main branch
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+
       - name: Checkout exact source
         uses: actions/checkout@v7
 
@@ -26,6 +33,7 @@ jobs:
           set -euxo pipefail
           SOURCE_VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
           test "$SOURCE_VERSION" = "${{ inputs.version }}"
+          test -f pubspec.lock
           if gh release view "v$SOURCE_VERSION" >/dev/null 2>&1; then
             echo "Release v$SOURCE_VERSION already exists. Immutable releases are never overwritten."
             exit 1
@@ -40,6 +48,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_PRODUCTION_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_PRODUCTION_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_PRODUCTION_KEY_PASSWORD }}
+          EXPECTED_CERT_SHA256: ${{ secrets.ANDROID_PRODUCTION_CERT_SHA256 }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
           ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
         run: |
@@ -48,11 +57,23 @@ jobs:
           test -n "$KEYSTORE_PASSWORD"
           test -n "$KEY_ALIAS"
           test -n "$KEY_PASSWORD"
+          test -n "$EXPECTED_CERT_SHA256"
           test -n "$ADMOB_APP_ID"
           test -n "$ADMOB_BANNER_ID"
 
           KEYSTORE_PATH="$RUNNER_TEMP/battery-guard-production.jks"
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+
+          ACTUAL_CERT_SHA256="$(
+            keytool -list -v \
+              -keystore "$KEYSTORE_PATH" \
+              -storepass "$KEYSTORE_PASSWORD" \
+              -alias "$KEY_ALIAS" |
+            sed -n 's/^[[:space:]]*SHA256: //p' |
+            head -n 1
+          )"
+          test -n "$ACTUAL_CERT_SHA256"
+          test "$(printf '%s' "$ACTUAL_CERT_SHA256" | tr '[:lower:]' '[:upper:]')" = "$(printf '%s' "$EXPECTED_CERT_SHA256" | tr '[:lower:]' '[:upper:]')"
 
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
           echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
@@ -61,6 +82,7 @@ jobs:
           echo "ADMOB_APP_ID=$ADMOB_APP_ID" >> "$GITHUB_ENV"
           echo "ADMOB_BANNER_ID=$ADMOB_BANNER_ID" >> "$GITHUB_ENV"
           echo "SIGNING_LANE=production" >> "$GITHUB_ENV"
+          echo "SIGNING_CERT_SHA256=$ACTUAL_CERT_SHA256" >> "$GITHUB_ENV"
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -91,7 +113,7 @@ jobs:
 
       - name: Dependencies and localization
         run: |
-          flutter pub get
+          flutter pub get --enforce-lockfile
           flutter gen-l10n
 
       - name: Quality gate
@@ -106,27 +128,79 @@ jobs:
           rm -rf build/symbols release
           mkdir -p build/symbols release
 
-          flutter build apk             --release             --split-per-abi             --split-debug-info=build/symbols             --dart-define=ADMOB_USE_LIVE_ADS=true             --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
+          flutter build apk             --release             --target-platform android-arm64             --split-per-abi             --split-debug-info=build/symbols             --dart-define=ADMOB_USE_LIVE_ADS=true             --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
 
           flutter build appbundle             --release             --split-debug-info=build/symbols             --dart-define=ADMOB_USE_LIVE_ADS=true             --dart-define=ADMOB_BANNER_ID="$ADMOB_BANNER_ID"
 
           VERSION="${{ inputs.version }}"
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "release/Battery-Guard-$VERSION-arm64-v8a.apk"
-          cp build/app/outputs/bundle/release/app-release.aab "release/Battery-Guard-$VERSION.aab"
+          APK="release/Battery-Guard-$VERSION-arm64-v8a.apk"
+          AAB="release/Battery-Guard-$VERSION.aab"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "$APK"
+          cp build/app/outputs/bundle/release/app-release.aab "$AAB"
+          cp pubspec.lock release/pubspec.lock
+          mkdir -p release/symbols
+          cp -R build/symbols/. release/symbols/
+
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          APK_VERIFY="$("$APKSIGNER" verify --print-certs "$APK")"
+          APK_CERT="$(
+            printf '%s\n' "$APK_VERIFY" |
+            sed -n 's/^.*certificate SHA-256 digest: //p' |
+            head -n 1 |
+            tr '[:lower:]' '[:upper:]'
+          )"
+          EXPECTED_DIGEST="$(printf '%s' "$SIGNING_CERT_SHA256" | tr -d ':' | tr '[:lower:]' '[:upper:]')"
+          test "$APK_CERT" = "$EXPECTED_DIGEST"
+
+          jarsigner -verify "$AAB"
+          AAB_CERT="$(
+            keytool -printcert -jarfile "$AAB" |
+            sed -n 's/^[[:space:]]*SHA256: //p' |
+            head -n 1
+          )"
+          test "$(printf '%s' "$AAB_CERT" | tr '[:lower:]' '[:upper:]')" = "$(printf '%s' "$SIGNING_CERT_SHA256" | tr '[:lower:]' '[:upper:]')"
+
+          APKANALYZER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name apkanalyzer | head -n 1)"
+          test -x "$APKANALYZER"
+          TARGET_SDK="$("$APKANALYZER" manifest target-sdk "$APK")"
+          PACKAGE_ID="$("$APKANALYZER" manifest application-id "$APK")"
+          test "$PACKAGE_ID" = "com.riccardopinato.batteryguard"
+
+          VERSION_CODE="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f2)"
+          BILLING_ADAPTER="$(
+            awk '
+              /^  in_app_purchase_android:/ {found=1; next}
+              found && /version:/ {
+                gsub(/"/, "", $2)
+                print $2
+                exit
+              }
+            ' pubspec.lock
+          )"
 
           {
             echo "version=$VERSION"
+            echo "versionCode=$VERSION_CODE"
+            echo "packageId=$PACKAGE_ID"
+            echo "targetSdk=$TARGET_SDK"
             echo "sourceSha=$GITHUB_SHA"
             echo "flutter=3.47.5"
             echo "signingLane=$SIGNING_LANE"
-            echo "artifactPolicy=immutable"
+            echo "uploadSigningCertSha256=$SIGNING_CERT_SHA256"
+            echo "billingAdapter=in_app_purchase_android:$BILLING_ADAPTER"
+            echo "artifactPolicy=immutable-arm64-plus-aab"
             echo "admob=production-configured-adaptive"
+            echo "localProTestBypass=false"
             echo "proProduct=battery_guard_pro_lifetime"
+            echo "trustedPurchaseVerification=required-before-rollout"
           } > release/BUILD_EVIDENCE.txt
 
           (
             cd release
-            sha256sum Battery-Guard-* BUILD_EVIDENCE.txt > SHA256SUMS.txt
+            find . -type f ! -name SHA256SUMS.txt -print0 |
+              sort -z |
+              xargs -0 sha256sum > SHA256SUMS.txt
           )
 
       - name: Create immutable GitHub Release
@@ -136,4 +210,4 @@ jobs:
         run: |
           set -euxo pipefail
           VERSION="${{ inputs.version }}"
-          gh release create "v$VERSION"             release/Battery-Guard-$VERSION-arm64-v8a.apk             release/Battery-Guard-$VERSION.aab             release/SHA256SUMS.txt             release/BUILD_EVIDENCE.txt             --target "$GITHUB_SHA"             --title "Battery Guard v$VERSION"             --notes "Production-signed immutable build. Physical-device and Play distribution evidence must still be recorded in RELEASE_GATE.md before production rollout."
+          gh release create "v$VERSION"             release/Battery-Guard-$VERSION-arm64-v8a.apk             release/Battery-Guard-$VERSION.aab             release/pubspec.lock             release/SHA256SUMS.txt             release/BUILD_EVIDENCE.txt             --target "$GITHUB_SHA"             --title "Battery Guard v$VERSION"             --notes "Production-signed immutable build. Physical-device and Play distribution evidence must still be recorded in RELEASE_GATE.md before production rollout."

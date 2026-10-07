@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.1.3+15 — Persistent Signing & Icon Refresh**
+Versione sorgente: **1.1.7+19 — Production & Runtime Hardening**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -12,6 +12,9 @@ Evidence attuale:
 - Free + Premium Test artifacts generated from the same source SHA/signing identity
 - STATICALLY CHECKED: required by CI
 - TESTED: required by CI
+- Billing dependency hardened to current 3.3.x / Android adapter 0.5.x
+- PR CI runs without signing secrets; signed INTERNAL artifacts are main-only and ARM64-first
+- telemetry availability propagated through History, sessions and widget
 - PHYSICAL UPDATE VERIFIED: **PENDING**
 - STORE READY: **NO — external production gates pending**
 

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'native_battery_service.dart';
+import 'store_entitlement_reconciler.dart';
 
 class PremiumService {
   PremiumService({
@@ -33,6 +34,7 @@ class PremiumService {
   bool isPro = false;
   bool storeAvailable = false;
   bool loading = true;
+  bool storeOwnershipReconciled = false;
   ProductDetails? product;
   String? error;
 
@@ -87,8 +89,7 @@ class PremiumService {
         if (response.productDetails.isNotEmpty) {
           product = response.productDetails.first;
         }
-        // Refresh non-consumable ownership from Google Play.
-        await _iap.restorePurchases();
+        await _reconcileStoreOwnership();
       }
     } catch (value) {
       error = value.toString();
@@ -129,10 +130,43 @@ class PremiumService {
     onChanged();
     try {
       await _iap.restorePurchases();
+      await _reconcileStoreOwnership();
     } catch (value) {
       error = value.toString();
       onChanged();
     }
+  }
+
+  Future<void> _reconcileStoreOwnership() async {
+    // INTERNAL sideload builds deliberately use a local entitlement and must
+    // never have it revoked by an unavailable Play Store.
+    if (_allowLocalProTest || _forcePremiumTest || !storeAvailable) return;
+
+    final purchases = await queryStorePurchases(
+      iap: _iap,
+      productId: productId,
+    );
+    if (purchases == null) return;
+
+    var owned = false;
+    for (final purchase in purchases) {
+      final validStatus =
+          purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored;
+      final hasVerificationData =
+          purchase.verificationData.serverVerificationData.trim().isNotEmpty;
+
+      if (!validStatus || !hasVerificationData) continue;
+
+      owned = true;
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+    }
+
+    storeOwnershipReconciled = true;
+    isPro = owned;
+    await platform.setProEntitlement(owned);
   }
 
   Future<void> _handlePurchases(List<PurchaseDetails> purchases) async {
@@ -142,6 +176,13 @@ class PremiumService {
       switch (purchase.status) {
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
+          // This client-side check is integrity hygiene, not trusted purchase
+          // verification. Production remains blocked until a secure backend
+          // validates the Google Play purchase token.
+          if (purchase.verificationData.serverVerificationData.trim().isEmpty) {
+            error = 'Purchase verification data unavailable';
+            continue;
+          }
           isPro = true;
           error = null;
           await platform.setProEntitlement(true);
@@ -158,6 +199,10 @@ class PremiumService {
       if (purchase.pendingCompletePurchase) {
         await _iap.completePurchase(purchase);
       }
+    }
+
+    if (storeAvailable && !_allowLocalProTest && !_forcePremiumTest) {
+      await _reconcileStoreOwnership();
     }
     onChanged();
   }
