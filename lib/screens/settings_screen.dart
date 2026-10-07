@@ -287,11 +287,7 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(l10n.whatBatteryGuardDoes),
                 subtitle: Text(l10n.whatBatteryGuardDoesBody),
               ),
-              const Divider(height: 1),
-              ListTile(
-                title: Text(l10n.version),
-                trailing: const Text('1.1.4'),
-              ),
+
             ],
           ),
         ],
