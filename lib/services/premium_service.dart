@@ -21,6 +21,11 @@ class PremiumService {
     defaultValue: false,
   );
 
+  static const bool _allowLocalProTest = bool.fromEnvironment(
+    'BATTERY_GUARD_ALLOW_LOCAL_PRO_TEST',
+    defaultValue: false,
+  );
+
   final InAppPurchase _iap = InAppPurchase.instance;
 
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -32,6 +37,15 @@ class PremiumService {
   String? error;
 
   String? get localizedPrice => product?.price;
+
+  bool get localTestUnlockAvailable =>
+      _allowLocalProTest &&
+      !isPro &&
+      (!storeAvailable || product == null);
+
+  bool get canUnlock =>
+      !loading &&
+      ((storeAvailable && product != null) || localTestUnlockAvailable);
 
   Future<void> initialize({required bool webPreview}) async {
     if (_forcePremiumTest) {
@@ -85,6 +99,14 @@ class PremiumService {
   }
 
   Future<bool> buy() async {
+    if (localTestUnlockAvailable) {
+      error = null;
+      isPro = true;
+      await platform.setProEntitlement(true);
+      onChanged();
+      return true;
+    }
+
     final details = product;
     if (!storeAvailable || details == null) return false;
 
