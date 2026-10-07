@@ -5,6 +5,7 @@ class HistoryEntry {
     required this.message,
     required this.level,
     required this.temperatureC,
+    required this.temperatureAvailable,
     required this.timestamp,
     required this.isCharging,
   });
@@ -17,10 +18,11 @@ class HistoryEntry {
       message: map['message']?.toString() ?? '',
       level: (map['level'] as num?)?.round() ?? 0,
       temperatureC: (map['temperatureC'] as num?)?.toDouble() ?? 0,
+      temperatureAvailable: map['temperatureAvailable'] == true,
       timestamp: DateTime.fromMillisecondsSinceEpoch(
         timestamp is num ? timestamp.round() : 0,
       ),
-      isCharging: map['isCharging'] as bool? ?? false,
+      isCharging: map['isCharging'] == true,
     );
   }
 
@@ -29,6 +31,7 @@ class HistoryEntry {
   final String message;
   final int level;
   final double temperatureC;
+  final bool temperatureAvailable;
   final DateTime timestamp;
   final bool isCharging;
 
