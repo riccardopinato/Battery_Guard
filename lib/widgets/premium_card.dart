@@ -64,7 +64,9 @@ class PremiumCard extends StatelessWidget {
             _Feature(text: l10n.proFeatureInsights30),
             if (!premium.isPro) ...[
               const SizedBox(height: 16),
-              if (!premium.storeAvailable && !premium.loading)
+              if (!premium.storeAvailable &&
+                  !premium.loading &&
+                  !premium.localTestUnlockAvailable)
                 Text(
                   l10n.storeUnavailable,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -82,17 +84,15 @@ class PremiumCard extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               FilledButton.icon(
-                onPressed: premium.loading ||
-                        !premium.storeAvailable ||
-                        premium.product == null
-                    ? null
-                    : () async {
+                onPressed: premium.canUnlock
+                    ? () async {
                         final started = await premium.buy();
                         if (!context.mounted || started) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(l10n.purchaseError)),
                         );
-                      },
+                      }
+                    : null,
                 icon: premium.loading
                     ? const SizedBox.square(
                         dimension: 18,
