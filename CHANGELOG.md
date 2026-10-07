@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.4
+- fixed the disabled "Unlock Pro" action in sideloaded INTERNAL Free APKs;
+- added a compile-time local Pro fallback only when `BATTERY_GUARD_ALLOW_LOCAL_PRO_TEST=true`;
+- INTERNAL APKs can unlock the cached local Pro entitlement when Google Play Billing/product metadata is unavailable;
+- production and AAB builds do not receive the local unlock flag and still require real Google Play Billing;
+- kept the forced-Premium QA artifact separate from the Free purchase-flow test;
+- bumped versionCode to 16 so v1.1.4 can update the persistent-signed v1.1.3 baseline in place;
+- aligned the Settings version label to 1.1.4.
+
 ## 1.1.3
 - refreshed the launcher icon with the approved shield + charged battery artwork;
 - moved the visual into the adaptive foreground safe zone and added Android 13+ monochrome/themed support;
