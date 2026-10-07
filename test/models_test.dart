@@ -4,6 +4,7 @@ import 'package:battery_guard/models/charge_test.dart';
 import 'package:battery_guard/models/charging_insights.dart';
 import 'package:battery_guard/models/charging_session.dart';
 import 'package:battery_guard/models/monitoring_config.dart';
+import 'package:battery_guard/models/history_entry.dart';
 import 'package:battery_guard/models/reliability_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -151,6 +152,7 @@ void main() {
         startTemperatureC: 30,
         currentTemperatureC: maxTemp - 1,
         maxTemperatureC: maxTemp,
+        temperatureAvailable: true,
         averagePowerW: 18,
         averageCurrentMa: 4000,
         percentPerHour: rate,
@@ -202,6 +204,38 @@ void main() {
     expect(insights.over42Count, 1);
     expect(insights.dominantSource, 'Caricatore AC');
     expect(insights.averageRatePercentPerHour, closeTo(32.5, 0.01));
+  });
+
+  test('HistoryEntry does not reinterpret unavailable temperature as zero', () {
+    final entry = HistoryEntry.fromMap({
+      'type': 'sample',
+      'level': 55,
+      'temperatureC': 0.0,
+      'temperatureAvailable': false,
+      'timestamp': 1000,
+    });
+
+    expect(entry.temperatureAvailable, isFalse);
+    expect(entry.temperatureC, 0.0);
+  });
+
+  test('ChargingSession preserves unavailable temperature state', () {
+    final session = ChargingSession.fromMap({
+      'id': 'no-temp',
+      'startedAt': 1000,
+      'lastObservedAt': 2000,
+      'endedAt': 3000,
+      'startLevel': 40,
+      'currentLevel': 45,
+      'endLevel': 45,
+      'temperatureAvailable': false,
+      'maxTemperatureC': 0.0,
+      'quality': 'completed',
+      'completed': true,
+    });
+
+    expect(session.temperatureAvailable, isFalse);
+    expect(session.temperatureRiseC, isNull);
   });
 
   test('ReliabilityStatus exposes notification channel truth', () {
