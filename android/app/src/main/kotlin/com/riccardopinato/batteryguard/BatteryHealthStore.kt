@@ -12,6 +12,8 @@ object BatteryHealthStore {
     private const val LAST_CYCLE = "last_cycle_count"
     private const val MAX_SAMPLES = 1500
     private const val MIN_SAMPLE_GAP_MS = 6 * 60 * 60 * 1000L
+    private const val LAST_SAMPLE_AT = "last_capacity_sample_at"
+    private const val LAST_SAMPLE_LEVEL = "last_capacity_sample_level"
     private val lock = Any()
 
     fun setNominalCapacity(context: Context, value: Int) {
@@ -64,15 +66,8 @@ object BatteryHealthStore {
             val temperature =
                 (snapshot["temperatureC"] as? Number)?.toDouble() ?: 0.0
 
-            val array = parseArray(prefs.getString(SAMPLES, null))
-            val last =
-                if (array.length() > 0) {
-                    array.optJSONObject(array.length() - 1)
-                } else {
-                    null
-                }
-            val lastAt = last?.optLong("at", 0L) ?: 0L
-            val lastLevel = last?.optInt("level", -100) ?: -100
+            val lastAt = prefs.getLong(LAST_SAMPLE_AT, 0L)
+            val lastLevel = prefs.getInt(LAST_SAMPLE_LEVEL, -100)
             if (
                 lastAt > 0L &&
                 now - lastAt < MIN_SAMPLE_GAP_MS &&
@@ -81,6 +76,7 @@ object BatteryHealthStore {
                 return
             }
 
+            val array = parseArray(prefs.getString(SAMPLES, null))
             array.put(
                 JSONObject().apply {
                     put("at", now)
@@ -98,7 +94,11 @@ object BatteryHealthStore {
             for (index in start until array.length()) {
                 trimmed.put(array.get(index))
             }
-            prefs.edit().putString(SAMPLES, trimmed.toString()).apply()
+            prefs.edit()
+                .putString(SAMPLES, trimmed.toString())
+                .putLong(LAST_SAMPLE_AT, now)
+                .putInt(LAST_SAMPLE_LEVEL, level)
+                .apply()
         }
     }
 
