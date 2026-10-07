@@ -16,8 +16,8 @@ val persistentSigningReady =
         !releaseKeyPassword.isNullOrBlank() &&
         file(releaseStorePath!!).exists()
 
-gradle.taskGraph.whenReady { graph ->
-    val releaseArtifactTaskSelected = graph.allTasks.any { task ->
+gradle.taskGraph.whenReady {
+    val releaseArtifactTaskSelected = allTasks.any { task ->
         val taskName = task.name.lowercase()
         taskName.contains("release") &&
             (
