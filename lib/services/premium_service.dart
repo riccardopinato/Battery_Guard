@@ -142,11 +142,27 @@ class PremiumService {
     // never have it revoked by an unavailable Play Store.
     if (_allowLocalProTest || _forcePremiumTest || !storeAvailable) return;
 
-    final owned = await reconcileStoreOwnership(
+    final purchases = await queryStorePurchases(
       iap: _iap,
       productId: productId,
     );
-    if (owned == null) return;
+    if (purchases == null) return;
+
+    var owned = false;
+    for (final purchase in purchases) {
+      final validStatus =
+          purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored;
+      final hasVerificationData =
+          purchase.verificationData.serverVerificationData.trim().isNotEmpty;
+
+      if (!validStatus || !hasVerificationData) continue;
+
+      owned = true;
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+    }
 
     storeOwnershipReconciled = true;
     isPro = owned;
@@ -165,7 +181,7 @@ class PremiumService {
           // validates the Google Play purchase token.
           if (purchase.verificationData.serverVerificationData.trim().isEmpty) {
             error = 'Purchase verification data unavailable';
-            break;
+            continue;
           }
           isPro = true;
           error = null;
