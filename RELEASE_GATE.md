@@ -1,65 +1,104 @@
-# Release Gate
+# Release Gate — Battery Guard 1.1.7
 
 ## Automated source/build gates
+- Flutter gen-l10n: required
 - Flutter analyze: required
-- unit tests: required
+- Flutter tests: required
+- localization catalog parity: required
 - Web Preview build: required
-- Free split APK + universal APK + AAB: required
-- Premium Test split APK + universal APK: required for INTERNAL QA
-- immutable artifact SHA evidence: required
-- INTERNAL APKs must use the persistent signing identity
-- every INTERNAL APK must pass certificate fingerprint verification
-- production release workflow must refuse missing dedicated production signing secrets
-- non-production Free builds must use Google Test Ads
-- production live ads require both `ADMOB_USE_LIVE_ADS=true` and a configured `ADMOB_BANNER_ID`
+- PR Android ARM64 debug compile: required
+- committed pubspec.lock + --enforce-lockfile: required for signed/main and production builds
+- INTERNAL Free ARM64 APK: required
+- INTERNAL Premium Test ARM64 APK: required
+- Free AAB without local-Pro test bypass: required
+- immutable SHA evidence: required
+- INTERNAL APK certificate fingerprint verification: required
+- package ID and targetSdk extracted from the exact APK: required
+- non-production Free ads use Google Test IDs
+- local Pro sideload bypass is INTERNAL APK only
+- production live ads require explicit live-ad define + configured production IDs
 
-## Persistent signing / update QA
-Expected INTERNAL certificate SHA-256:
+## Repository administration gate
+Before CERTIFIED:
+- main must be protected by repository rules/branch protection;
+- merges to main must require the deterministic CI status;
+- direct bypasses should be restricted to explicit emergency administration.
+
+This connector cannot administer branch protection, so this remains an external repository setting.
+
+## Persistent INTERNAL signing
+Expected INTERNAL SHA-256:
 `CB:6C:7D:05:C3:43:0F:34:31:F3:22:82:48:E2:14:C6:4B:0B:50:EA:E1:6D:8C:D1:0F:63:5C:32:AF:3D:E2:91`
 
-Before update compatibility can be CERTIFIED:
-- install a persistent-signed APK N;
-- create real local data/settings;
-- install APK N+1 with a higher versionCode without uninstalling;
-- verify update succeeds;
-- verify local data/settings survive;
-- verify package remains `com.riccardopinato.batteryguard`;
-- verify signing certificate SHA-256 is unchanged.
+Update compatibility requires:
+- same package ID `com.riccardopinato.batteryguard`;
+- same INTERNAL certificate;
+- higher versionCode;
+- N -> N+1 physical install without uninstall;
+- local data/settings preserved.
 
-The first transition from an older ephemeral debug-signed APK may require one uninstall/reinstall. That is only migration to the persistent baseline, not update certification.
+## Production signing gate
+Required secrets:
+- ANDROID_PRODUCTION_KEYSTORE_BASE64
+- ANDROID_PRODUCTION_KEYSTORE_PASSWORD
+- ANDROID_PRODUCTION_KEY_ALIAS
+- ANDROID_PRODUCTION_KEY_PASSWORD
+- ANDROID_PRODUCTION_CERT_SHA256
+- ADMOB_APP_ID
+- ADMOB_BANNER_ID
 
-## AdMob adaptive physical QA
-Before production rollout verify on real devices:
-- small phone portrait;
-- large phone portrait;
-- landscape if supported;
-- gesture navigation;
-- three-button navigation where available;
-- light/dark mode;
-- no overlap with app controls;
-- no banner inside/over the NavigationBar;
-- no accidental-click-risk layout;
-- no-fill/failure leaves the app fully usable;
-- Pro entitlement removes the placement;
-- UMP consent and Privacy Options work as configured.
+Production workflow:
+- must run from `main`;
+- uses environment `production`;
+- verifies keystore fingerprint before build;
+- verifies the exact APK with apksigner;
+- verifies AAB JAR signature and signer fingerprint;
+- records source SHA, package ID, targetSdk and Billing adapter in evidence;
+- never enables INTERNAL Pro bypass.
 
-## External gates still required before PRODUCTION RELEASED
-1. Add dedicated Android PRODUCTION signing secrets:
-   - ANDROID_PRODUCTION_KEYSTORE_BASE64
-   - ANDROID_PRODUCTION_KEYSTORE_PASSWORD
-   - ANDROID_PRODUCTION_KEY_ALIAS
-   - ANDROID_PRODUCTION_KEY_PASSWORD
-2. Configure Google Play product `battery_guard_pro_lifetime`.
-3. Configure production AdMob IDs in GitHub secrets:
-   - ADMOB_APP_ID
-   - ADMOB_BANNER_ID
-4. Complete/review the Google consent message configuration for EEA/UK where applicable.
-5. Upload candidate AAB to Play Internal Testing.
-6. Verify purchase + restore and verify that Pro removes all ad placements with Play test account.
-   - Before production, add a trusted purchase-verification strategy (server-side or equivalent trusted verifier) rather than treating an unverified purchase event as final entitlement evidence.
-7. Complete PHYSICAL_ACCEPTANCE_MATRIX.md on real devices, including the AdMob adaptive checks above.
-8. Verify foreground-service specialUse declaration in Play Console.
-9. Publish privacy policy at a public URL and add support contact.
-10. Reconcile final Data Safety and Google Mobile Ads disclosures form with exact production AAB.
+## Google Play Billing gate
+Client reconciliation is IMPLEMENTED.
+Trusted purchase verification is NOT IMPLEMENTED.
 
-Until these external gates pass, the strongest valid verdict is **NOT CERTIFIED / BLOCKED FOR PRODUCTION**, even if CI is green.
+Before rollout:
+- verify purchaseToken on a trusted backend with Google Play Developer API;
+- grant only PURCHASED state;
+- acknowledge correctly;
+- process refund/revocation/voided purchase lifecycle;
+- test purchase, restore, pending, refund and revocation in Internal Testing.
+
+## Runtime / physical gates
+Run PHYSICAL_ACCEPTANCE_MATRIX.md against the exact artifact SHA on at least:
+- one Samsung device;
+- one Xiaomi/Redmi/Poco-class device.
+
+Mandatory scenarios include:
+- clean install/onboarding;
+- notification permission denied/granted;
+- disabled notification channels;
+- screen-off FGS;
+- recents removal;
+- reboot recovery;
+- OEM/battery-optimization restrictions;
+- low/high/full/temperature/unplug alerts;
+- night-mode silent route;
+- widget and Quick Settings;
+- unavailable telemetry rendering;
+- interrupted session recovery;
+- Charge Doctor active-charging enforcement and setup grouping;
+- Battery Health plausibility;
+- AdMob/UMP/privacy choices;
+- Pro buy/restore/refund/revocation;
+- signed in-place update with data preservation.
+
+## Store / policy gates
+- Play product `battery_guard_pro_lifetime` configured;
+- real AdMob IDs configured;
+- UMP message reviewed for applicable regions;
+- candidate AAB uploaded to Play Internal Testing;
+- FGS specialUse declaration accepted;
+- public privacy policy + support contact;
+- final Data Safety reconciled against exact AAB.
+
+## Current verdict
+**IMPLEMENTED + SOURCE HARDENED, NOT CERTIFIED / BLOCKED FOR PRODUCTION** until external repository, backend, Play and physical-device gates pass.
