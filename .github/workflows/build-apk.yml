@@ -191,7 +191,7 @@ jobs:
           SHORT_SHA="${GITHUB_SHA:0:12}"
 
           rm -rf release
-          mkdir -p release
+          mkdir -p release/symbols-free release/symbols-premium
 
           FREE_APK="release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-arm64-v8a.apk"
           PREMIUM_APK="release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-arm64-v8a.apk"
@@ -201,6 +201,8 @@ jobs:
           cp /tmp/battery_guard_premium-arm64-v8a-release.apk "$PREMIUM_APK"
           cp /tmp/battery_guard_free/app-release.aab "$FREE_AAB"
           cp pubspec.lock release/pubspec.lock
+          cp -R build/symbols-free/. release/symbols-free/
+          cp -R build/symbols-premium/. release/symbols-premium/
 
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
           test -x "$APKSIGNER"
