@@ -16,14 +16,22 @@ val persistentSigningReady =
         !releaseKeyPassword.isNullOrBlank() &&
         file(releaseStorePath!!).exists()
 
-val releaseTaskRequested = gradle.startParameter.taskNames.any {
-    it.contains("Release", ignoreCase = true)
-}
+gradle.taskGraph.whenReady { graph ->
+    val releaseArtifactTaskSelected = graph.allTasks.any { task ->
+        val taskName = task.name.lowercase()
+        taskName.contains("release") &&
+            (
+                taskName.startsWith("package") ||
+                    taskName.startsWith("bundle") ||
+                    taskName.startsWith("assemble")
+            )
+    }
 
-if (releaseTaskRequested && !persistentSigningReady) {
-    throw GradleException(
-        "Persistent signing is required for Battery Guard release artifacts.",
-    )
+    if (releaseArtifactTaskSelected && !persistentSigningReady) {
+        throw GradleException(
+            "Persistent signing is required for Battery Guard release artifacts.",
+        )
+    }
 }
 
 android {
