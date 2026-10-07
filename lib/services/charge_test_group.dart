@@ -5,10 +5,10 @@ String chargeTestGroupKey({
   String normalize(String value) => value
       .trim()
       .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
+      // Normalize common separators without deleting non-ASCII letters.
+      .replaceAll(RegExp(r'[\s\-_/.,:;]+'), ' ')
       .replaceAllMapped(
-        RegExp(r'(\d)\s+([a-z])'),
+        RegExp(r'(\d)\s+([a-zA-Z])'),
         (match) => '${match.group(1)}${match.group(2)}',
       )
       .trim();
