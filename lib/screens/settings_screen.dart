@@ -290,7 +290,7 @@ class SettingsScreen extends StatelessWidget {
               const Divider(height: 1),
               ListTile(
                 title: Text(l10n.version),
-                trailing: const Text('1.1.1'),
+                trailing: const Text('1.1.4'),
               ),
             ],
           ),
