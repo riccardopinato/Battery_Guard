@@ -170,6 +170,7 @@ class AppController extends ChangeNotifier {
         startTemperatureC: 29.5,
         currentTemperatureC: 34.0 + index * 0.4,
         maxTemperatureC: 35.0 + index * 0.5,
+        temperatureAvailable: true,
         averagePowerW: 15.0 + index,
         averageCurrentMa: 3500,
         percentPerHour: 45.0 - index * 2,
@@ -406,6 +407,7 @@ class AppController extends ChangeNotifier {
 
     final first = kIsWeb ? snapshot : await _platform.getSnapshot();
     if (!first.isPlugged) return 'not_plugged';
+    if (!first.isCharging) return 'not_charging';
     if (!first.powerAvailable || !first.currentAvailable) {
       return 'power_unavailable';
     }
@@ -434,7 +436,7 @@ class AppController extends ChangeNotifier {
     if (active == null) return;
 
     final value = kIsWeb ? snapshot : await _platform.getSnapshot();
-    if (!value.isPlugged) {
+    if (!value.isPlugged || !value.isCharging) {
       await stopChargeDoctorTest();
       return;
     }
