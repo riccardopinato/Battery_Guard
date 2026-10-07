@@ -16,6 +16,24 @@ val persistentSigningReady =
         !releaseKeyPassword.isNullOrBlank() &&
         file(releaseStorePath!!).exists()
 
+gradle.taskGraph.whenReady {
+    val releaseArtifactTaskSelected = allTasks.any { task ->
+        val taskName = task.name.lowercase()
+        taskName.contains("release") &&
+            (
+                taskName.startsWith("package") ||
+                    taskName.startsWith("bundle") ||
+                    taskName.startsWith("assemble")
+            )
+    }
+
+    if (releaseArtifactTaskSelected && !persistentSigningReady) {
+        throw GradleException(
+            "Persistent signing is required for Battery Guard release artifacts.",
+        )
+    }
+}
+
 android {
     namespace = "com.riccardopinato.batteryguard"
     compileSdk = flutter.compileSdkVersion
@@ -55,13 +73,9 @@ android {
 
     buildTypes {
         release {
-            if (!persistentSigningReady) {
-                throw GradleException(
-                    "Persistent signing is required for Battery Guard release artifacts.",
-                )
+            if (persistentSigningReady) {
+                signingConfig = signingConfigs.getByName("persistent")
             }
-
-            signingConfig = signingConfigs.getByName("persistent")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

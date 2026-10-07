@@ -59,7 +59,51 @@ jobs:
           fi
           chmod +x android/gradlew
 
+      - name: Flutter environment
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate localization
+        run: flutter gen-l10n
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build Web Preview
+        run: flutter build web --release --base-href /Battery_Guard/
+
+      - name: Build Android debug smoke for untrusted PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: flutter build apk --debug
+
+      - name: Deploy Web Preview branch
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/battery_guard_pages
+          mkdir -p /tmp/battery_guard_pages
+          cp -R build/web/. /tmp/battery_guard_pages/
+          cd /tmp/battery_guard_pages
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy Battery Guard Web Preview ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
+
       - name: Require persistent INTERNAL signing
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -93,51 +137,13 @@ jobs:
           echo "SIGNING_LANE=internal" >> "$GITHUB_ENV"
           echo "SIGNING_CERT_SHA256=$ACTUAL_CERT_SHA256" >> "$GITHUB_ENV"
 
-      - name: Flutter environment
-        run: |
-          flutter --version
-          flutter doctor -v
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate localization
-        run: flutter gen-l10n
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
-
-      - name: Build Web Preview
-        run: flutter build web --release --base-href /Battery_Guard/
-
-      - name: Deploy Web Preview branch
-        if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euxo pipefail
-          rm -rf /tmp/battery_guard_pages
-          mkdir -p /tmp/battery_guard_pages
-          cp -R build/web/. /tmp/battery_guard_pages/
-          cd /tmp/battery_guard_pages
-          git init -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Deploy Battery Guard Web Preview ${GITHUB_SHA}"
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --force origin gh-pages
-
       - name: Build FREE APKs and AAB
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
-          rm -rf build/symbols-free /tmp/battery_guard_free
-          mkdir -p build/symbols-free /tmp/battery_guard_free
+          rm -rf build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
+          mkdir -p build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
 
           flutter build apk --release --split-per-abi --split-debug-info=build/symbols-free
           flutter build apk --release --split-debug-info=build/symbols-free
@@ -148,8 +154,10 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk /tmp/battery_guard_free/app-x86_64-release.apk
           cp build/app/outputs/flutter-apk/app-release.apk /tmp/battery_guard_free/app-release.apk
           cp build/app/outputs/bundle/release/app-release.aab /tmp/battery_guard_free/app-release.aab
+          cp -R build/symbols-free/. /tmp/battery_guard_free_symbols/
 
       - name: Build PREMIUM TEST APKs
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
@@ -164,6 +172,7 @@ jobs:
           flutter build apk             --release             --split-debug-info=build/symbols-premium             --dart-define=BATTERY_GUARD_FORCE_PRO_TEST=true
 
       - name: Prepare and verify immutable INTERNAL bundle
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euxo pipefail
@@ -173,7 +182,7 @@ jobs:
           SHORT_SHA="${GITHUB_SHA:0:12}"
 
           rm -rf release
-          mkdir -p release
+          mkdir -p release/symbols-free release/symbols-premium
 
           cp /tmp/battery_guard_free/app-arm64-v8a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-arm64-v8a.apk"
           cp /tmp/battery_guard_free/app-armeabi-v7a-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-FREE-armeabi-v7a.apk"
@@ -186,6 +195,8 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-x86_64.apk"
           cp build/app/outputs/flutter-apk/app-release.apk             "release/Battery-Guard-${VERSION}-${SHORT_SHA}-PREMIUM-TEST-universal.apk"
 
+          cp -R /tmp/battery_guard_free_symbols/. release/symbols-free/
+          cp -R build/symbols-premium/. release/symbols-premium/
           cp pubspec.lock release/pubspec.lock
 
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
@@ -197,7 +208,7 @@ jobs:
             VERIFY_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK")"
             ACTUAL_DIGEST="$(
               printf '%s\n' "$VERIFY_OUTPUT" |
-              sed -n 's/^.*Signer: certificate SHA-256 digest: //p' |
+              sed -n 's/^.*certificate SHA-256 digest: //p' |
               head -n 1 |
               tr '[:lower:]' '[:upper:]'
             )"
@@ -222,16 +233,16 @@ jobs:
 
           (
             cd release
-            sha256sum               Battery-Guard-*               pubspec.lock               BUILD_EVIDENCE.txt               > SHA256SUMS.txt
+            find . -type f ! -name SHA256SUMS.txt -print0 |
+              sort -z |
+              xargs -0 sha256sum > SHA256SUMS.txt
           )
 
       - name: Upload immutable INTERNAL artifact
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/upload-artifact@v4
         with:
           name: Battery-Guard-INTERNAL-${{ github.sha }}
-          path: |
-            release/*
-            build/symbols-free/**
-            build/symbols-premium/**
+          path: release/**
           if-no-files-found: error
           retention-days: 7
