@@ -65,7 +65,7 @@ jobs:
           flutter doctor -v
 
       - name: Resolve dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Generate localization
         run: flutter gen-l10n
