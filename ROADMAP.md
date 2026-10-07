@@ -78,3 +78,11 @@
 - INTERNAL and PRODUCTION signing lanes separated;
 - dedicated `ANDROID_PRODUCTION_*` secrets for production;
 - physical in-place update verification remains required before CERTIFIED update compatibility.
+
+
+## 1.1.4 — INTERNAL Pro Unlock QA ✅ IMPLEMENTED / DEVICE QA PENDING
+- sideloaded INTERNAL Free APK keeps the Pro CTA actionable when Play Billing metadata is unavailable;
+- local Pro fallback is compile-time gated and excluded from AAB/production;
+- production purchase/restore behavior remains Google Play Billing only;
+- versionCode 16 enables in-place update testing from persistent-signed v1.1.3;
+- device acceptance: tap Unlock Pro -> Pro state -> ads removed -> gated features accessible -> entitlement survives app restart.

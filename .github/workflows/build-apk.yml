@@ -145,8 +145,8 @@ jobs:
           rm -rf build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
           mkdir -p build/symbols-free /tmp/battery_guard_free /tmp/battery_guard_free_symbols
 
-          flutter build apk --release --split-per-abi --split-debug-info=build/symbols-free
-          flutter build apk --release --split-debug-info=build/symbols-free
+          flutter build apk --release --split-per-abi --split-debug-info=build/symbols-free --dart-define=BATTERY_GUARD_ALLOW_LOCAL_PRO_TEST=true
+          flutter build apk --release --split-debug-info=build/symbols-free --dart-define=BATTERY_GUARD_ALLOW_LOCAL_PRO_TEST=true
           flutter build appbundle --release --split-debug-info=build/symbols-free
 
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk /tmp/battery_guard_free/app-arm64-v8a-release.apk
