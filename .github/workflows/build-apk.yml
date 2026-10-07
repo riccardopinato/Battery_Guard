@@ -79,6 +79,14 @@ jobs:
       - name: Build Web Preview
         run: flutter build web --release --base-href /Battery_Guard/
 
+      - name: Upload Web Preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: Battery-Guard-web-${{ github.sha }}
+          path: build/web/**
+          if-no-files-found: error
+          retention-days: 2
+
       - name: Compile ARM64 debug on PR
         if: github.event_name == 'pull_request'
         run: flutter build apk --debug --target-platform android-arm64
@@ -249,3 +257,33 @@ jobs:
           path: release/**
           if-no-files-found: error
           retention-days: 7
+
+
+  deploy-web:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-android
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Web Preview
+        uses: actions/download-artifact@v4
+        with:
+          name: Battery-Guard-web-${{ github.sha }}
+          path: web-preview
+
+      - name: Deploy Web Preview branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd web-preview
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy Battery Guard Web Preview ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
