@@ -7,3 +7,13 @@ android/.gradle/
 *.iml
 .idea/
 .metadata
+
+# Android signing / release secrets
+*.jks
+*.keystore
+*.p12
+*.pfx
+key.properties
+keystore.properties
+android/key.properties
+android/keystore.properties
