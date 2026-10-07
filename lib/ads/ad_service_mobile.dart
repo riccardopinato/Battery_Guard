@@ -137,6 +137,11 @@ class AdService {
         }
       },
     );
-    await completer.future;
+    await completer.future.timeout(
+      const Duration(seconds: 15),
+      onTimeout: () {
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
   }
 }
