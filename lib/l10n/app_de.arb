@@ -353,5 +353,6 @@
   "permissionMissing": "Benachrichtigungsberechtigung fehlt",
   "notificationsDisabled": "App-Benachrichtigungen deaktiviert",
   "alertChannelDisabled": "Batteriewarnkanal deaktiviert",
-  "deliveryReady": "Warnungen bereit"
+  "deliveryReady": "Warnungen bereit",
+  "testRequiresCharging": "Warte, bis das Gerät tatsächlich lädt, bevor du den Test startest."
 }
