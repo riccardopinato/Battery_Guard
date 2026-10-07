@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.7
+- upgraded `in_app_purchase` to 3.3.1 and Android adapter to 0.5.3;
+- added Google Play ownership reconciliation so cached Pro can be revoked after a successful store query no longer reports ownership;
+- kept trusted server-side purchase verification as an explicit production rollout gate rather than pretending client-side checks are sufficient;
+- removed the manifest POWER_CONNECTED/POWER_DISCONNECTED receiver and its dead code;
+- pinned Android compileSdk/targetSdk to API 36;
+- added explicit no-backup/no-device-transfer XML rules;
+- propagated temperature availability through History, charging sessions and widget UI;
+- Charge Doctor now requires active charging and compares only normalized equivalent named setups on the same Android charging source;
+- localized notification quick actions;
+- optimized Battery Health sampling to avoid reparsing the JSON sample buffer on every battery event;
+- added UMP Privacy Options timeout protection;
+- expanded regression tests for unavailable telemetry, Charge Doctor grouping and localization catalog parity;
+- redesigned CI: PRs never receive signing secrets, main produces persistent-signed ARM64-first INTERNAL artifacts, Web deployment has isolated write permission;
+- hardened production workflow with main-only execution, dedicated production certificate fingerprint verification, APK/AAB signature verification, lockfile enforcement and richer Evidence Bundle;
+- expanded signing/keystore ignore rules;
+- bumped source to 1.1.7+19.
+
 ## 1.1.4
 - fixed the disabled "Unlock Pro" action in sideloaded INTERNAL Free APKs;
 - added a compile-time local Pro fallback only when `BATTERY_GUARD_ALLOW_LOCAL_PRO_TEST=true`;
