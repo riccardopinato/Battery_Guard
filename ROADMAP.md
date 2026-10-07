@@ -86,3 +86,33 @@
 - production purchase/restore behavior remains Google Play Billing only;
 - versionCode 16 enables in-place update testing from persistent-signed v1.1.3;
 - device acceptance: tap Unlock Pro -> Pro state -> ads removed -> gated features accessible -> entitlement survives app restart.
+
+
+## 1.1.5 — Production & Security Hardening ✅ IMPLEMENTED / EXTERNAL VERIFICATION PENDING
+- Play Billing plugin moved to current 3.3.x / Android adapter 0.5.x;
+- cached Pro entitlement reconciled against current Google Play ownership when store queries succeed;
+- trusted backend purchase-token verification remains a production gate;
+- keystore ignore rules hardened;
+- PR workflows no longer receive signing secrets;
+- production workflow restricted to main and verifies expected signing fingerprint;
+- target/compile SDK pinned to API 36;
+- pubspec.lock is mandatory once the CI-resolved lock is committed.
+
+## 1.1.6 — Runtime Correctness ✅ IMPLEMENTED / PHYSICAL QA PENDING
+- unreliable manifest power-event receiver removed;
+- unavailable temperature is preserved through History, sessions and widget;
+- Charge Doctor requires active charging;
+- Charge Doctor baselines are scoped to equivalent normalized setup labels + source;
+- notification quick actions localized;
+- Battery Health sample persistence optimized;
+- explicit Android cloud/D2D extraction exclusions added.
+
+## 1.1.7 — Test & Evidence ✅ IMPLEMENTED / CI + PHYSICAL QA PENDING
+- model regressions expanded;
+- Charge Doctor grouping tests added;
+- localization catalog parity test added;
+- UMP privacy-options timeout hardened;
+- INTERNAL artifacts changed to ARM64-first;
+- Evidence Bundle records targetSdk, package, Billing adapter and local-Pro bypass state;
+- production candidate records and verifies upload certificate identity;
+- branch protection remains an external repository-administration gate.
