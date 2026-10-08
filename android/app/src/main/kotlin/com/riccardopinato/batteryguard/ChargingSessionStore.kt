@@ -498,6 +498,23 @@ object ChargingSessionStore {
                             level != last.optInt("level", level) ||
                                 isCharging !=
                                     last.optBoolean("isCharging", isCharging) ||
+                                (
+                                    snapshot["screenStateAvailable"] == true &&
+                                        (
+                                            !last.optBoolean(
+                                                "screenStateAvailable",
+                                                false,
+                                            ) ||
+                                                (
+                                                    snapshot["screenInteractive"] as? Boolean
+                                                        ?: false
+                                                    ) !=
+                                                    last.optBoolean(
+                                                        "screenInteractive",
+                                                        false,
+                                                    )
+                                            )
+                                    ) ||
                                 meaningfulPowerChange ||
                                 meaningfulTemperatureChange
                             )
