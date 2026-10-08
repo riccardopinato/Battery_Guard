@@ -24,7 +24,7 @@ class ChargingCurvePoint {
       timestamp: DateTime.fromMillisecondsSinceEpoch(
         timestamp is num ? timestamp.round() : 0,
       ),
-      level: level is num ? level.round().clamp(0, 100) : 0,
+      level: level is num ? level.round().clamp(0, 100).toInt() : 0,
       isCharging: map['isCharging'] == true,
       isPlugged: map['isPlugged'] == true,
       temperatureC:
