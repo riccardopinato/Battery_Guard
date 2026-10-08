@@ -354,5 +354,88 @@
   "notificationsDisabled": "App-Benachrichtigungen deaktiviert",
   "alertChannelDisabled": "Batteriewarnkanal deaktiviert",
   "deliveryReady": "Warnungen bereit",
-  "testRequiresCharging": "Warte, bis das Gerät tatsächlich lädt, bevor du den Test startest."
+  "testRequiresCharging": "Warte, bis das Gerät tatsächlich lädt, bevor du den Test startest.",
+  "capabilityMapTitle": "Geräte-Fähigkeitskarte",
+  "capabilityMapSubtitle": "Zeigt, welche Batteriesignale das Gerät tatsächlich bereitstellt, woher jeder Wert stammt und wie zuverlässig Battery Guard ihn einschätzt.",
+  "capabilityMapSettingsBody": "Sieh, welche Batteriewerte Android auf diesem Gerät bereitstellt und wie sie abgeleitet werden.",
+  "capabilityLevel": "Akkustand",
+  "capabilityCurrent": "Strom",
+  "capabilityPower": "Ladeleistung",
+  "capabilityChargeCounter": "Ladezähler",
+  "capabilityStatus": "Akkustatus",
+  "capabilityTechnology": "Akkutechnologie",
+  "capabilityPlugType": "Ladequelle",
+  "sourceSystemReported": "Von Android gemeldet",
+  "sourceOemReported": "Vom OEM gemeldet",
+  "sourceMeasured": "Gemessen",
+  "sourceCalculated": "Berechnet",
+  "sourceEstimated": "Geschätzt",
+  "confidenceUnknown": "Unbekannt",
+  "sessionDetailTitle": "Ladesitzung",
+  "oemChargeLimitDetected": "Ladelimit des Geräts erkannt",
+  "oemChargeLimitBody": "Das Telefon blieb angeschlossen, stoppte den Ladevorgang aber absichtlich bei etwa {level} %. Battery Guard behandelt dies als Geräteschutz/adaptive Pause und nicht als fehlerhafte Sitzung.",
+  "sessionEvidence": "Sitzungsnachweise",
+  "validityActive": "Aktiv",
+  "validityValid": "Gültig",
+  "validityPartial": "Teilweise",
+  "validityInterrupted": "Unterbrochen",
+  "validityExcluded": "Ausgeschlossen",
+  "validityUncertain": "Unsicher",
+  "reasonTooShort": "Die Sitzung ist zu kurz, um als zuverlässig zu gelten.",
+  "reasonInsufficientSocDelta": "Der Akkustand hat sich zu wenig verändert, um zuverlässig zu vergleichen.",
+  "reasonPowerMissing": "Die Ladeleistung war in dieser Sitzung nicht verfügbar.",
+  "reasonCurrentMissing": "Der Ladestrom war in dieser Sitzung nicht verfügbar.",
+  "reasonTemperatureMissing": "Die Akkutemperatur war in dieser Sitzung nicht verfügbar.",
+  "reasonUserUnplugged": "Die Sitzung endete, als das Ladegerät getrennt wurde.",
+  "reasonSystemInterrupted": "Android oder das Gerät hat die kontinuierliche Überwachung unterbrochen.",
+  "reasonOemChargeLimit": "Ein Ladelimit oder eine adaptive Ladepause des Geräts wurde erkannt.",
+  "reasonMonitoringGap": "Während der Sitzung trat eine längere Überwachungslücke auf.",
+  "reasonInvalidTelemetry": "Die Telemetrie enthielt Werte, die Battery Guard nicht als zuverlässig einstufen konnte.",
+  "chargingCurveTitle": "Ladekurve",
+  "chargingCurveNotEnoughData": "Für diese Sitzung liegen noch nicht genügend Messpunkte für eine Kurve vor.",
+  "chargingCurvePremiumTitle": "Die vollständige Ladekurve ist eine Pro-Analyse",
+  "chargingCurvePremiumBody": "Free behält Zusammenfassung, Nachweise und Schutzsignale. Pro schaltet die vollständige SoC-, Leistungs-, Temperatur- und Stromkurve mit Phasenanalyse frei.",
+  "chargingCurveSemantics": "Normalisierte Ladekurve mit Akkustand, Leistung, Temperatur und Strom im Zeitverlauf.",
+  "curveNormalizedHint": "Die Linien werden separat normalisiert, um ihren Verlauf zu vergleichen; für absolute Werte dienen die numerischen Messwerte.",
+  "curveAnalysis": "Kurvenanalyse",
+  "curveDataPoints": "Datenpunkte: {count}",
+  "curvePeakPower": "Beobachtete Spitzenleistung: {value} W",
+  "curveTemperatureRise": "Beobachtete Temperaturänderung: {value} °C",
+  "phaseRampUp": "Anlauf",
+  "phaseFast": "Schnellladen",
+  "phaseSteady": "Stabil",
+  "phasePlateau": "Plateau",
+  "phaseThermalThrottle": "Thermische Drosselung",
+  "phaseTaper": "Enddrosselung",
+  "phaseChargeLimit": "Ladelimit / Pause",
+  "phaseFull": "Voll",
+  "proFeatureCurves": "Vollständige Ladekurven und Phasenanalyse",
+  "@oemChargeLimitBody": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@curveDataPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@curvePeakPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@curveTemperatureRise": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }
