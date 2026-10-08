@@ -61,6 +61,8 @@ class PremiumCard extends StatelessWidget {
             const SizedBox(height: 8),
             _Feature(text: l10n.proFeatureDoctor),
             const SizedBox(height: 8),
+            _Feature(text: l10n.proFeatureCurves),
+            const SizedBox(height: 8),
             _Feature(text: l10n.proFeatureInsights30),
             if (!premium.isPro) ...[
               const SizedBox(height: 16),
