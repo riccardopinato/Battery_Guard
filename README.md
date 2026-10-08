@@ -77,3 +77,13 @@ La lane INTERNAL usa i secret `ANDROID_KEYSTORE_*` come keystore persistente, ri
 La lane PRODUCTION usa secret separati `ANDROID_PRODUCTION_*` e richiede configurazione AdMob reale. La Web Preview usa dati simulati e non certifica capability native.
 
 Vedi `PRODUCT_BIBLE.md`, `ROADMAP.md`, `CHANGELOG.md`, `MONETIZATION.md`, `RELEASE_GATE.md` e la documentazione Play/Privacy.
+
+## Battery Intelligence — v1.7
+
+MAXI STEP C extends the existing local telemetry stack without a parallel database or cloud backend:
+
+- **Free:** Battery Health summary, Android-reported health evidence, nominal capacity setup and standard ETA.
+- **Pro:** Health Lab 2 confidence/uncertainty/outlier inspection, smoothed trend, Smart ETA and Idle Drain Sentinel.
+- Smart ETA learns only from valid personal charging-session evidence and uses screen context only when Android exposed it.
+- Idle Drain records only qualifying screen-off, unplugged intervals and compares them with the device's own comparable baseline.
+- All Battery Intelligence data remains local; Web Preview uses simulated evidence and does not certify native behavior.
