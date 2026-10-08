@@ -3,6 +3,7 @@ class ChargingCurvePoint {
     required this.timestamp,
     required this.level,
     required this.isCharging,
+    required this.isPlugged,
     this.temperatureC,
     this.voltageV,
     this.currentMa,
@@ -25,6 +26,7 @@ class ChargingCurvePoint {
       ),
       level: level is num ? level.round().clamp(0, 100) : 0,
       isCharging: map['isCharging'] == true,
+      isPlugged: map['isPlugged'] == true,
       temperatureC:
           availableNumber('temperatureC', 'temperatureAvailable')?.toDouble(),
       voltageV: availableNumber('voltageV', 'voltageAvailable')?.toDouble(),
@@ -36,6 +38,7 @@ class ChargingCurvePoint {
   final DateTime timestamp;
   final int level;
   final bool isCharging;
+  final bool isPlugged;
   final double? temperatureC;
   final double? voltageV;
   final double? currentMa;
