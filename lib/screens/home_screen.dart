@@ -230,8 +230,7 @@ class HomeScreen extends StatelessWidget {
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                           Text(
-                            controller.premium.isPro &&
-                                    controller.batteryHealthReport.hasEstimate
+                            controller.batteryHealthReport.hasEstimate
                                 ? '${controller.batteryHealthReport.estimatedHealthPercent.toStringAsFixed(0)}% • ${l10n.estimatedHealth}'
                                 : l10n.healthLabSubtitle,
                             maxLines: 2,
@@ -244,11 +243,7 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(
-                      controller.premium.isPro
-                          ? Icons.chevron_right_rounded
-                          : Icons.lock_outline_rounded,
-                    ),
+                    const Icon(Icons.chevron_right_rounded),
                   ],
                 ),
               ),
@@ -256,7 +251,10 @@ class HomeScreen extends StatelessWidget {
           ),
           if (session != null && snapshot.isPlugged) ...[
             const SizedBox(height: 14),
-            _ChargingSessionCard(session: session),
+            _ChargingSessionCard(
+              session: session,
+              controller: controller,
+            ),
           ],
           const SizedBox(height: 14),
           GridView.count(
@@ -344,9 +342,13 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _ChargingSessionCard extends StatelessWidget {
-  const _ChargingSessionCard({required this.session});
+  const _ChargingSessionCard({
+    required this.session,
+    required this.controller,
+  });
 
   final ChargingSession session;
+  final AppController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -355,6 +357,12 @@ class _ChargingSessionCard extends StatelessWidget {
     final speed = session.percentPerHour > 0
         ? '${session.percentPerHour.toStringAsFixed(1)} %/h'
         : l10n.calculating;
+    final eta = controller.effectiveEta;
+    final etaValue = eta.available
+        ? '≈ ${l10n.minutesShort(eta.minutes)}'
+        : l10n.calculating;
+    final etaLabel =
+        controller.premium.isPro ? l10n.smartEta : l10n.standardEta;
 
     return Card(
       child: Padding(
@@ -407,8 +415,8 @@ class _ChargingSessionCard extends StatelessWidget {
                   value: '${session.averagePowerW.toStringAsFixed(1)} W',
                 ),
                 _SessionMetric(
-                  label: l10n.atTarget(session.targetLevel),
-                  value: session.estimateLabel,
+                  label: '$etaLabel • ${l10n.atTarget(session.targetLevel)}',
+                  value: etaValue,
                 ),
                 _SessionMetric(
                   label: l10n.temperature,
