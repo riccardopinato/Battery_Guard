@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.1.7+19 — Production & Runtime Hardening**
+Versione sorgente: **1.3.0+21 — Intelligence Foundation**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -14,7 +14,10 @@ Evidence attuale:
 - TESTED: required by CI
 - Billing dependency hardened to current 3.3.x / Android adapter 0.5.x
 - PR CI runs without signing secrets; signed INTERNAL artifacts are main-only and ARM64-first
-- telemetry availability propagated through History, sessions and widget
+- telemetry availability + provenance/confidence propagated through the runtime model
+- Device Capability Map available in Free
+- explainable session validity/reason codes + OEM charge-limit detection
+- bounded adaptive charging curves collected locally; full curve analysis is Premium
 - PHYSICAL UPDATE VERIFIED: **PENDING**
 - STORE READY: **NO — external production gates pending**
 
@@ -29,7 +32,11 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - foreground monitoring Android;
 - avvisi soglia, temperatura, 100%, cavo scollegato;
 - modalità notte;
-- Smart Charging con sessioni, velocità, ETA e baseline personale;
+- Smart Charging con sessioni, velocità, ETA, validity/reason codes e baseline personale;
+- Device Capability Map con source/confidence per ogni segnale;
+- riconoscimento di pause/limiti OEM/adaptive charging;
+- curve di ricarica bounded con SoC/potenza/corrente/tensione/temperatura;
+- dettaglio sessione Free + analisi curva completa Premium;
 - Insights 7/30 giorni;
 - widget Home;
 - Quick Settings Tile;
