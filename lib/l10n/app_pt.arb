@@ -556,5 +556,14 @@
     }
   },
   "proFeatureRanking": "Ranking carregador + cabo e tendências",
-  "proFeatureStress": "Pontuação detalhada de Battery Stress e detalhe das exposições"
+  "proFeatureStress": "Pontuação detalhada de Battery Stress e detalhe das exposições",
+  "powerHeatExposure": "Potência alta + calor",
+  "powerHeatDetail": "Sobreposição potência alta + calor: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  }
 }
