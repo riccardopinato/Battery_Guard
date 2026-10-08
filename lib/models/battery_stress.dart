@@ -1,0 +1,145 @@
+import 'charging_curve_point.dart';
+import 'charging_session.dart';
+
+enum BatteryStressLevel {
+  low,
+  moderate,
+  high,
+  veryHigh,
+}
+
+class BatteryStressAnalysis {
+  const BatteryStressAnalysis({
+    required this.score,
+    required this.level,
+    required this.highSocMinutes,
+    required this.hotMinutes,
+    required this.veryHotMinutes,
+    required this.highVoltageMinutes,
+    required this.maxTemperatureC,
+    required this.reasons,
+    required this.dataSufficient,
+  });
+
+  factory BatteryStressAnalysis.unavailable() => const BatteryStressAnalysis(
+        score: 0,
+        level: BatteryStressLevel.low,
+        highSocMinutes: 0,
+        hotMinutes: 0,
+        veryHotMinutes: 0,
+        highVoltageMinutes: 0,
+        maxTemperatureC: null,
+        reasons: [],
+        dataSufficient: false,
+      );
+
+  factory BatteryStressAnalysis.fromSession(ChargingSession session) {
+    if (session.curvePoints.length < 2) {
+      return BatteryStressAnalysis.unavailable();
+    }
+    return BatteryStressAnalysis.fromCurve(session.curvePoints);
+  }
+
+  factory BatteryStressAnalysis.fromCurve(List<ChargingCurvePoint> points) {
+    if (points.length < 2) return BatteryStressAnalysis.unavailable();
+
+    var highSocSeconds = 0.0;
+    var hotSeconds = 0.0;
+    var veryHotSeconds = 0.0;
+    var highVoltageSeconds = 0.0;
+    double? maxTemperature;
+
+    for (var index = 1; index < points.length; index++) {
+      final previous = points[index - 1];
+      final current = points[index];
+      final seconds = current.timestamp
+              .difference(previous.timestamp)
+              .inMilliseconds
+              .clamp(0, const Duration(minutes: 10).inMilliseconds) /
+          1000.0;
+
+      final avgSoc = (previous.level + current.level) / 2.0;
+      if (avgSoc >= 80) highSocSeconds += seconds;
+
+      final temperatures = [
+        previous.temperatureC,
+        current.temperatureC,
+      ].whereType<double>().toList(growable: false);
+      if (temperatures.isNotEmpty) {
+        final temp =
+            temperatures.reduce((left, right) => left > right ? left : right);
+        maxTemperature =
+            maxTemperature == null || temp > maxTemperature ? temp : maxTemperature;
+        if (temp >= 38) hotSeconds += seconds;
+        if (temp >= 42) veryHotSeconds += seconds;
+      }
+
+      final voltages = [
+        previous.voltageV,
+        current.voltageV,
+      ].whereType<double>().toList(growable: false);
+      if (voltages.isNotEmpty) {
+        final voltage =
+            voltages.reduce((left, right) => left > right ? left : right);
+        if (voltage >= 4.20) highVoltageSeconds += seconds;
+      }
+    }
+
+    final highSocMinutes = highSocSeconds / 60.0;
+    final hotMinutes = hotSeconds / 60.0;
+    final veryHotMinutes = veryHotSeconds / 60.0;
+    final highVoltageMinutes = highVoltageSeconds / 60.0;
+
+    var score = 0.0;
+    score += (highSocMinutes * 0.8).clamp(0, 28).toDouble();
+    score += (hotMinutes * 1.8).clamp(0, 32).toDouble();
+    score += (veryHotMinutes * 3.0).clamp(0, 24).toDouble();
+    score += (highVoltageMinutes * 0.7).clamp(0, 16).toDouble();
+
+    if (maxTemperature != null) {
+      if (maxTemperature >= 45) {
+        score += 18;
+      } else if (maxTemperature >= 42) {
+        score += 10;
+      } else if (maxTemperature >= 40) {
+        score += 5;
+      }
+    }
+
+    final bounded = score.clamp(0, 100).toDouble();
+    final reasons = <String>[];
+    if (highSocMinutes >= 20) reasons.add('HIGH_SOC_EXPOSURE');
+    if (hotMinutes >= 10) reasons.add('HEAT_EXPOSURE');
+    if (veryHotMinutes >= 3) reasons.add('VERY_HIGH_TEMPERATURE');
+    if (highVoltageMinutes >= 20) reasons.add('HIGH_VOLTAGE_EXPOSURE');
+
+    final level = switch (bounded) {
+      < 25 => BatteryStressLevel.low,
+      < 50 => BatteryStressLevel.moderate,
+      < 75 => BatteryStressLevel.high,
+      _ => BatteryStressLevel.veryHigh,
+    };
+
+    return BatteryStressAnalysis(
+      score: bounded,
+      level: level,
+      highSocMinutes: highSocMinutes,
+      hotMinutes: hotMinutes,
+      veryHotMinutes: veryHotMinutes,
+      highVoltageMinutes: highVoltageMinutes,
+      maxTemperatureC: maxTemperature,
+      reasons: List.unmodifiable(reasons),
+      dataSufficient: true,
+    );
+  }
+
+  final double score;
+  final BatteryStressLevel level;
+  final double highSocMinutes;
+  final double hotMinutes;
+  final double veryHotMinutes;
+  final double highVoltageMinutes;
+  final double? maxTemperatureC;
+  final List<String> reasons;
+  final bool dataSufficient;
+}
