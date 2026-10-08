@@ -157,14 +157,23 @@
 - per-setup Overall Score and Stress trends when enough history exists;
 - centralized Free/Premium gates for profiles, scores, ranking and stress details.
 
-## NEXT — MAXI STEP C: Battery Intelligence
-Target: v1.6 + v1.7
-- Health Lab 2.0;
-- reported vs estimated health evidence;
-- confidence engine and outlier inspector;
-- capacity/health trend with smoothing and uncertainty;
-- Smart ETA based on setup/history/taper;
-- screen ON/OFF charging behavior where reliable;
-- Idle Drain Sentinel against the user's own baseline;
-- Free health summary + standard ETA;
-- Pro full Health Lab, trend/confidence, Smart ETA and Idle Drain.
+## 1.6.0 — Health Lab 2.0 ✅ IMPLEMENTED / DEVICE EVIDENCE ACCUMULATION PENDING
+- Android-reported health status kept separate from Battery Guard estimated capacity health;
+- robust capacity estimator with smoothing, MAD-based outlier filtering and uncertainty;
+- confidence score from sample count, SoC spread, precision and freshness;
+- outlier inspector and smoothed capacity trend;
+- Free health summary; Pro confidence/trend/outlier/thermal evidence.
+
+## 1.7.0 — Smart ETA & Idle Drain ✅ IMPLEMENTED / DEVICE QA PENDING
+- Free standard ETA from current valid charging-session evidence;
+- Pro Smart ETA from current session + same-source valid history + taper evidence;
+- screen interactive state captured as explicit charging-curve evidence when available;
+- Idle Drain Sentinel from screen-off, unplugged intervals only;
+- Idle Drain compares recent behavior with the device's own power-mode-compatible baseline;
+- no per-app drain attribution and no unsupported battery-degradation claims;
+- six-language UI + Web Preview simulation + regression tests.
+
+## NEXT — MAXI STEP D
+- post-C physical evidence accumulation and calibration;
+- tune thresholds/formulas only from observed device evidence;
+- no new product scope until Battery Intelligence device QA is reviewed.
