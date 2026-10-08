@@ -51,6 +51,14 @@ class AppController extends ChangeNotifier {
   bool canUseFeature(BatteryGuardFeature feature) =>
       FeatureCatalog.isEnabled(feature, isPro: premium.isPro);
 
+  List<ChargingSetupProfile> get accessibleChargingSetups {
+    if (premium.isPro ||
+        canUseFeature(BatteryGuardFeature.multipleChargingSetups)) {
+      return chargingSetups;
+    }
+    return chargingSetups.take(1).toList(growable: false);
+  }
+
   Future<void> initialize() async {
     loading = true;
     notifyListeners();
@@ -560,6 +568,11 @@ class AppController extends ChangeNotifier {
     ChargingSetupProfile setup,
   ) async {
     if (activeChargeTest != null) return null;
+    if (!premium.isPro &&
+        chargingSetups.isNotEmpty &&
+        accessibleChargingSetups.every((item) => item.id != setup.id)) {
+      return 'premium_required';
+    }
 
     final first = kIsWeb ? snapshot : await _platform.getSnapshot();
     if (!first.isPlugged) return 'not_plugged';
