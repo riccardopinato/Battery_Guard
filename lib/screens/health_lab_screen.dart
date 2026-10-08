@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/app_controller.dart';
 import '../widgets/premium_card.dart';
@@ -86,7 +87,10 @@ class HealthLabScreen extends StatelessWidget {
                   title: Text(l10n.healthReportedStatus),
                   subtitle: Text(
                     report.reportedHealthAvailable
-                        ? report.reportedHealthStatus
+                        ? localizedBatteryHealth(
+                            l10n,
+                            report.reportedHealthStatus,
+                          )
                         : l10n.dataUnavailable,
                   ),
                 ),
@@ -237,7 +241,10 @@ class HealthLabScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       report.reportedHealthAvailable
-                          ? report.reportedHealthStatus
+                          ? localizedBatteryHealth(
+                              l10n,
+                              report.reportedHealthStatus,
+                            )
                           : l10n.dataUnavailable,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w800,
@@ -311,6 +318,18 @@ class HealthLabScreen extends StatelessWidget {
                           ),
                     ),
                     const SizedBox(height: 6),
+                    Text(
+                      switch (controller.idleDrainReport.status) {
+                        'high' => l10n.idleDrainHigh,
+                        'elevated' => l10n.idleDrainElevated,
+                        'normal' => l10n.idleDrainNormal,
+                        _ => l10n.idleDrainLearning,
+                      },
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
                     Text(l10n.idleDrainSubtitle),
                     const SizedBox(height: 10),
                     _RowMetric(
