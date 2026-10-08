@@ -437,5 +437,122 @@
         "type": "String"
       }
     }
+  },
+  "chargeDoctorSubtitleV2": "Test your real charger + cable combinations and compare them against your own baseline.",
+  "testGuidanceV2": "For comparable results, keep the same charger, cable, device state and similar battery level. Scores are based on your own observations, not a generic phone database.",
+  "chargingSetups": "Charging setups",
+  "newChargingSetup": "New setup",
+  "editChargingSetup": "Edit setup",
+  "setupName": "Setup name",
+  "chargerName": "Charger",
+  "cableName": "Cable",
+  "notesOptional": "Notes (optional)",
+  "save": "Save",
+  "edit": "Edit",
+  "multipleSetupsPro": "Multiple charger/cable setups are available with Pro.",
+  "setupRequiresName": "Enter a setup name, charger or cable.",
+  "deleteSetupTitle": "Delete charging setup?",
+  "deleteSetupBody": "Delete “{setup}”? Saved tests remain available in history.",
+  "noChargingSetups": "Create a charger + cable setup before running your first test.",
+  "setupBeforeTest": "Create your first charging setup",
+  "setupBeforeTestBody": "Free includes one charger/cable profile and qualitative Charge Doctor analysis.",
+  "chargeDoctorSetupReady": "Connect this setup and start a controlled test when the device is actively charging.",
+  "chargerRanking": "Charger & cable ranking",
+  "rankingNeedsTests": "Run reliable tests on your setups to build a ranking.",
+  "rankingTestsAndPower": "{tests} tests • {power} W average",
+  "trendNotEnoughData": "Trend pending",
+  "trendStable": "Stable trend",
+  "trendImproving": "+{value} score",
+  "trendWorsening": "-{value} score",
+  "rankingProTitle": "Compare your charging setups",
+  "rankingProBody": "Pro ranks your charger + cable combinations using your own speed, stability, thermal and stress history.",
+  "peakPower": "Peak power",
+  "batteryStress": "Battery stress",
+  "chargeQualitySummary": "Charge quality",
+  "stability": "Stability",
+  "thermalBehavior": "Thermal",
+  "overall": "Overall",
+  "detailedScoresPro": "Pro unlocks numeric Speed / Stability / Thermal / Overall scores, personal-baseline details and stress breakdown.",
+  "proScoreBreakdown": "Pro score breakdown",
+  "personalBaselineDetail": "Personal baseline: {baseline} W • delta {delta}% • {tests} comparable tests",
+  "stressDetail": "Stress {score}/100 • high SoC {highSoc} min • heat {hot} min",
+  "noChargeAnomalies": "No relevant anomalies detected in this test.",
+  "anomalyUnstablePower": "Power delivery was more variable than expected.",
+  "anomalyPowerDrops": "Repeated charging-power drops were detected.",
+  "anomalyHighTemperature": "Battery temperature reached a high range.",
+  "anomalyTemperatureRise": "Battery temperature rose sharply during the test.",
+  "anomalySlowBaseline": "Charging was materially slower than this setup’s personal baseline.",
+  "anomalyElevatedStress": "The observed session had elevated battery-stress exposure.",
+  "scoreExcellent": "Excellent",
+  "scoreGood": "Good",
+  "scoreFair": "Fair",
+  "scoreWeak": "Weak",
+  "stressLow": "Low",
+  "stressModerate": "Moderate",
+  "stressHigh": "High",
+  "stressVeryHigh": "Very high",
+  "stressNotEnoughData": "Not enough session telemetry to estimate stress exposure.",
+  "stressHeuristicNotice": "Stress is an explainable exposure estimate based on heat, high state of charge and voltage. It is not a direct measurement of battery degradation.",
+  "stressScore": "Stress score",
+  "highSocExposure": "High SoC",
+  "heatExposure": "Heat exposure",
+  "highVoltageExposure": "High voltage",
+  "stressDetailsPro": "Pro unlocks the numeric stress score and exposure breakdown.",
+  "@deleteSetupBody": {
+    "placeholders": {
+      "setup": {
+        "type": "String"
+      }
+    }
+  },
+  "@rankingTestsAndPower": {
+    "placeholders": {
+      "tests": {
+        "type": "int"
+      },
+      "power": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendImproving": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendWorsening": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@personalBaselineDetail": {
+    "placeholders": {
+      "baseline": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      },
+      "tests": {
+        "type": "int"
+      }
+    }
+  },
+  "@stressDetail": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "highSoc": {
+        "type": "String"
+      },
+      "hot": {
+        "type": "String"
+      }
+    }
   }
 }
