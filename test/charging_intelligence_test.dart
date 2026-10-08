@@ -71,6 +71,7 @@ void main() {
       hotMinutes: 0,
       veryHotMinutes: 0,
       highVoltageMinutes: 0,
+      highPowerHeatMinutes: 0,
     );
   }
 
@@ -251,12 +252,14 @@ void main() {
         level: 30,
         temperatureC: 30,
         voltageV: 3.9,
+        powerW: 8,
       ),
       BatteryStressSample(
         timestamp: start.add(const Duration(minutes: 20)),
         level: 60,
         temperatureC: 33,
         voltageV: 4.05,
+        powerW: 10,
       ),
     ]);
     final high = BatteryStressAnalysis.fromSamples([
@@ -265,18 +268,21 @@ void main() {
         level: 85,
         temperatureC: 40,
         voltageV: 4.22,
+        powerW: 20,
       ),
       BatteryStressSample(
         timestamp: start.add(const Duration(minutes: 20)),
         level: 92,
         temperatureC: 43,
         voltageV: 4.28,
+        powerW: 22,
       ),
       BatteryStressSample(
         timestamp: start.add(const Duration(minutes: 40)),
         level: 96,
         temperatureC: 44,
         voltageV: 4.30,
+        powerW: 21,
       ),
     ]);
 
@@ -284,6 +290,7 @@ void main() {
     expect(high.score, greaterThan(low.score));
     expect(high.level.index, greaterThan(low.level.index));
     expect(high.reasons, contains('HEAT_EXPOSURE'));
+    expect(high.highPowerHeatMinutes, greaterThan(0));
   });
 
   test('Free keeps qualitative protection while Pro owns deep analytics', () {
