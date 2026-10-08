@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
+import '../models/battery_intelligence.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/charging_setup_profile.dart';
@@ -116,6 +117,12 @@ class NativeBatteryService {
       value,
     );
     return BatteryHealthReport.fromMap(raw ?? const {});
+  }
+
+  Future<IdleDrainReport> getIdleDrainReport() async {
+    final raw =
+        await _control.invokeMethod<Map<dynamic, dynamic>>('getIdleDrainReport');
+    return IdleDrainReport.fromMap(raw ?? const {});
   }
 
   Future<bool> requestNotificationPermission() async =>
