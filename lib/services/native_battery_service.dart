@@ -6,6 +6,7 @@ import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
+import '../models/charging_setup_profile.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
@@ -86,6 +87,22 @@ class NativeBatteryService {
 
   Future<void> clearChargeTests() =>
       _control.invokeMethod<void>('clearChargeTests');
+
+  Future<List<ChargingSetupProfile>> getChargingSetups() async {
+    final raw =
+        await _control.invokeMethod<List<dynamic>>('getChargingSetups') ??
+            const [];
+    return raw
+        .whereType<Map<dynamic, dynamic>>()
+        .map(ChargingSetupProfile.fromMap)
+        .toList(growable: false);
+  }
+
+  Future<void> saveChargingSetup(ChargingSetupProfile profile) =>
+      _control.invokeMethod<void>('saveChargingSetup', profile.toMap());
+
+  Future<void> deleteChargingSetup(String id) =>
+      _control.invokeMethod<void>('deleteChargingSetup', id);
 
   Future<BatteryHealthReport> getBatteryHealthReport() async {
     final raw = await _control
