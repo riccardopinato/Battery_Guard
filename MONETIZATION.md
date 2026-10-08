@@ -103,3 +103,17 @@ Pro monetizes depth, comparison and optimization:
 - detailed stress exposure.
 
 Refund/revocation never deletes extra setup data. Extra setup profiles become inaccessible for new Free tests but remain stored locally so re-entitlement restores access without data loss.
+
+## Battery Intelligence v1.7 tier boundary
+
+**Free protects**
+- health summary when evidence is sufficient;
+- Android-reported health status separated from estimated health;
+- standard ETA.
+
+**Pro explains and optimizes**
+- confidence score, uncertainty, trend and outlier inspector;
+- Smart ETA from personal history;
+- Idle Drain Sentinel.
+
+Premium gating stays centralized through `FeatureCatalog`; data collection and user-owned local evidence are not deleted when Pro is unavailable.
