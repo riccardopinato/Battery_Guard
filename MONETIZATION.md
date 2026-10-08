@@ -1,4 +1,4 @@
-# Monetization — v1.3.0
+# Monetization — v1.5.0
 
 Product ID: `battery_guard_pro_lifetime`
 
@@ -16,6 +16,10 @@ Type: Google Play non-consumable / one-time purchase.
 - Device Capability Map and telemetry provenance/confidence;
 - session validity/reason codes and OEM charge-limit detection;
 - session summary with basic charging metrics;
+- Charge Doctor Basic with one charger/cable setup;
+- qualitative Speed / Stability / Thermal / Overall evaluation;
+- relevant charging anomalies;
+- qualitative Battery Stress level;
 - 7-day Insights;
 - Google AdMob **Large Anchored Adaptive Banner** after consent where required.
 
@@ -34,7 +38,12 @@ Type: Google Play non-consumable / one-time purchase.
 - Battery Health Lab with estimated capacity/health, cycle count where exposed, trend and thermal profile;
 - Charge Doctor controlled tests and personal comparison;
 - 30-day Insights;
-- full charging curves (SoC / power / temperature / current) and deterministic phase analysis.
+- full charging curves (SoC / power / temperature / current) and deterministic phase analysis;
+- multiple charger/cable setup profiles;
+- numeric Speed / Stability / Thermal / Overall score breakdown;
+- personal-baseline details;
+- charger/cable ranking and historical trends;
+- numeric Battery Stress score and exposure breakdown.
 
 ## Principles
 - no subscription;
@@ -75,3 +84,22 @@ Premium in MAXI STEP A:
 - curve phase analysis.
 
 Curve samples are collected locally for both Free and Pro so upgrading later does not discard prior history. Free users do not receive the full curve visualization/analysis until entitlement is active.
+
+
+## Charging Intelligence monetization rule — v1.5
+Free must remain useful for protection and diagnosis:
+- one charger/cable setup;
+- unlimited controlled tests on that accessible setup;
+- qualitative score bands;
+- anomalies;
+- qualitative stress level.
+
+Pro monetizes depth, comparison and optimization:
+- multiple setup profiles;
+- numeric score values;
+- baseline deltas;
+- ranking;
+- trends;
+- detailed stress exposure.
+
+Refund/revocation never deletes extra setup data. Extra setup profiles become inaccessible for new Free tests but remain stored locally so re-entitlement restores access without data loss.
