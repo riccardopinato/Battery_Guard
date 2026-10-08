@@ -349,6 +349,7 @@ class AppController extends ChangeNotifier {
         confidence: ChargeTestConfidence.high,
         powerCoefficientOfVariation: primary ? 0.07 + index * 0.01 : 0.14,
         powerDropCount: primary ? (index == 3 ? 1 : 0) : 2,
+        stressAvailable: true,
         stressScore: primary ? 18.0 + index * 2 : 28.0,
         highSocMinutes: 0,
         hotMinutes: primary ? 0 : 1.5,
@@ -684,6 +685,7 @@ class AppController extends ChangeNotifier {
       powerCoefficientOfVariation:
           active.coefficientOfVariation(active.powers),
       powerDropCount: active.powerDropCount(),
+      stressAvailable: stress.dataSufficient,
       stressScore: stress.dataSufficient ? stress.score : 0,
       highSocMinutes: stress.highSocMinutes,
       hotMinutes: stress.hotMinutes,
