@@ -556,5 +556,14 @@
     }
   },
   "proFeatureRanking": "Ladegerät- + Kabel-Ranking und Trends",
-  "proFeatureStress": "Detaillierter Battery-Stress-Score und Expositionsaufschlüsselung"
+  "proFeatureStress": "Detaillierter Battery-Stress-Score und Expositionsaufschlüsselung",
+  "powerHeatExposure": "Hohe Leistung + Wärme",
+  "powerHeatDetail": "Überlappung hohe Leistung + Wärme: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  }
 }
