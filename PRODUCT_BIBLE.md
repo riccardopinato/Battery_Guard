@@ -29,9 +29,13 @@ Ridurre l'incertezza durante la ricarica del telefono con dati osservabili e avv
 
 Charge Doctor compares observed telemetry under controlled conditions. It never labels a charger or cable as defective from one measurement. Personal comparison requires reliable prior tests using the same charging source.
 
-## Monetization v1
+## Monetization doctrine
 
-Free keeps all core monitoring/protection behavior, including the lower/upper charge window and their distinct alerts. Free can display consent-gated AdMob banners. Pro is a one-time Google Play purchase that removes ads and unlocks Battery Health Lab, Charge Doctor and 30-day Insights. No subscription.
+**Free protects. Pro explains, compares and optimizes.**
+
+Free always includes safety monitoring, reliability diagnostics, telemetry availability/provenance, Device Capability Map, session validity/reason codes and OEM/adaptive charge-limit detection.
+
+Pro is a one-time Google Play purchase. It removes ads and unlocks advanced analysis surfaces, including full charging curves/phase analysis, Battery Health Lab, Charge Doctor advanced capabilities and extended Insights. No subscription.
 
 ## Battery Health Lab guardrails
 
@@ -52,13 +56,20 @@ Free ads must never receive Battery Guard battery telemetry, charging history, H
 
 ## Data truth
 
-Ogni misura deve avere disponibilità esplicita. Una sessione può essere:
-- active
-- completed
-- interrupted
-- uncertain
+Ogni segnale deve dichiarare:
+- availability;
+- source;
+- confidence;
+- observed timestamp.
 
-Solo le sessioni completed affidabili alimentano Insights e baseline adattive.
+Una sessione mantiene separati:
+- lifecycle quality: active / completed / interrupted / uncertain;
+- validity: active / valid / partial / interrupted / excluded / uncertain;
+- reason codes spiegabili.
+
+Una sessione vecchia senza nuova evidenza resta leggibile, ma Battery Guard non inventa curve, source o reason codes retroattivi.
+
+Solo le sessioni con validità sufficiente alimentano Insights e baseline compatibili.
 
 ## Release truth
 
