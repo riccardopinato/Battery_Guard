@@ -259,7 +259,7 @@
   },
   "restorePurchases": "Ripristina acquisti",
   "storeUnavailable": "L'acquisto Google Play non è disponibile su questa build o dispositivo.",
-  "proFeatureDoctor": "Test controllati Charge Doctor",
+  "proFeatureDoctor": "Punteggi numerici avanzati Charge Doctor e baseline personale",
   "proFeatureInsights30": "Insights a 30 giorni",
   "purchaseError": "Impossibile completare l'acquisto.",
   "proSection": "Pro",
@@ -554,5 +554,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "proFeatureRanking": "Classifica caricatore + cavo e trend",
+  "proFeatureStress": "Punteggio Battery Stress dettagliato e breakdown esposizioni"
 }
