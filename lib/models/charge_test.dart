@@ -30,6 +30,7 @@ class ChargeTest {
     required this.hotMinutes,
     required this.veryHotMinutes,
     required this.highVoltageMinutes,
+    required this.highPowerHeatMinutes,
   });
 
   factory ChargeTest.fromMap(Map<dynamic, dynamic> map) {
@@ -83,6 +84,7 @@ class ChargeTest {
       hotMinutes: d('hotMinutes'),
       veryHotMinutes: d('veryHotMinutes'),
       highVoltageMinutes: d('highVoltageMinutes'),
+      highPowerHeatMinutes: d('highPowerHeatMinutes'),
     );
   }
 
@@ -115,6 +117,7 @@ class ChargeTest {
         'hotMinutes': hotMinutes,
         'veryHotMinutes': veryHotMinutes,
         'highVoltageMinutes': highVoltageMinutes,
+        'highPowerHeatMinutes': highPowerHeatMinutes,
       };
 
   final String id;
@@ -145,6 +148,7 @@ class ChargeTest {
   final double hotMinutes;
   final double veryHotMinutes;
   final double highVoltageMinutes;
+  final double highPowerHeatMinutes;
 
   Duration get duration => endedAt.difference(startedAt);
   double get temperatureRiseC =>
