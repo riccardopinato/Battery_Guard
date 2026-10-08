@@ -251,7 +251,7 @@
   "unlockPro": "Pro freischalten",
   "restorePurchases": "Käufe wiederherstellen",
   "storeUnavailable": "Google-Play-Käufe sind in diesem Build oder auf diesem Gerät nicht verfügbar.",
-  "proFeatureDoctor": "Kontrollierte Charge-Doctor-Tests",
+  "proFeatureDoctor": "Erweiterte numerische Charge-Doctor-Scores und persönliche Baseline",
   "proFeatureInsights30": "30-Tage-Insights",
   "purchaseError": "Kauf konnte nicht abgeschlossen werden.",
   "proSection": "Pro",
@@ -434,6 +434,134 @@
   "@curveTemperatureRise": {
     "placeholders": {
       "value": {
+        "type": "String"
+      }
+    }
+  },
+  "chargeDoctorSubtitleV2": "Teste reale Ladegerät- + Kabel-Kombinationen und vergleiche sie mit deiner persönlichen Baseline.",
+  "testGuidanceV2": "Für vergleichbare Ergebnisse nutze dasselbe Ladegerät, Kabel, denselben Gerätezustand und einen ähnlichen Akkustand. Die Scores basieren auf deinen eigenen Messungen, nicht auf einer allgemeinen Gerätedatenbank.",
+  "chargingSetups": "Lade-Setups",
+  "newChargingSetup": "Neues Setup",
+  "editChargingSetup": "Setup bearbeiten",
+  "setupName": "Setup-Name",
+  "chargerName": "Ladegerät",
+  "cableName": "Kabel",
+  "notesOptional": "Notizen (optional)",
+  "save": "Speichern",
+  "edit": "Bearbeiten",
+  "multipleSetupsPro": "Mehrere Ladegerät/Kabel-Setups sind mit Pro verfügbar.",
+  "setupRequiresName": "Gib einen Namen, ein Ladegerät oder ein Kabel ein.",
+  "deleteSetupTitle": "Lade-Setup löschen?",
+  "deleteSetupBody": "„{setup}“ löschen? Gespeicherte Tests bleiben im Verlauf.",
+  "noChargingSetups": "Erstelle vor dem ersten Test ein Ladegerät- + Kabel-Setup.",
+  "setupBeforeTest": "Erstelle dein erstes Lade-Setup",
+  "setupBeforeTestBody": "Free enthält ein Ladegerät/Kabel-Profil und die qualitative Charge-Doctor-Analyse.",
+  "chargeDoctorSetupReady": "Verbinde dieses Setup und starte einen kontrollierten Test, wenn das Gerät aktiv lädt.",
+  "chargerRanking": "Ladegerät- und Kabel-Ranking",
+  "rankingNeedsTests": "Führe zuverlässige Tests durch, um ein Ranking aufzubauen.",
+  "rankingTestsAndPower": "{tests} Tests • Ø {power} W",
+  "trendNotEnoughData": "Trend ausstehend",
+  "trendStable": "Stabiler Trend",
+  "trendImproving": "+{value} Punkte",
+  "trendWorsening": "-{value} Punkte",
+  "rankingProTitle": "Vergleiche deine Lade-Setups",
+  "rankingProBody": "Pro bewertet deine Ladegerät- + Kabel-Kombinationen anhand deines eigenen Verlaufs für Geschwindigkeit, Stabilität, Temperatur und Stress.",
+  "peakPower": "Spitzenleistung",
+  "batteryStress": "Akkustress",
+  "chargeQualitySummary": "Ladequalität",
+  "stability": "Stabilität",
+  "thermalBehavior": "Thermik",
+  "overall": "Gesamt",
+  "detailedScoresPro": "Pro schaltet numerische Scores, persönliche Baseline und Stress-Details frei.",
+  "proScoreBreakdown": "Pro-Score-Details",
+  "personalBaselineDetail": "Persönliche Baseline: {baseline} W • Delta {delta}% • {tests} vergleichbare Tests",
+  "stressDetail": "Stress {score}/100 • hoher SoC {highSoc} min • Wärme {hot} min",
+  "noChargeAnomalies": "Keine relevanten Auffälligkeiten in diesem Test erkannt.",
+  "anomalyUnstablePower": "Die Leistungsabgabe war variabler als erwartet.",
+  "anomalyPowerDrops": "Wiederholte Einbrüche der Ladeleistung wurden erkannt.",
+  "anomalyHighTemperature": "Die Akkutemperatur erreichte einen hohen Bereich.",
+  "anomalyTemperatureRise": "Die Akkutemperatur stieg während des Tests schnell an.",
+  "anomalySlowBaseline": "Das Laden war deutlich langsamer als die persönliche Baseline dieses Setups.",
+  "anomalyElevatedStress": "Die Sitzung zeigte eine erhöhte Akkustress-Exposition.",
+  "scoreExcellent": "Ausgezeichnet",
+  "scoreGood": "Gut",
+  "scoreFair": "Mittel",
+  "scoreWeak": "Schwach",
+  "stressLow": "Niedrig",
+  "stressModerate": "Moderat",
+  "stressHigh": "Hoch",
+  "stressVeryHigh": "Sehr hoch",
+  "stressNotEnoughData": "Nicht genügend Telemetrie zur Schätzung der Stress-Exposition.",
+  "stressHeuristicNotice": "Stress ist eine nachvollziehbare Expositionsschätzung aus Wärme, hohem Ladezustand und Spannung. Er misst nicht direkt die chemische Alterung.",
+  "stressScore": "Stress-Score",
+  "highSocExposure": "Hoher SoC",
+  "heatExposure": "Wärmeexposition",
+  "highVoltageExposure": "Hohe Spannung",
+  "stressDetailsPro": "Pro schaltet den numerischen Stress-Score und die Expositionsdetails frei.",
+  "@deleteSetupBody": {
+    "placeholders": {
+      "setup": {
+        "type": "String"
+      }
+    }
+  },
+  "@rankingTestsAndPower": {
+    "placeholders": {
+      "tests": {
+        "type": "int"
+      },
+      "power": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendImproving": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendWorsening": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@personalBaselineDetail": {
+    "placeholders": {
+      "baseline": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      },
+      "tests": {
+        "type": "int"
+      }
+    }
+  },
+  "@stressDetail": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "highSoc": {
+        "type": "String"
+      },
+      "hot": {
+        "type": "String"
+      }
+    }
+  },
+  "proFeatureRanking": "Ladegerät- + Kabel-Ranking und Trends",
+  "proFeatureStress": "Detaillierter Battery-Stress-Score und Expositionsaufschlüsselung",
+  "powerHeatExposure": "Hohe Leistung + Wärme",
+  "powerHeatDetail": "Überlappung hohe Leistung + Wärme: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
         "type": "String"
       }
     }

@@ -201,6 +201,17 @@ jobs:
             echo "freeSessionReasons=true"
             echo "freeOemLimitDetection=true"
             echo "premiumChargingCurve=true"
+            echo "chargingIntelligence=true"
+            echo "freeChargeDoctorBasic=true"
+            echo "freeChargingSetupLimit=1"
+            echo "freeQualitativeScores=true"
+            echo "freeBatteryStressSummary=true"
+            echo "premiumMultipleSetups=true"
+            echo "premiumDetailedChargeScores=true"
+            echo "premiumChargerRanking=true"
+            echo "premiumBatteryStressDetails=true"
+            echo "personalBaselineScope=profileId"
+            echo "batteryStressModel=exposure-heuristic-v1"
           } > release/BUILD_EVIDENCE.txt
 
           (

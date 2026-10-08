@@ -137,12 +137,34 @@
 - six-language localization parity;
 - regression coverage for provenance, session reasons, feature access and curve analyzer.
 
-## NEXT — MAXI STEP B: Charging Intelligence
-Target: v1.4 + v1.5
-- Charge Doctor 2.0;
-- charger/cable profiles;
-- Stability Score;
-- Speed / Stability / Thermal / Overall score separation;
-- personal baseline and charger ranking;
-- Battery Stress Engine;
-- Free qualitative summary vs Premium detailed score/breakdown/trends.
+## 1.4.0 — Charge Doctor 2.0 ✅ IMPLEMENTED / DEVICE QA PENDING
+- persistent charger/cable setup profiles;
+- Free: one setup + controlled tests + qualitative Speed/Stability/Thermal/Overall;
+- Pro: multiple setups + numeric score breakdown;
+- Stability Score from sampled power variance + repeated drops;
+- Speed Score against personal baseline only;
+- Thermal Score from actual observed temperature and rise;
+- raw evidence persisted so formulas remain recalculable;
+- legacy tests remain readable without fabricated profile evidence.
+
+## 1.5.0 — Battery Stress & Charging Ranking ✅ IMPLEMENTED / DEVICE QA PENDING
+- Battery Stress exposure engine for normal sessions + Charge Doctor tests;
+- factors: high SoC, heat, very-high temperature, high voltage, high-power/heat overlap;
+- explicit heuristic disclaimer: no direct degradation claim;
+- Free qualitative stress + anomalies;
+- Pro numeric stress breakdown;
+- charger/cable ranking from user-owned reliable tests;
+- per-setup Overall Score and Stress trends when enough history exists;
+- centralized Free/Premium gates for profiles, scores, ranking and stress details.
+
+## NEXT — MAXI STEP C: Battery Intelligence
+Target: v1.6 + v1.7
+- Health Lab 2.0;
+- reported vs estimated health evidence;
+- confidence engine and outlier inspector;
+- capacity/health trend with smoothing and uncertainty;
+- Smart ETA based on setup/history/taper;
+- screen ON/OFF charging behavior where reliable;
+- Idle Drain Sentinel against the user's own baseline;
+- Free health summary + standard ETA;
+- Pro full Health Lab, trend/confidence, Smart ETA and Idle Drain.

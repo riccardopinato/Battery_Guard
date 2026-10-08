@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charge_test.dart';
+import '../models/charging_setup_profile.dart';
 import '../services/app_controller.dart';
-import '../services/charge_test_group.dart';
+import '../services/charging_intelligence_engine.dart';
+import '../services/feature_access.dart';
 import '../widgets/premium_card.dart';
 
 class ChargeDoctorScreen extends StatefulWidget {
@@ -22,7 +24,7 @@ class ChargeDoctorScreen extends StatefulWidget {
 }
 
 class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
-  final TextEditingController _labelController = TextEditingController();
+  String? _selectedSetupId;
   Timer? _uiTimer;
 
   @override
@@ -38,8 +40,19 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
   @override
   void dispose() {
     _uiTimer?.cancel();
-    _labelController.dispose();
     super.dispose();
+  }
+
+  ChargingSetupProfile? _selectedSetup() {
+    final setups = widget.controller.chargingSetups;
+    if (setups.isEmpty) return null;
+    final selected = _selectedSetupId;
+    if (selected != null) {
+      for (final setup in setups) {
+        if (setup.id == selected) return setup;
+      }
+    }
+    return setups.first;
   }
 
   @override
@@ -47,30 +60,16 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
     final l10n = AppLocalizations.of(context);
     final active = widget.controller.activeChargeTest;
     final tests = widget.controller.chargeTests;
+    final setups = widget.controller.accessibleChargingSetups;
+    final selectedSetup = _selectedSetup();
     final scheme = Theme.of(context).colorScheme;
-
-    if (!widget.controller.premium.isPro) {
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-        children: [
-          Text(
-            l10n.chargeDoctorTitle,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.chargeDoctorSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: 18),
-          PremiumCard(controller: widget.controller),
-        ],
-      );
-    }
+    final detailedScores = widget.controller.canUseFeature(
+      BatteryGuardFeature.detailedChargeScores,
+    );
+    final rankings = ChargingIntelligenceEngine.ranking(
+      tests: tests,
+      profiles: setups,
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
@@ -95,20 +94,31 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          l10n.chargeDoctorSubtitle,
+          l10n.chargeDoctorSubtitleV2,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
+        _SetupSection(
+          controller: widget.controller,
+          setups: setups,
+          selectedSetup: selectedSetup,
+          onSelect: (id) => setState(() => _selectedSetupId = id),
+          onCreate: () => _openSetupDialog(context),
+          onEdit: (setup) => _openSetupDialog(context, setup: setup),
+          onDelete: (setup) => _confirmDeleteSetup(context, setup),
+        ),
+        const SizedBox(height: 14),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: active == null
                 ? _StartPanel(
                     controller: widget.controller,
-                    labelController: _labelController,
+                    setup: selectedSetup,
                     onStarted: () => setState(() {}),
+                    onCreateSetup: () => _openSetupDialog(context),
                   )
                 : _ActivePanel(
                     controller: widget.controller,
@@ -127,11 +137,23 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
               children: [
                 const Icon(Icons.science_outlined),
                 const SizedBox(width: 10),
-                Expanded(child: Text(l10n.testGuidance)),
+                Expanded(child: Text(l10n.testGuidanceV2)),
               ],
             ),
           ),
         ),
+        const SizedBox(height: 22),
+        Text(
+          l10n.chargerRanking,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+        const SizedBox(height: 10),
+        if (widget.controller.canUseFeature(BatteryGuardFeature.chargerRanking))
+          _RankingPanel(entries: rankings)
+        else
+          _PremiumRankingPreview(controller: widget.controller),
         const SizedBox(height: 22),
         Text(
           l10n.savedTests,
@@ -164,50 +186,138 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
           ...tests.map(
             (test) => _TestCard(
               test: test,
-              comparison: _comparisonFor(test, tests),
+              analysis: ChargingIntelligenceEngine.analyze(test, tests),
+              detailedScores: detailedScores,
             ),
           ),
+        if (!widget.controller.premium.isPro) ...[
+          const SizedBox(height: 18),
+          PremiumCard(controller: widget.controller),
+        ],
       ],
     );
   }
 
-  _Comparison _comparisonFor(
-    ChargeTest current,
-    List<ChargeTest> all,
-  ) {
-    if (!current.reliable || current.averagePowerW <= 0) {
-      return const _Comparison.insufficient();
-    }
+  Future<void> _openSetupDialog(
+    BuildContext context, {
+    ChargingSetupProfile? setup,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final name = TextEditingController(text: setup?.name ?? '');
+    final charger = TextEditingController(text: setup?.chargerName ?? '');
+    final cable = TextEditingController(text: setup?.cableName ?? '');
+    final notes = TextEditingController(text: setup?.notes ?? '');
 
-    final currentGroup = chargeTestGroupKey(
-      label: current.label,
-      source: current.source,
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          setup == null ? l10n.newChargingSetup : l10n.editChargingSetup,
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                decoration: InputDecoration(labelText: l10n.setupName),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: charger,
+                decoration: InputDecoration(labelText: l10n.chargerName),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: cable,
+                decoration: InputDecoration(labelText: l10n.cableName),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: notes,
+                maxLines: 2,
+                decoration: InputDecoration(labelText: l10n.notesOptional),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
     );
-    final comparable = all
-        .where(
-          (test) =>
-              test.id != current.id &&
-              test.reliable &&
-              chargeTestGroupKey(
-                    label: test.label,
-                    source: test.source,
-                  ) ==
-                  currentGroup &&
-              test.averagePowerW > 0,
-        )
-        .toList(growable: false);
 
-    if (comparable.length < 2) {
-      return const _Comparison.insufficient();
+    if (shouldSave != true || !mounted) {
+      name.dispose();
+      charger.dispose();
+      cable.dispose();
+      notes.dispose();
+      return;
     }
 
-    final baseline =
-        comparable.map((test) => test.averagePowerW).reduce((a, b) => a + b) /
-            comparable.length;
-    if (baseline <= 0) return const _Comparison.insufficient();
+    final result = await widget.controller.saveChargingSetup(
+      id: setup?.id,
+      name: name.text,
+      chargerName: charger.text,
+      cableName: cable.text,
+      notes: notes.text,
+    );
+    name.dispose();
+    charger.dispose();
+    cable.dispose();
+    notes.dispose();
 
-    final delta = ((current.averagePowerW - baseline) / baseline) * 100;
-    return _Comparison(deltaPercent: delta, baselineW: baseline);
+    if (!mounted) return;
+    if (result == 'premium_required') {
+      ScaffoldMessenger.of(this.context).showSnackBar(
+        SnackBar(content: Text(l10n.multipleSetupsPro)),
+      );
+      return;
+    }
+    if (result == 'invalid_setup') {
+      ScaffoldMessenger.of(this.context).showSnackBar(
+        SnackBar(content: Text(l10n.setupRequiresName)),
+      );
+      return;
+    }
+    if (result != null) {
+      setState(() => _selectedSetupId = result);
+    }
+  }
+
+  Future<void> _confirmDeleteSetup(
+    BuildContext context,
+    ChargingSetupProfile setup,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteSetupTitle),
+        content: Text(l10n.deleteSetupBody(setup.displayName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await widget.controller.deleteChargingSetup(setup.id);
+      if (mounted) setState(() => _selectedSetupId = null);
+    }
   }
 
   Future<void> _confirmClear(BuildContext context) async {
@@ -236,37 +346,185 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
   }
 }
 
-class _StartPanel extends StatelessWidget {
-  const _StartPanel({
+class _SetupSection extends StatelessWidget {
+  const _SetupSection({
     required this.controller,
-    required this.labelController,
-    required this.onStarted,
+    required this.setups,
+    required this.selectedSetup,
+    required this.onSelect,
+    required this.onCreate,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final AppController controller;
-  final TextEditingController labelController;
-  final VoidCallback onStarted;
+  final List<ChargingSetupProfile> setups;
+  final ChargingSetupProfile? selectedSetup;
+  final ValueChanged<String> onSelect;
+  final VoidCallback onCreate;
+  final ValueChanged<ChargingSetupProfile> onEdit;
+  final ValueChanged<ChargingSetupProfile> onDelete;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final canAddMultiple =
+        controller.canUseFeature(BatteryGuardFeature.multipleChargingSetups);
+    final canAdd = setups.isEmpty || canAddMultiple;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.power_rounded),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    l10n.chargingSetups,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: canAdd ? l10n.newChargingSetup : l10n.multipleSetupsPro,
+                  onPressed: canAdd
+                      ? onCreate
+                      : () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.multipleSetupsPro)),
+                          );
+                        },
+                  icon: Icon(
+                    canAdd ? Icons.add_rounded : Icons.lock_outline_rounded,
+                  ),
+                ),
+              ],
+            ),
+            if (setups.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(l10n.noChargingSetups),
+              )
+            else ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final setup in setups)
+                    ChoiceChip(
+                      label: Text(setup.displayName),
+                      selected: selectedSetup?.id == setup.id,
+                      onSelected: (_) => onSelect(setup.id),
+                    ),
+                ],
+              ),
+              if (selectedSetup != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          [
+                            if (selectedSetup!.chargerName.isNotEmpty)
+                              selectedSetup!.chargerName,
+                            if (selectedSetup!.cableName.isNotEmpty)
+                              selectedSetup!.cableName,
+                            localizedPlugType(l10n, selectedSetup!.source),
+                          ].join(' • '),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.edit,
+                        onPressed: () => onEdit(selectedSetup!),
+                        icon: const Icon(Icons.edit_outlined),
+                      ),
+                      IconButton(
+                        tooltip: l10n.delete,
+                        onPressed: controller.activeChargeTest?.profileId ==
+                                selectedSetup!.id
+                            ? null
+                            : () => onDelete(selectedSetup!),
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StartPanel extends StatelessWidget {
+  const _StartPanel({
+    required this.controller,
+    required this.setup,
+    required this.onStarted,
+    required this.onCreateSetup,
+  });
+
+  final AppController controller;
+  final ChargingSetupProfile? setup;
+  final VoidCallback onStarted;
+  final VoidCallback onCreateSetup;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    if (setup == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.setupBeforeTest,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(l10n.setupBeforeTestBody),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            onPressed: onCreateSetup,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(l10n.newChargingSetup),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          controller: labelController,
-          textInputAction: TextInputAction.done,
-          decoration: InputDecoration(
-            labelText: l10n.testName,
-            hintText: l10n.testNameHint,
-            prefixIcon: const Icon(Icons.cable_rounded),
-          ),
+        Text(
+          setup!.displayName,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
         ),
+        const SizedBox(height: 6),
+        Text(l10n.chargeDoctorSetupReady),
         const SizedBox(height: 14),
         FilledButton.icon(
           onPressed: () async {
-            final error =
-                await controller.startChargeDoctorTest(labelController.text);
+            final error = await controller.startChargeDoctorTest(setup!);
             if (!context.mounted) return;
             if (error == null) {
               onStarted();
@@ -276,6 +534,7 @@ class _StartPanel extends StatelessWidget {
               'not_plugged' => l10n.testRequiresPlug,
               'not_charging' => l10n.testRequiresCharging,
               'power_unavailable' => l10n.testPowerUnavailable,
+              'premium_required' => l10n.multipleSetupsPro,
               _ => l10n.testPowerUnavailable,
             };
             ScaffoldMessenger.of(context).showSnackBar(
@@ -384,14 +643,125 @@ class _ActivePanel extends StatelessWidget {
   }
 }
 
+class _RankingPanel extends StatelessWidget {
+  const _RankingPanel({required this.entries});
+
+  final List<ChargingSetupRankingEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (entries.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Text(l10n.rankingNeedsTests),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (var index = 0; index < entries.length; index++)
+          Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Text('#${index + 1}'),
+              ),
+              title: Text(
+                entries[index].name,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              subtitle: Text(
+                l10n.rankingTestsAndPower(
+                  entries[index].tests,
+                  entries[index].averagePowerW.toStringAsFixed(1),
+                ),
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _score(entries[index].overallScore),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                  ),
+                  Text(
+                    _trendText(l10n, entries[index].overallTrendDelta),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _score(double? value) => value == null ? '—' : value.toStringAsFixed(0);
+
+  String _trendText(AppLocalizations l10n, double? delta) {
+    if (delta == null) return l10n.trendNotEnoughData;
+    if (delta.abs() < 2) return l10n.trendStable;
+    return delta > 0
+        ? l10n.trendImproving(delta.toStringAsFixed(0))
+        : l10n.trendWorsening(delta.abs().toStringAsFixed(0));
+  }
+}
+
+class _PremiumRankingPreview extends StatelessWidget {
+  const _PremiumRankingPreview({required this.controller});
+
+  final AppController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            const Icon(Icons.emoji_events_outlined, size: 34),
+            const SizedBox(height: 10),
+            Text(
+              l10n.rankingProTitle,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.rankingProBody,
+              textAlign: TextAlign.center,
+            ),
+            if (controller.premium.canUnlock) ...[
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () => controller.premium.buy(),
+                icon: const Icon(Icons.workspace_premium_outlined),
+                label: Text(l10n.unlockPro),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TestCard extends StatelessWidget {
   const _TestCard({
     required this.test,
-    required this.comparison,
+    required this.analysis,
+    required this.detailedScores,
   });
 
   final ChargeTest test;
-  final _Comparison comparison;
+  final ChargeTestAnalysis analysis;
+  final bool detailedScores;
 
   @override
   Widget build(BuildContext context) {
@@ -403,18 +773,6 @@ class _TestCard extends StatelessWidget {
           ChargeTestConfidence.medium => l10n.confidenceMedium,
           ChargeTestConfidence.high => l10n.confidenceHigh,
         };
-
-    final comparisonText = comparison.insufficient
-        ? l10n.baselineNeedsTests
-        : comparison.deltaPercent! > 10
-            ? l10n.aboveBaseline(
-                comparison.deltaPercent!.abs().toStringAsFixed(0),
-              )
-            : comparison.deltaPercent! < -10
-                ? l10n.belowBaseline(
-                    comparison.deltaPercent!.abs().toStringAsFixed(0),
-                  )
-                : l10n.similarBaseline;
 
     final duration = test.duration.inMinutes > 0
         ? l10n.minutesShort(test.duration.inMinutes)
@@ -445,6 +803,18 @@ class _TestCard extends StatelessWidget {
                 Chip(label: Text(confidenceLabel())),
               ],
             ),
+            if (test.chargerName.isNotEmpty || test.cableName.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                [
+                  if (test.chargerName.isNotEmpty) test.chargerName,
+                  if (test.cableName.isNotEmpty) test.cableName,
+                ].join(' • '),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -457,23 +827,20 @@ class _TestCard extends StatelessWidget {
                       : l10n.measurementUnavailable,
                 ),
                 _Metric(
-                  label: l10n.observedCurrent,
-                  value: test.averageCurrentMa > 0
-                      ? '${test.averageCurrentMa.toStringAsFixed(0)} mA'
-                      : l10n.measurementUnavailable,
-                ),
-                _Metric(
-                  label: l10n.observedVoltage,
-                  value: test.averageVoltageV > 0
-                      ? '${test.averageVoltageV.toStringAsFixed(2)} V'
+                  label: l10n.peakPower,
+                  value: test.peakPowerW > 0
+                      ? '${test.peakPowerW.toStringAsFixed(1)} W'
                       : l10n.measurementUnavailable,
                 ),
                 _Metric(
                   label: l10n.temperatureRise,
-                  value: test.maxTemperatureC > 0 &&
-                          test.startTemperatureC > 0
+                  value: test.temperatureAvailable
                       ? '+${test.temperatureRiseC.toStringAsFixed(1)} °C'
                       : l10n.measurementUnavailable,
+                ),
+                _Metric(
+                  label: l10n.batteryStress,
+                  value: _stressBand(l10n, test),
                 ),
               ],
             ),
@@ -486,16 +853,224 @@ class _TestCard extends StatelessWidget {
             ),
             const Divider(height: 24),
             Text(
-              l10n.baselineComparison,
+              l10n.chargeQualitySummary,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
             ),
-            const SizedBox(height: 4),
-            Text(comparisonText),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _BandChip(
+                  label: l10n.speed,
+                  band: analysis.speedBand,
+                ),
+                _BandChip(
+                  label: l10n.stability,
+                  band: analysis.stabilityBand,
+                ),
+                _BandChip(
+                  label: l10n.thermalBehavior,
+                  band: analysis.thermalBand,
+                ),
+                _BandChip(
+                  label: l10n.overall,
+                  band: analysis.overallBand,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _Anomalies(analysis: analysis),
+            if (detailedScores) ...[
+              const Divider(height: 24),
+              _DetailedScores(test: test, analysis: analysis),
+            ] else ...[
+              const Divider(height: 24),
+              Row(
+                children: [
+                  const Icon(Icons.lock_outline_rounded, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(l10n.detailedScoresPro)),
+                ],
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  String _stressBand(AppLocalizations l10n, ChargeTest test) {
+    if (!test.stressAvailable) return l10n.measurementUnavailable;
+    final value = test.stressScore;
+    if (value < 25) return l10n.stressLow;
+    if (value < 50) return l10n.stressModerate;
+    if (value < 75) return l10n.stressHigh;
+    return l10n.stressVeryHigh;
+  }
+}
+
+class _DetailedScores extends StatelessWidget {
+  const _DetailedScores({
+    required this.test,
+    required this.analysis,
+  });
+
+  final ChargeTest test;
+  final ChargeTestAnalysis analysis;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.proScoreBreakdown,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            _ScoreMetric(label: l10n.speed, value: analysis.speedScore),
+            _ScoreMetric(label: l10n.stability, value: analysis.stabilityScore),
+            _ScoreMetric(
+              label: l10n.thermalBehavior,
+              value: analysis.thermalScore,
+            ),
+            _ScoreMetric(label: l10n.overall, value: analysis.overallScore),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (analysis.baselinePowerW != null &&
+            analysis.powerDeltaPercent != null)
+          Text(
+            l10n.personalBaselineDetail(
+              analysis.baselinePowerW!.toStringAsFixed(1),
+              analysis.powerDeltaPercent!.toStringAsFixed(0),
+              analysis.comparableTests,
+            ),
+          )
+        else
+          Text(l10n.baselineNeedsTests),
+        if (test.stressAvailable) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.stressDetail(
+              test.stressScore.toStringAsFixed(0),
+              test.highSocMinutes.toStringAsFixed(1),
+              test.hotMinutes.toStringAsFixed(1),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.powerHeatDetail(
+              test.highPowerHeatMinutes.toStringAsFixed(1),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Anomalies extends StatelessWidget {
+  const _Anomalies({required this.analysis});
+
+  final ChargeTestAnalysis analysis;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final visible = analysis.anomalies
+        .where((item) => item != ChargingAnomaly.insufficientBaseline)
+        .toList(growable: false);
+
+    if (visible.isEmpty) {
+      return Row(
+        children: [
+          const Icon(Icons.check_circle_outline_rounded, size: 18),
+          const SizedBox(width: 7),
+          Expanded(child: Text(l10n.noChargeAnomalies)),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final anomaly in visible)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.warning_amber_rounded, size: 18),
+                const SizedBox(width: 7),
+                Expanded(child: Text(_label(l10n, anomaly))),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _label(AppLocalizations l10n, ChargingAnomaly anomaly) {
+    return switch (anomaly) {
+      ChargingAnomaly.unstablePower => l10n.anomalyUnstablePower,
+      ChargingAnomaly.repeatedPowerDrops => l10n.anomalyPowerDrops,
+      ChargingAnomaly.highTemperature => l10n.anomalyHighTemperature,
+      ChargingAnomaly.highTemperatureRise => l10n.anomalyTemperatureRise,
+      ChargingAnomaly.slowerThanBaseline => l10n.anomalySlowBaseline,
+      ChargingAnomaly.insufficientBaseline => l10n.baselineNeedsTests,
+      ChargingAnomaly.elevatedStress => l10n.anomalyElevatedStress,
+    };
+  }
+}
+
+class _BandChip extends StatelessWidget {
+  const _BandChip({
+    required this.label,
+    required this.band,
+  });
+
+  final String label;
+  final ChargeScoreBand band;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final value = switch (band) {
+      ChargeScoreBand.excellent => l10n.scoreExcellent,
+      ChargeScoreBand.good => l10n.scoreGood,
+      ChargeScoreBand.fair => l10n.scoreFair,
+      ChargeScoreBand.weak => l10n.scoreWeak,
+      ChargeScoreBand.unavailable => l10n.measurementUnavailable,
+    };
+    return Chip(label: Text('$label: $value'));
+  }
+}
+
+class _ScoreMetric extends StatelessWidget {
+  const _ScoreMetric({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final double? value;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Metric(
+      label: label,
+      value: value == null ? '—' : '${value!.toStringAsFixed(0)}/100',
     );
   }
 }
@@ -537,20 +1112,4 @@ class _Metric extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Comparison {
-  const _Comparison({
-    required this.deltaPercent,
-    required this.baselineW,
-  }) : insufficient = false;
-
-  const _Comparison.insufficient()
-      : deltaPercent = null,
-        baselineW = null,
-        insufficient = true;
-
-  final double? deltaPercent;
-  final double? baselineW;
-  final bool insufficient;
 }

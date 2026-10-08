@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../models/battery_stress.dart';
 import '../models/charging_curve_analysis.dart';
 import '../models/charging_session.dart';
 import '../services/app_controller.dart';
@@ -36,6 +37,13 @@ class ChargingSessionDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
             children: [
               _SummaryCard(session: session),
+              _StressCard(
+                analysis: BatteryStressAnalysis.fromSession(session),
+                showDetails: controller.canUseFeature(
+                  BatteryGuardFeature.batteryStressDetails,
+                ),
+              ),
+              const SizedBox(height: 12),
               if (session.oemChargeLimitDetected) ...[
                 const SizedBox(height: 12),
                 Card(
@@ -158,6 +166,111 @@ class ChargingSessionDetailScreen extends StatelessWidget {
       ChargingSessionReason.invalidTelemetry => l10n.reasonInvalidTelemetry,
       ChargingSessionReason.unknown => l10n.qualityUncertain,
     };
+  }
+}
+
+class _StressCard extends StatelessWidget {
+  const _StressCard({
+    required this.analysis,
+    required this.showDetails,
+  });
+
+  final BatteryStressAnalysis analysis;
+  final bool showDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+
+    String levelLabel() => switch (analysis.level) {
+          BatteryStressLevel.low => l10n.stressLow,
+          BatteryStressLevel.moderate => l10n.stressModerate,
+          BatteryStressLevel.high => l10n.stressHigh,
+          BatteryStressLevel.veryHigh => l10n.stressVeryHigh,
+        };
+
+    if (!analysis.dataSufficient) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.shield_outlined),
+          title: Text(l10n.batteryStress),
+          subtitle: Text(l10n.stressNotEnoughData),
+        ),
+      );
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.shield_outlined,
+                  color: scheme.primary,
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    l10n.batteryStress,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+                Chip(label: Text(levelLabel())),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.stressHeuristicNotice),
+            if (showDetails) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  _Metric(
+                    label: l10n.stressScore,
+                    value: '${analysis.score.toStringAsFixed(0)}/100',
+                  ),
+                  _Metric(
+                    label: l10n.highSocExposure,
+                    value:
+                        '${analysis.highSocMinutes.toStringAsFixed(1)} min',
+                  ),
+                  _Metric(
+                    label: l10n.heatExposure,
+                    value: '${analysis.hotMinutes.toStringAsFixed(1)} min',
+                  ),
+                  _Metric(
+                    label: l10n.highVoltageExposure,
+                    value:
+                        '${analysis.highVoltageMinutes.toStringAsFixed(1)} min',
+                  ),
+                  _Metric(
+                    label: l10n.powerHeatExposure,
+                    value:
+                        '${analysis.highPowerHeatMinutes.toStringAsFixed(1)} min',
+                  ),
+                ],
+              ),
+            ] else ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.lock_outline_rounded, size: 18),
+                  const SizedBox(width: 7),
+                  Expanded(child: Text(l10n.stressDetailsPro)),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 

@@ -251,7 +251,7 @@
   "unlockPro": "Desbloquear Pro",
   "restorePurchases": "Restaurar compras",
   "storeUnavailable": "A compra Google Play não está disponível nesta versão ou dispositivo.",
-  "proFeatureDoctor": "Testes controlados Charge Doctor",
+  "proFeatureDoctor": "Pontuações numéricas avançadas do Charge Doctor e referência pessoal",
   "proFeatureInsights30": "Insights de 30 dias",
   "purchaseError": "Não foi possível concluir a compra.",
   "proSection": "Pro",
@@ -434,6 +434,134 @@
   "@curveTemperatureRise": {
     "placeholders": {
       "value": {
+        "type": "String"
+      }
+    }
+  },
+  "chargeDoctorSubtitleV2": "Teste combinações reais de carregador + cabo e compare-as com a sua própria referência.",
+  "testGuidanceV2": "Para resultados comparáveis, mantenha o mesmo carregador, cabo, estado do dispositivo e um nível de bateria semelhante. As pontuações usam as suas próprias observações, não uma base genérica.",
+  "chargingSetups": "Configurações de carregamento",
+  "newChargingSetup": "Nova configuração",
+  "editChargingSetup": "Editar configuração",
+  "setupName": "Nome",
+  "chargerName": "Carregador",
+  "cableName": "Cabo",
+  "notesOptional": "Notas (opcional)",
+  "save": "Guardar",
+  "edit": "Editar",
+  "multipleSetupsPro": "Várias configurações carregador/cabo estão disponíveis com Pro.",
+  "setupRequiresName": "Introduza um nome, carregador ou cabo.",
+  "deleteSetupTitle": "Eliminar configuração?",
+  "deleteSetupBody": "Eliminar “{setup}”? Os testes guardados permanecem no histórico.",
+  "noChargingSetups": "Crie uma configuração carregador + cabo antes do primeiro teste.",
+  "setupBeforeTest": "Crie a sua primeira configuração",
+  "setupBeforeTestBody": "Free inclui um perfil carregador/cabo e análise qualitativa do Charge Doctor.",
+  "chargeDoctorSetupReady": "Ligue esta configuração e inicie um teste controlado quando o dispositivo estiver a carregar.",
+  "chargerRanking": "Ranking de carregadores e cabos",
+  "rankingNeedsTests": "Execute testes fiáveis para construir o ranking.",
+  "rankingTestsAndPower": "{tests} testes • média {power} W",
+  "trendNotEnoughData": "Tendência pendente",
+  "trendStable": "Tendência estável",
+  "trendImproving": "+{value} pontos",
+  "trendWorsening": "-{value} pontos",
+  "rankingProTitle": "Compare as suas configurações de carga",
+  "rankingProBody": "Pro classifica as combinações carregador + cabo usando o seu histórico de velocidade, estabilidade, térmica e stress.",
+  "peakPower": "Potência máxima",
+  "batteryStress": "Stress da bateria",
+  "chargeQualitySummary": "Qualidade da carga",
+  "stability": "Estabilidade",
+  "thermalBehavior": "Térmica",
+  "overall": "Global",
+  "detailedScoresPro": "Pro desbloqueia pontuações numéricas, referência pessoal e detalhe do stress.",
+  "proScoreBreakdown": "Detalhe das pontuações Pro",
+  "personalBaselineDetail": "Referência pessoal: {baseline} W • delta {delta}% • {tests} testes comparáveis",
+  "stressDetail": "Stress {score}/100 • SoC alto {highSoc} min • calor {hot} min",
+  "noChargeAnomalies": "Nenhuma anomalia relevante detetada neste teste.",
+  "anomalyUnstablePower": "A entrega de potência foi mais variável do que o esperado.",
+  "anomalyPowerDrops": "Foram detetadas quedas repetidas de potência.",
+  "anomalyHighTemperature": "A temperatura da bateria atingiu uma zona elevada.",
+  "anomalyTemperatureRise": "A temperatura aumentou rapidamente durante o teste.",
+  "anomalySlowBaseline": "O carregamento foi claramente mais lento do que a referência pessoal desta configuração.",
+  "anomalyElevatedStress": "A sessão apresentou exposição elevada ao stress da bateria.",
+  "scoreExcellent": "Excelente",
+  "scoreGood": "Boa",
+  "scoreFair": "Razoável",
+  "scoreWeak": "Fraca",
+  "stressLow": "Baixo",
+  "stressModerate": "Moderado",
+  "stressHigh": "Alto",
+  "stressVeryHigh": "Muito alto",
+  "stressNotEnoughData": "Telemetria insuficiente para estimar a exposição ao stress.",
+  "stressHeuristicNotice": "O stress é uma estimativa explicável baseada em calor, estado de carga elevado e tensão. Não mede diretamente a degradação química.",
+  "stressScore": "Pontuação de stress",
+  "highSocExposure": "SoC elevado",
+  "heatExposure": "Exposição ao calor",
+  "highVoltageExposure": "Alta tensão",
+  "stressDetailsPro": "Pro desbloqueia a pontuação numérica e o detalhe das exposições.",
+  "@deleteSetupBody": {
+    "placeholders": {
+      "setup": {
+        "type": "String"
+      }
+    }
+  },
+  "@rankingTestsAndPower": {
+    "placeholders": {
+      "tests": {
+        "type": "int"
+      },
+      "power": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendImproving": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendWorsening": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@personalBaselineDetail": {
+    "placeholders": {
+      "baseline": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      },
+      "tests": {
+        "type": "int"
+      }
+    }
+  },
+  "@stressDetail": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "highSoc": {
+        "type": "String"
+      },
+      "hot": {
+        "type": "String"
+      }
+    }
+  },
+  "proFeatureRanking": "Ranking carregador + cabo e tendências",
+  "proFeatureStress": "Pontuação detalhada de Battery Stress e detalhe das exposições",
+  "powerHeatExposure": "Potência alta + calor",
+  "powerHeatDetail": "Sobreposição potência alta + calor: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
         "type": "String"
       }
     }

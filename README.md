@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.3.0+21 — Intelligence Foundation**
+Versione sorgente: **1.5.0+23 — Charging Intelligence**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -18,6 +18,10 @@ Evidence attuale:
 - Device Capability Map available in Free
 - explainable session validity/reason codes + OEM charge-limit detection
 - bounded adaptive charging curves collected locally; full curve analysis is Premium
+- Charge Doctor 2.0 with persistent charger/cable profiles and personal baselines
+- Free qualitative Speed/Stability/Thermal/Stress assessment; Pro numeric score breakdown
+- charger/cable ranking and historical trends in Pro
+- explainable Battery Stress exposure engine for normal sessions and controlled tests
 - PHYSICAL UPDATE VERIFIED: **PENDING**
 - STORE READY: **NO — external production gates pending**
 
@@ -40,8 +44,11 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - Insights 7/30 giorni;
 - widget Home;
 - Quick Settings Tile;
-- Charge Doctor con test controllati, confidence model e confronto personale A/B;
-- Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Charge Doctor + Insights 30 giorni;
+- Charge Doctor 2.0 con profili caricatore+cavo, confidence model, Stability Score e baseline personale;
+- quattro assi separati Speed / Stability / Thermal / Overall;
+- Battery Stress qualitativo Free e breakdown numerico Pro;
+- ranking e trend storici dei setup in Pro;
+- Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Charge Doctor avanzato + curve + ranking + stress dettagliato + Insights 30 giorni;
 - AdMob Free con UMP/Privacy Options e Large Anchored Adaptive Banner, separato dalla NavigationBar;
 - Test Ads obbligatori nelle build INTERNAL/QA;
 - nuova icona launcher adaptive con variante themed/monochrome Android 13+;

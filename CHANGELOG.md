@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.5.0 — Battery Stress & Charging Ranking
+- added deterministic Battery Stress exposure analysis for normal charging sessions and Charge Doctor tests;
+- stress combines high-SoC exposure, heat, very-high temperature, high voltage and high-power + heat overlap without claiming direct chemical degradation;
+- Free shows qualitative Battery Stress level and relevant anomalies;
+- Pro unlocks numeric stress score, exposure breakdown, charger/cable ranking and score trends;
+- added per-setup ranking using only the user's own reliable tests;
+- added trend deltas for recent Overall Score and Stress when enough history exists;
+- expanded Premium value proposition without paywalling safety or monitoring truth;
+- bumped source to 1.5.0+23.
+
+## 1.4.0 — Charge Doctor 2.0
+- added persistent charger + cable setup profiles;
+- Free includes one usable setup profile and qualitative Charge Doctor analysis;
+- Pro unlocks multiple profiles, numeric Speed / Stability / Thermal / Overall scores and personal-baseline details;
+- Speed Score compares only against the same personal setup profile and requires enough comparable tests;
+- Stability Score uses sampled power variability and repeated drops rather than average wattage alone;
+- Thermal Score uses observed maximum temperature and temperature rise;
+- added raw evidence persistence: peak power, coefficient of variation, drop count, temperature availability and stress exposures;
+- legacy Charge Doctor tests remain readable through legacy grouping without invented profile or stress evidence;
+- added regression tests for setup isolation, scores, ranking, stress and Free/Pro gates.
+
 ## 1.3.0 — Charging Session Intelligence
 - added bounded adaptive charging curves with SoC, power, current, voltage and temperature samples;
 - added a deterministic curve analyzer for ramp-up, fast charging, plateau, thermal throttling, taper, charge-limit pause and full-charge phases;

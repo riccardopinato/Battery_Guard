@@ -4,6 +4,12 @@ enum BatteryGuardFeature {
   sessionReasons,
   oemChargeLimitDetection,
   chargingCurve,
+  chargeDoctorBasic,
+  multipleChargingSetups,
+  detailedChargeScores,
+  chargerRanking,
+  batteryStressSummary,
+  batteryStressDetails,
 }
 
 enum FeatureTier {
@@ -21,6 +27,12 @@ class FeatureCatalog {
       BatteryGuardFeature.sessionReasons => FeatureTier.free,
       BatteryGuardFeature.oemChargeLimitDetection => FeatureTier.free,
       BatteryGuardFeature.chargingCurve => FeatureTier.premium,
+      BatteryGuardFeature.chargeDoctorBasic => FeatureTier.free,
+      BatteryGuardFeature.multipleChargingSetups => FeatureTier.premium,
+      BatteryGuardFeature.detailedChargeScores => FeatureTier.premium,
+      BatteryGuardFeature.chargerRanking => FeatureTier.premium,
+      BatteryGuardFeature.batteryStressSummary => FeatureTier.free,
+      BatteryGuardFeature.batteryStressDetails => FeatureTier.premium,
     };
   }
 

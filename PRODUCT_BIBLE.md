@@ -77,3 +77,32 @@ La Evidence Ladder canonica è:
 IMPLEMENTED -> STATICALLY CHECKED -> TESTED -> CI GREEN -> ARTIFACT BUILT -> TRUSTED RUNTIME VERIFIED -> PHYSICAL DEVICE VERIFIED -> DISTRIBUTION VERIFIED -> STORE READY -> PRODUCTION RELEASED.
 
 Nessun livello implica automaticamente il successivo.
+
+
+## Charging Intelligence doctrine — v1.5
+
+Charge Doctor is no longer an all-or-nothing Premium feature.
+
+**FREE**
+- one charger + cable setup profile;
+- controlled tests;
+- qualitative Speed / Stability / Thermal / Overall bands;
+- safety-relevant anomalies;
+- qualitative Battery Stress.
+
+**PRO**
+- multiple setup profiles;
+- numeric score breakdown;
+- personal baseline delta;
+- charger/cable ranking;
+- setup trends;
+- detailed Battery Stress exposure.
+
+Scoring rules:
+- never compare against an external generic device database;
+- Speed requires enough reliable tests from the same setup;
+- Stability uses sampled power behavior, not average watts alone;
+- Thermal uses observed temperature evidence only;
+- Overall is composed only from available sub-scores;
+- missing evidence stays unavailable;
+- Battery Stress is an exposure heuristic, never a claim of measured chemical degradation.

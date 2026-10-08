@@ -54,19 +54,41 @@ object ChargeTestStore {
 
     private fun toMap(item: JSONObject): Map<String, Any?> = mapOf(
         "id" to item.optString("id", ""),
+        "profileId" to item.optString("profileId", ""),
         "label" to item.optString("label", "Charge Test"),
+        "chargerName" to item.optString("chargerName", ""),
+        "cableName" to item.optString("cableName", ""),
         "startedAt" to item.optLong("startedAt", 0L),
         "endedAt" to item.optLong("endedAt", 0L),
         "startLevel" to item.optInt("startLevel", 0),
         "endLevel" to item.optInt("endLevel", 0),
         "averagePowerW" to item.optDouble("averagePowerW", 0.0),
+        "peakPowerW" to item.optDouble("peakPowerW", item.optDouble("averagePowerW", 0.0)),
         "averageCurrentMa" to item.optDouble("averageCurrentMa", 0.0),
         "averageVoltageV" to item.optDouble("averageVoltageV", 0.0),
         "startTemperatureC" to item.optDouble("startTemperatureC", 0.0),
+        "averageTemperatureC" to item.optDouble("averageTemperatureC", 0.0),
         "maxTemperatureC" to item.optDouble("maxTemperatureC", 0.0),
+        "temperatureAvailable" to item.optBoolean(
+            "temperatureAvailable",
+            item.optDouble("maxTemperatureC", 0.0) > 0.0,
+        ),
         "samples" to item.optInt("samples", 0),
         "source" to item.optString("source", "unknown"),
         "confidence" to item.optString("confidence", "low"),
+        "powerCoefficientOfVariation" to
+            item.optDouble("powerCoefficientOfVariation", 0.0),
+        "powerDropCount" to item.optInt("powerDropCount", 0),
+        "stressAvailable" to item.optBoolean(
+            "stressAvailable",
+            item.has("stressScore") && item.optInt("samples", 0) >= 2,
+        ),
+        "stressScore" to item.optDouble("stressScore", 0.0),
+        "highSocMinutes" to item.optDouble("highSocMinutes", 0.0),
+        "hotMinutes" to item.optDouble("hotMinutes", 0.0),
+        "veryHotMinutes" to item.optDouble("veryHotMinutes", 0.0),
+        "highVoltageMinutes" to item.optDouble("highVoltageMinutes", 0.0),
+        "highPowerHeatMinutes" to item.optDouble("highPowerHeatMinutes", 0.0),
     )
 
     private fun parseArray(raw: String?): JSONArray {
