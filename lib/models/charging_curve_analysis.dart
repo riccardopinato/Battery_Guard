@@ -123,9 +123,9 @@ class ChargingCurveAnalysis {
     required DateTime sessionStart,
   }) {
     if (!current.isCharging) {
-      return current.level >= 99
-          ? ChargingPhase.full
-          : ChargingPhase.chargeLimit;
+      if (current.level >= 99) return ChargingPhase.full;
+      if (current.isPlugged) return ChargingPhase.chargeLimit;
+      return ChargingPhase.steady;
     }
 
     final power = current.powerW;
