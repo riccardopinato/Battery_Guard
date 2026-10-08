@@ -354,5 +354,88 @@
   "notificationsDisabled": "App notifications disabled",
   "alertChannelDisabled": "Battery alert channel disabled",
   "deliveryReady": "Alerts ready",
-  "testRequiresCharging": "Wait until the device is actively charging before starting the test."
+  "testRequiresCharging": "Wait until the device is actively charging before starting the test.",
+  "capabilityMapTitle": "Device capability map",
+  "capabilityMapSubtitle": "Shows which battery signals this device actually exposes, where each value comes from, and how much confidence Battery Guard assigns to it.",
+  "capabilityMapSettingsBody": "See which battery metrics Android exposes on this device and how they are derived.",
+  "capabilityLevel": "Battery level",
+  "capabilityCurrent": "Current",
+  "capabilityPower": "Charging power",
+  "capabilityChargeCounter": "Charge counter",
+  "capabilityStatus": "Battery status",
+  "capabilityTechnology": "Battery technology",
+  "capabilityPlugType": "Charging source",
+  "sourceSystemReported": "Reported by Android",
+  "sourceOemReported": "Reported by OEM",
+  "sourceMeasured": "Measured",
+  "sourceCalculated": "Calculated",
+  "sourceEstimated": "Estimated",
+  "confidenceUnknown": "Unknown",
+  "sessionDetailTitle": "Charging session",
+  "oemChargeLimitDetected": "Device charging limit detected",
+  "oemChargeLimitBody": "The phone stayed plugged in but intentionally stopped charging around {level}%. Battery Guard treats this as a device protection/adaptive pause, not as a broken session.",
+  "sessionEvidence": "Session evidence",
+  "validityActive": "Active",
+  "validityValid": "Valid",
+  "validityPartial": "Partial",
+  "validityInterrupted": "Interrupted",
+  "validityExcluded": "Excluded",
+  "validityUncertain": "Uncertain",
+  "reasonTooShort": "Session too short to be considered reliable.",
+  "reasonInsufficientSocDelta": "Battery level changed too little for a reliable comparison.",
+  "reasonPowerMissing": "Charging power was not exposed for this session.",
+  "reasonCurrentMissing": "Charging current was not exposed for this session.",
+  "reasonTemperatureMissing": "Battery temperature was not exposed for this session.",
+  "reasonUserUnplugged": "Session ended when the charger was unplugged.",
+  "reasonSystemInterrupted": "Android or the device interrupted continuous monitoring.",
+  "reasonOemChargeLimit": "A device charging limit or adaptive charging pause was detected.",
+  "reasonMonitoringGap": "A long monitoring gap occurred during the session.",
+  "reasonInvalidTelemetry": "The telemetry contained values Battery Guard could not trust.",
+  "chargingCurveTitle": "Charging curve",
+  "chargingCurveNotEnoughData": "There are not enough curve samples for this session yet.",
+  "chargingCurvePremiumTitle": "Full charging curve is a Pro analysis",
+  "chargingCurvePremiumBody": "Free keeps the session summary, evidence and protection signals. Pro unlocks the full SoC, power, temperature and current curve with phase analysis.",
+  "chargingCurveSemantics": "Normalized charging curve showing battery level, power, temperature and current over time.",
+  "curveNormalizedHint": "Lines are normalized independently to compare their shape over time; use the numeric metrics for absolute values.",
+  "curveAnalysis": "Curve analysis",
+  "curveDataPoints": "Data points: {count}",
+  "curvePeakPower": "Observed peak power: {value} W",
+  "curveTemperatureRise": "Observed temperature change: {value} °C",
+  "phaseRampUp": "Ramp-up",
+  "phaseFast": "Fast charge",
+  "phaseSteady": "Steady",
+  "phasePlateau": "Plateau",
+  "phaseThermalThrottle": "Thermal throttling",
+  "phaseTaper": "Taper",
+  "phaseChargeLimit": "Charge limit / pause",
+  "phaseFull": "Full",
+  "proFeatureCurves": "Full charging curves and phase analysis",
+  "@oemChargeLimitBody": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@curveDataPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@curvePeakPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@curveTemperatureRise": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }
