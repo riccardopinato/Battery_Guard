@@ -556,5 +556,14 @@
     }
   },
   "proFeatureRanking": "Classifica caricatore + cavo e trend",
-  "proFeatureStress": "Punteggio Battery Stress dettagliato e breakdown esposizioni"
+  "proFeatureStress": "Punteggio Battery Stress dettagliato e breakdown esposizioni",
+  "powerHeatExposure": "Potenza alta + calore",
+  "powerHeatDetail": "Sovrapposizione potenza alta + calore: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  }
 }
