@@ -968,6 +968,12 @@ class _DetailedScores extends StatelessWidget {
               test.hotMinutes.toStringAsFixed(1),
             ),
           ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.powerHeatDetail(
+              test.highPowerHeatMinutes.toStringAsFixed(1),
+            ),
+          ),
         ],
       ],
     );
