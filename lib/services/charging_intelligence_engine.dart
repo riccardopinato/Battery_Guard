@@ -68,6 +68,8 @@ class ChargingSetupRankingEntry {
     required this.thermalScore,
     required this.overallScore,
     required this.averageStressScore,
+    required this.overallTrendDelta,
+    required this.stressTrendDelta,
   });
 
   final String setupId;
@@ -79,6 +81,8 @@ class ChargingSetupRankingEntry {
   final double? thermalScore;
   final double? overallScore;
   final double averageStressScore;
+  final double? overallTrendDelta;
+  final double? stressTrendDelta;
 }
 
 class ChargingIntelligenceEngine {
@@ -207,6 +211,41 @@ class ChargingIntelligenceEngine {
         return list.isEmpty ? null : avg(list);
       }
 
+      final chronological = [...group]
+        ..sort((a, b) => a.endedAt.compareTo(b.endedAt));
+      double? overallTrend;
+      double? stressTrend;
+      if (chronological.length >= 4) {
+        final previous = chronological
+            .take(chronological.length - 2)
+            .toList(growable: false);
+        final latest = chronological
+            .skip(chronological.length - 2)
+            .toList(growable: false);
+
+        final previousOverall = avgNullable(
+          previous.map((test) => analyze(test, reliable).overallScore),
+        );
+        final latestOverall = avgNullable(
+          latest.map((test) => analyze(test, reliable).overallScore),
+        );
+        if (previousOverall != null && latestOverall != null) {
+          overallTrend = latestOverall - previousOverall;
+        }
+
+        final previousStress = previous
+            .where((test) => test.stressAvailable)
+            .map((test) => test.stressScore)
+            .toList(growable: false);
+        final latestStress = latest
+            .where((test) => test.stressAvailable)
+            .map((test) => test.stressScore)
+            .toList(growable: false);
+        if (previousStress.isNotEmpty && latestStress.isNotEmpty) {
+          stressTrend = avg(latestStress) - avg(previousStress);
+        }
+      }
+
       entries.add(
         ChargingSetupRankingEntry(
           setupId: key,
@@ -218,7 +257,13 @@ class ChargingIntelligenceEngine {
               avgNullable(analyses.map((item) => item.stabilityScore)),
           thermalScore: avgNullable(analyses.map((item) => item.thermalScore)),
           overallScore: avgNullable(analyses.map((item) => item.overallScore)),
-          averageStressScore: avg(group.map((test) => test.stressScore)),
+          averageStressScore: avg(
+            group.where((test) => test.stressAvailable).map(
+                  (test) => test.stressScore,
+                ),
+          ),
+          overallTrendDelta: overallTrend,
+          stressTrendDelta: stressTrend,
         ),
       );
     }
