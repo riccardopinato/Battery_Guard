@@ -725,9 +725,15 @@ class AppController extends ChangeNotifier {
     }
 
     final now = DateTime.now();
-    final existing = existingId.isEmpty
-        ? null
-        : chargingSetups.where((item) => item.id == existingId).firstOrNull;
+    ChargingSetupProfile? existing;
+    if (existingId.isNotEmpty) {
+      for (final item in chargingSetups) {
+        if (item.id == existingId) {
+          existing = item;
+          break;
+        }
+      }
+    }
     final profile = ChargingSetupProfile(
       id: existing?.id ?? now.microsecondsSinceEpoch.toString(),
       name: normalizedName.isNotEmpty
