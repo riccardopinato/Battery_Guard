@@ -79,6 +79,10 @@ object ChargeTestStore {
         "powerCoefficientOfVariation" to
             item.optDouble("powerCoefficientOfVariation", 0.0),
         "powerDropCount" to item.optInt("powerDropCount", 0),
+        "stressAvailable" to item.optBoolean(
+            "stressAvailable",
+            item.has("stressScore") && item.optInt("samples", 0) >= 2,
+        ),
         "stressScore" to item.optDouble("stressScore", 0.0),
         "highSocMinutes" to item.optDouble("highSocMinutes", 0.0),
         "hotMinutes" to item.optDouble("hotMinutes", 0.0),
