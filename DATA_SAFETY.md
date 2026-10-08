@@ -28,3 +28,13 @@ Status: **DRAFT — NOT FINAL PLAY DECLARATION**.
 
 ## Purchase entitlement reconciliation
 The Android client can query current Google Play ownership to reconcile the locally cached Pro entitlement. This is not a Battery Guard backend and does not replace trusted server-side purchase verification. Production rollout remains blocked until the final purchase-verification architecture and exact Play disclosure are reconciled.
+
+## Battery Intelligence local data
+
+Battery Intelligence adds only local diagnostic evidence:
+- Health Lab capacity samples, confidence/outlier/trend evidence: local;
+- screen interactive state attached to battery/charging observations: local;
+- Idle Drain screen-off segments and personal baseline: local;
+- Smart ETA inputs/results: computed locally from charging sessions.
+
+Battery Guard does not send this evidence to an app backend and does not provide it to AdMob as targeting input.
