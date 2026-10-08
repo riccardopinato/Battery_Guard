@@ -8,6 +8,20 @@ enum BatteryStressLevel {
   veryHigh,
 }
 
+class BatteryStressSample {
+  const BatteryStressSample({
+    required this.timestamp,
+    required this.level,
+    this.temperatureC,
+    this.voltageV,
+  });
+
+  final DateTime timestamp;
+  final int level;
+  final double? temperatureC;
+  final double? voltageV;
+}
+
 class BatteryStressAnalysis {
   const BatteryStressAnalysis({
     required this.score,
@@ -41,7 +55,24 @@ class BatteryStressAnalysis {
   }
 
   factory BatteryStressAnalysis.fromCurve(List<ChargingCurvePoint> points) {
-    if (points.length < 2) return BatteryStressAnalysis.unavailable();
+    return BatteryStressAnalysis.fromSamples(
+      [
+        for (final point in points)
+          BatteryStressSample(
+            timestamp: point.timestamp,
+            level: point.level,
+            temperatureC: point.temperatureC,
+            voltageV: point.voltageV,
+          ),
+      ],
+    );
+  }
+
+  factory BatteryStressAnalysis.fromSamples(List<BatteryStressSample> samples) {
+    if (samples.length < 2) return BatteryStressAnalysis.unavailable();
+
+    final points = [...samples]
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     var highSocSeconds = 0.0;
     var hotSeconds = 0.0;
