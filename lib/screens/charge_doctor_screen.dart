@@ -396,7 +396,7 @@ class _SetupSection extends StatelessWidget {
                   onPressed: canAdd
                       ? onCreate
                       : () {
-                          ScaffoldMessenger.of(this.context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.multipleSetupsPro)),
                           );
                         },
@@ -537,7 +537,7 @@ class _StartPanel extends StatelessWidget {
               'premium_required' => l10n.multipleSetupsPro,
               _ => l10n.testPowerUnavailable,
             };
-            ScaffoldMessenger.of(this.context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(message)),
             );
           },
