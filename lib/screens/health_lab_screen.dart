@@ -53,7 +53,7 @@ class HealthLabScreen extends StatelessWidget {
                     children: [
                       Text(
                         report.hasEstimate
-                            ? '\${health.toStringAsFixed(0)}%'
+                            ? '${health.toStringAsFixed(0)}%'
                             : '—',
                         style: Theme.of(context)
                             .textTheme
@@ -64,7 +64,7 @@ class HealthLabScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         report.hasEstimate
-                            ? '\${report.estimatedFullCapacityMah.toStringAsFixed(0)} mAh / \${report.nominalCapacityMah} mAh'
+                            ? '${report.estimatedFullCapacityMah.toStringAsFixed(0)} mAh / ${report.nominalCapacityMah} mAh'
                             : report.nominalCapacityMah <= 0
                                 ? l10n.healthNeedNominal
                                 : l10n.healthDataUnavailable,
@@ -214,7 +214,7 @@ class HealthLabScreen extends StatelessWidget {
                   icon: Icons.verified_outlined,
                   label: l10n.confidenceScore,
                   value:
-                      '\${report.confidenceScore.toStringAsFixed(0)}/100 • \${_confidenceLabel(l10n, report.confidence)}',
+                      '${report.confidenceScore.toStringAsFixed(0)}/100 • ${_confidenceLabel(l10n, report.confidence)}',
                 ),
                 _HealthMetric(
                   icon: Icons.trending_down_rounded,
@@ -256,16 +256,16 @@ class HealthLabScreen extends StatelessWidget {
                     _RowMetric(
                       label: l10n.uncertainty,
                       value: report.hasEstimate
-                          ? '±\${report.uncertaintyPercent.toStringAsFixed(1)}%'
+                          ? '±${report.uncertaintyPercent.toStringAsFixed(1)}%'
                           : l10n.dataUnavailable,
                     ),
                     _RowMetric(
                       label: l10n.socCoverage,
-                      value: '\${report.socSpread}%',
+                      value: '${report.socSpread}%',
                     ),
                     _RowMetric(
                       label: l10n.outliers,
-                      value: '\${report.outlierCount} / \${report.totalSampleCount}',
+                      value: '${report.outlierCount} / ${report.totalSampleCount}',
                     ),
                   ],
                 ),
@@ -279,7 +279,7 @@ class HealthLabScreen extends StatelessWidget {
                 subtitle: Text(
                   report.outliers.isEmpty
                       ? l10n.noOutliers
-                      : '\${report.outlierCount} / \${report.totalSampleCount}',
+                      : '${report.outlierCount} / ${report.totalSampleCount}',
                 ),
                 children: [
                   if (report.outliers.isEmpty)
@@ -295,10 +295,10 @@ class HealthLabScreen extends StatelessWidget {
                       ListTile(
                         dense: true,
                         title: Text(
-                          '\${item.estimateMah.toStringAsFixed(0)} mAh',
+                          '${item.estimateMah.toStringAsFixed(0)} mAh',
                         ),
                         subtitle: Text(
-                          '\${item.level}% • Δ \${item.deviationPercent.toStringAsFixed(1)}%',
+                          '${item.level}% • Δ ${item.deviationPercent.toStringAsFixed(1)}%',
                         ),
                       ),
                 ],
@@ -335,13 +335,13 @@ class HealthLabScreen extends StatelessWidget {
                     _RowMetric(
                       label: l10n.idleDrainRecent,
                       value: controller.idleDrainReport.hasBaseline
-                          ? '\${controller.idleDrainReport.recentRatePercentPerHour.toStringAsFixed(2)} %/h'
+                          ? '${controller.idleDrainReport.recentRatePercentPerHour.toStringAsFixed(2)} %/h'
                           : l10n.idleDrainLearning,
                     ),
                     _RowMetric(
                       label: l10n.idleDrainBaseline,
                       value: controller.idleDrainReport.hasBaseline
-                          ? '\${controller.idleDrainReport.baselineRatePercentPerHour.toStringAsFixed(2)} %/h'
+                          ? '${controller.idleDrainReport.baselineRatePercentPerHour.toStringAsFixed(2)} %/h'
                           : l10n.dataUnavailable,
                     ),
                   ],
