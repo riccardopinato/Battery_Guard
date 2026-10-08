@@ -412,8 +412,9 @@ class _ChargingSessionCard extends StatelessWidget {
                 ),
                 _SessionMetric(
                   label: l10n.temperature,
-                  value:
-                      '${session.currentTemperatureC.toStringAsFixed(1)} °C • max ${session.maxTemperatureC.toStringAsFixed(1)} °C',
+                  value: session.temperatureAvailable
+                      ? '${session.currentTemperatureC.toStringAsFixed(1)} °C • max ${session.maxTemperatureC.toStringAsFixed(1)} °C'
+                      : l10n.dataUnavailable,
                 ),
               ],
             ),
