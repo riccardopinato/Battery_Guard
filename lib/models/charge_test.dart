@@ -24,6 +24,7 @@ class ChargeTest {
     required this.confidence,
     required this.powerCoefficientOfVariation,
     required this.powerDropCount,
+    required this.stressAvailable,
     required this.stressScore,
     required this.highSocMinutes,
     required this.hotMinutes,
@@ -73,6 +74,10 @@ class ChargeTest {
       ),
       powerCoefficientOfVariation: d('powerCoefficientOfVariation'),
       powerDropCount: i('powerDropCount'),
+      stressAvailable: b(
+        'stressAvailable',
+        map.containsKey('stressScore') && i('samples') >= 2,
+      ),
       stressScore: d('stressScore'),
       highSocMinutes: d('highSocMinutes'),
       hotMinutes: d('hotMinutes'),
@@ -104,6 +109,7 @@ class ChargeTest {
         'confidence': confidence.name,
         'powerCoefficientOfVariation': powerCoefficientOfVariation,
         'powerDropCount': powerDropCount,
+        'stressAvailable': stressAvailable,
         'stressScore': stressScore,
         'highSocMinutes': highSocMinutes,
         'hotMinutes': hotMinutes,
@@ -133,6 +139,7 @@ class ChargeTest {
   final ChargeTestConfidence confidence;
   final double powerCoefficientOfVariation;
   final int powerDropCount;
+  final bool stressAvailable;
   final double stressScore;
   final double highSocMinutes;
   final double hotMinutes;
