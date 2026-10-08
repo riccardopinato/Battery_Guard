@@ -251,7 +251,7 @@
   "unlockPro": "Débloquer Pro",
   "restorePurchases": "Restaurer les achats",
   "storeUnavailable": "L'achat Google Play n'est pas disponible sur cette version ou cet appareil.",
-  "proFeatureDoctor": "Tests contrôlés Charge Doctor",
+  "proFeatureDoctor": "Scores numériques avancés Charge Doctor et référence personnelle",
   "proFeatureInsights30": "Insights sur 30 jours",
   "purchaseError": "L'achat n'a pas pu être finalisé.",
   "proSection": "Pro",
@@ -554,5 +554,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "proFeatureRanking": "Classement chargeur + câble et tendances",
+  "proFeatureStress": "Score Battery Stress détaillé et répartition des expositions"
 }
