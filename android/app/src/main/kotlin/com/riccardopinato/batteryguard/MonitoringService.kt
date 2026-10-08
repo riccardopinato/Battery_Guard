@@ -118,6 +118,7 @@ class MonitoringService : Service() {
 
         HistoryStore.addSample(this, snapshot)
         BatteryHealthStore.record(this, snapshot)
+        IdleDrainStore.record(this, snapshot)
         BatteryGuardWidgetProvider.updateAll(this, snapshot = snapshot)
 
         val sessionUpdate = ChargingSessionStore.update(
