@@ -76,14 +76,28 @@ class _ChargingCurvePainter extends CustomPainter {
     final temperatures =
         points.map((point) => point.temperatureC).whereType<double>();
 
-    final maxPower = powers.isEmpty ? 1.0 : math.max(1.0, powers.reduce(math.max));
-    final maxCurrent =
-        currents.isEmpty ? 1.0 : math.max(1.0, currents.reduce(math.max));
+    final maxPower = powers.isEmpty
+        ? 1.0
+        : math.max(
+            1.0,
+            powers.reduce((left, right) => left > right ? left : right),
+          ).toDouble();
+    final maxCurrent = currents.isEmpty
+        ? 1.0
+        : math.max(
+            1.0,
+            currents.reduce((left, right) => left > right ? left : right),
+          ).toDouble();
     final tempList = temperatures.toList(growable: false);
-    final minTemp = tempList.isEmpty ? 20.0 : tempList.reduce(math.min) - 1.0;
+    final minTemp = tempList.isEmpty
+        ? 20.0
+        : tempList.reduce((left, right) => left < right ? left : right) - 1.0;
     final maxTemp = tempList.isEmpty
         ? 50.0
-        : math.max(minTemp + 5.0, tempList.reduce(math.max) + 1.0);
+        : math.max(
+            minTemp + 5.0,
+            tempList.reduce((left, right) => left > right ? left : right) + 1.0,
+          ).toDouble();
 
     double xFor(ChargingCurvePoint point) {
       final elapsed = point.timestamp.millisecondsSinceEpoch - startMs;
@@ -99,7 +113,7 @@ class _ChargingCurvePainter extends CustomPainter {
           started = false;
           continue;
         }
-        final normalized = value.clamp(0.0, 1.0);
+        final normalized = value.clamp(0.0, 1.0).toDouble();
         final offset = Offset(
           xFor(point),
           size.height - normalized * size.height,
