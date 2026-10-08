@@ -515,6 +515,14 @@ object ChargingSessionStore {
                     "isPlugged",
                     snapshot["isPlugged"] as? Boolean ?: false,
                 )
+                put(
+                    "screenStateAvailable",
+                    snapshot["screenStateAvailable"] as? Boolean ?: false,
+                )
+                put(
+                    "screenInteractive",
+                    snapshot["screenInteractive"] as? Boolean ?: false,
+                )
                 put("temperatureAvailable", temperatureAvailable)
                 put("temperatureC", if (temperatureAvailable) temperature else 0.0)
                 put("voltageAvailable", voltageAvailable)
@@ -843,6 +851,10 @@ object ChargingSessionStore {
                     "level" to item.optInt("level", 0),
                     "isCharging" to item.optBoolean("isCharging", false),
                     "isPlugged" to item.optBoolean("isPlugged", false),
+                    "screenStateAvailable" to
+                        item.optBoolean("screenStateAvailable", false),
+                    "screenInteractive" to
+                        item.optBoolean("screenInteractive", false),
                     "temperatureAvailable" to
                         item.optBoolean("temperatureAvailable", false),
                     "temperatureC" to item.optDouble("temperatureC", 0.0),
