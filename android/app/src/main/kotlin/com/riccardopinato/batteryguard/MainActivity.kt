@@ -91,7 +91,13 @@ class MainActivity : FlutterActivity() {
                     "getBatteryHealthReport" -> {
                         val snapshot = BatteryInfoReader.read(this)
                         BatteryHealthStore.record(this, snapshot)
+                        IdleDrainStore.record(this, snapshot)
                         result.success(BatteryHealthStore.report(this))
+                    }
+                    "getIdleDrainReport" -> {
+                        val snapshot = BatteryInfoReader.read(this)
+                        IdleDrainStore.record(this, snapshot)
+                        result.success(IdleDrainStore.report(this))
                     }
                     "setNominalCapacityMah" -> {
                         val value = (call.arguments as? Number)?.toInt() ?: 0

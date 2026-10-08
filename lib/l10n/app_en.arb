@@ -565,5 +565,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "healthReportedStatus": "Android-reported battery status",
+  "healthReportedExplainer": "This Android status reports conditions such as Good, Overheated or Cold. It is not a manufacturer health percentage.",
+  "healthEstimateExplainer": "Battery Guard estimates full-charge capacity from compatible charge-counter samples collected locally.",
+  "confidenceScore": "Confidence score",
+  "uncertainty": "Estimated uncertainty",
+  "outliers": "Outliers",
+  "outlierInspector": "Outlier inspector",
+  "noOutliers": "No recent outliers detected.",
+  "socCoverage": "SoC coverage",
+  "advancedHealthAnalysis": "Advanced Health Lab analysis",
+  "observedTrend": "Observed capacity trend",
+  "trendStable": "Stable within uncertainty",
+  "trendUp": "Observed estimate is higher",
+  "trendDown": "Observed estimate is lower",
+  "standardEta": "Standard ETA",
+  "smartEta": "Smart ETA",
+  "etaLearning": "Learning from more charging history",
+  "etaHistory": "Historical sessions used",
+  "idleDrain": "Idle Drain",
+  "idleDrainSubtitle": "Compares screen-off discharge with this device's own local baseline. It does not attribute drain to individual apps.",
+  "idleDrainLearning": "Learning your idle baseline",
+  "idleDrainNormal": "In line with your baseline",
+  "idleDrainElevated": "Above your usual baseline",
+  "idleDrainHigh": "Much higher than your usual baseline",
+  "idleDrainBaseline": "Baseline",
+  "idleDrainRecent": "Recent",
+  "screenContextUsed": "Screen state included"
 }

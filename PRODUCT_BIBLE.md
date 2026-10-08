@@ -106,3 +106,28 @@ Scoring rules:
 - Overall is composed only from available sub-scores;
 - missing evidence stays unavailable;
 - Battery Stress is an exposure heuristic, never a claim of measured chemical degradation.
+
+## Battery Intelligence doctrine — v1.7
+
+Battery Intelligence remains deterministic, local-first and evidence-bounded.
+
+**FREE**
+- Battery Health summary when compatible charge-counter evidence exists;
+- Android-reported health status shown separately from estimated capacity health;
+- nominal-capacity setup;
+- standard charging ETA from the current observed session.
+
+**PRO**
+- Health Lab 2 confidence score, uncertainty, smoothed trend and outlier inspector;
+- Smart ETA using valid same-source personal charging history and available screen/taper context;
+- Idle Drain Sentinel against the device's own comparable screen-off baseline.
+
+Guardrails:
+- Android `BATTERY_HEALTH_*` status is never presented as an OEM health percentage;
+- estimated health is never presented without compatible evidence and nominal capacity;
+- missing evidence remains unavailable/learning;
+- Smart ETA never uses a generic external device database;
+- screen ON/OFF context is used only when explicitly observed;
+- Idle Drain never claims which app caused drain and excludes charging intervals;
+- thresholds are heuristics for personal comparison, not chemical degradation measurements.
+

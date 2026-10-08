@@ -126,6 +126,7 @@ object BatteryInfoReader {
 
         val powerManager =
             context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val screenInteractive = powerManager.isInteractive
 
         val signals = linkedMapOf<String, Map<String, Any>>(
             "level" to meta(
@@ -194,6 +195,12 @@ object BatteryInfoReader {
                 "high",
                 observedAt,
             ),
+            "screenState" to meta(
+                true,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
         )
 
         return mapOf(
@@ -216,6 +223,8 @@ object BatteryInfoReader {
             "isPlugged" to isPlugged,
             "plugType" to plugTypeLabel(pluggedCode),
             "isPowerSaveMode" to powerManager.isPowerSaveMode,
+            "screenInteractive" to screenInteractive,
+            "screenStateAvailable" to true,
             "timestamp" to observedAt,
             "signals" to signals,
         )
@@ -249,6 +258,7 @@ object BatteryInfoReader {
             "health",
             "technology",
             "plugType",
+            "screenState",
         ).forEach { key ->
             unavailableSignals[key] = meta(
                 false,
@@ -278,6 +288,8 @@ object BatteryInfoReader {
             "isPlugged" to false,
             "plugType" to "Nessuno",
             "isPowerSaveMode" to false,
+            "screenInteractive" to false,
+            "screenStateAvailable" to false,
             "timestamp" to observedAt,
             "signals" to unavailableSignals,
         )

@@ -498,6 +498,23 @@ object ChargingSessionStore {
                             level != last.optInt("level", level) ||
                                 isCharging !=
                                     last.optBoolean("isCharging", isCharging) ||
+                                (
+                                    snapshot["screenStateAvailable"] == true &&
+                                        (
+                                            !last.optBoolean(
+                                                "screenStateAvailable",
+                                                false,
+                                            ) ||
+                                                (
+                                                    snapshot["screenInteractive"] as? Boolean
+                                                        ?: false
+                                                    ) !=
+                                                    last.optBoolean(
+                                                        "screenInteractive",
+                                                        false,
+                                                    )
+                                            )
+                                    ) ||
                                 meaningfulPowerChange ||
                                 meaningfulTemperatureChange
                             )
@@ -514,6 +531,14 @@ object ChargingSessionStore {
                 put(
                     "isPlugged",
                     snapshot["isPlugged"] as? Boolean ?: false,
+                )
+                put(
+                    "screenStateAvailable",
+                    snapshot["screenStateAvailable"] as? Boolean ?: false,
+                )
+                put(
+                    "screenInteractive",
+                    snapshot["screenInteractive"] as? Boolean ?: false,
                 )
                 put("temperatureAvailable", temperatureAvailable)
                 put("temperatureC", if (temperatureAvailable) temperature else 0.0)
@@ -843,6 +868,10 @@ object ChargingSessionStore {
                     "level" to item.optInt("level", 0),
                     "isCharging" to item.optBoolean("isCharging", false),
                     "isPlugged" to item.optBoolean("isPlugged", false),
+                    "screenStateAvailable" to
+                        item.optBoolean("screenStateAvailable", false),
+                    "screenInteractive" to
+                        item.optBoolean("screenInteractive", false),
                     "temperatureAvailable" to
                         item.optBoolean("temperatureAvailable", false),
                     "temperatureC" to item.optDouble("temperatureC", 0.0),

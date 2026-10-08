@@ -21,6 +21,8 @@ class BatterySnapshot {
     required this.isPlugged,
     required this.plugType,
     required this.isPowerSaveMode,
+    this.screenInteractive = false,
+    this.screenStateAvailable = false,
     required this.timestamp,
     required this.signals,
   });
@@ -45,6 +47,8 @@ class BatterySnapshot {
         isPlugged: false,
         plugType: 'None',
         isPowerSaveMode: false,
+        screenInteractive: false,
+        screenStateAvailable: false,
         timestamp: DateTime.now(),
         signals: const {},
       );
@@ -103,6 +107,8 @@ class BatterySnapshot {
       isPlugged: boolean('isPlugged'),
       plugType: text('plugType', 'None'),
       isPowerSaveMode: boolean('isPowerSaveMode'),
+      screenInteractive: boolean('screenInteractive'),
+      screenStateAvailable: boolean('screenStateAvailable'),
       timestamp: timestamp,
       signals: Map.unmodifiable(signals),
     );
@@ -127,6 +133,8 @@ class BatterySnapshot {
   final bool isPlugged;
   final String plugType;
   final bool isPowerSaveMode;
+  final bool screenInteractive;
+  final bool screenStateAvailable;
   final DateTime timestamp;
   final Map<String, BatterySignalMeta> signals;
 

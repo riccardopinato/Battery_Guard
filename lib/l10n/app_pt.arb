@@ -565,5 +565,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "healthReportedStatus": "Estado da bateria informado pelo Android",
+  "healthReportedExplainer": "Este estado do Android indica condições como Boa, Sobreaquecida ou Fria. Não é uma percentagem de saúde do fabricante.",
+  "healthEstimateExplainer": "O Battery Guard estima a capacidade total a partir de amostras compatíveis do contador de carga guardadas localmente.",
+  "confidenceScore": "Pontuação de confiança",
+  "uncertainty": "Incerteza estimada",
+  "outliers": "Valores atípicos",
+  "outlierInspector": "Inspector de valores atípicos",
+  "noOutliers": "Nenhum valor atípico recente detetado.",
+  "socCoverage": "Cobertura de SoC",
+  "advancedHealthAnalysis": "Análise avançada do Health Lab",
+  "observedTrend": "Tendência de capacidade observada",
+  "trendStable": "Estável dentro da incerteza",
+  "trendUp": "A estimativa observada está mais alta",
+  "trendDown": "A estimativa observada está mais baixa",
+  "standardEta": "ETA padrão",
+  "smartEta": "Smart ETA",
+  "etaLearning": "A aprender com mais histórico de carregamento",
+  "etaHistory": "Sessões históricas usadas",
+  "idleDrain": "Idle Drain",
+  "idleDrainSubtitle": "Compara a descarga com o ecrã desligado com a referência local deste dispositivo. Não atribui consumo a apps individuais.",
+  "idleDrainLearning": "A aprender a tua referência em repouso",
+  "idleDrainNormal": "Dentro da tua referência",
+  "idleDrainElevated": "Acima da tua referência habitual",
+  "idleDrainHigh": "Muito acima da tua referência habitual",
+  "idleDrainBaseline": "Referência",
+  "idleDrainRecent": "Recente",
+  "screenContextUsed": "Estado do ecrã incluído"
 }

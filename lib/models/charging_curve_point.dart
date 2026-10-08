@@ -4,6 +4,7 @@ class ChargingCurvePoint {
     required this.level,
     required this.isCharging,
     required this.isPlugged,
+    this.screenInteractive,
     this.temperatureC,
     this.voltageV,
     this.currentMa,
@@ -27,6 +28,9 @@ class ChargingCurvePoint {
       level: level is num ? level.round().clamp(0, 100).toInt() : 0,
       isCharging: map['isCharging'] == true,
       isPlugged: map['isPlugged'] == true,
+      screenInteractive: map['screenStateAvailable'] == true
+          ? map['screenInteractive'] == true
+          : null,
       temperatureC:
           availableNumber('temperatureC', 'temperatureAvailable')?.toDouble(),
       voltageV: availableNumber('voltageV', 'voltageAvailable')?.toDouble(),
@@ -39,6 +43,7 @@ class ChargingCurvePoint {
   final int level;
   final bool isCharging;
   final bool isPlugged;
+  final bool? screenInteractive;
   final double? temperatureC;
   final double? voltageV;
   final double? currentMa;

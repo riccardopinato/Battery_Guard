@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.0+25 — MAXI STEP C: Battery Intelligence
+- completed the v1.6 Health Lab 2 milestone and v1.7 Smart ETA / Idle Drain milestone in one integrated release;
+- separated Android-reported battery health status from Battery Guard estimated capacity health;
+- added robust capacity smoothing, MAD-based outlier filtering, uncertainty and confidence score;
+- added outlier inspector and smoothed longitudinal capacity trend;
+- Free now receives health summary + standard ETA; Pro receives advanced Health Lab, Smart ETA and Idle Drain;
+- Smart ETA uses current-session evidence, valid same-source personal history and screen/taper context when observed;
+- added screen interactive provenance to snapshots and future charging-curve points;
+- added local Idle Drain baseline from screen-off, unplugged intervals without per-app attribution;
+- added six-language Battery Intelligence strings, Web Preview fixtures and deterministic ETA regression tests;
+- no new runtime dependency and no cloud battery telemetry.
+
+
 ## 1.5.0 — Battery Stress & Charging Ranking
 - added deterministic Battery Stress exposure analysis for normal charging sessions and Charge Doctor tests;
 - stress combines high-SoC exposure, heat, very-high temperature, high voltage and high-power + heat overlap without claiming direct chemical degradation;

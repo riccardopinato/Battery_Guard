@@ -10,6 +10,11 @@ enum BatteryGuardFeature {
   chargerRanking,
   batteryStressSummary,
   batteryStressDetails,
+  healthSummary,
+  healthLabAdvanced,
+  standardEta,
+  smartEta,
+  idleDrain,
 }
 
 enum FeatureTier {
@@ -33,6 +38,11 @@ class FeatureCatalog {
       BatteryGuardFeature.chargerRanking => FeatureTier.premium,
       BatteryGuardFeature.batteryStressSummary => FeatureTier.free,
       BatteryGuardFeature.batteryStressDetails => FeatureTier.premium,
+      BatteryGuardFeature.healthSummary => FeatureTier.free,
+      BatteryGuardFeature.healthLabAdvanced => FeatureTier.premium,
+      BatteryGuardFeature.standardEta => FeatureTier.free,
+      BatteryGuardFeature.smartEta => FeatureTier.premium,
+      BatteryGuardFeature.idleDrain => FeatureTier.premium,
     };
   }
 

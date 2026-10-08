@@ -87,6 +87,8 @@ class MonitoringService : Service() {
             addAction(Intent.ACTION_BATTERY_CHANGED)
             addAction(Intent.ACTION_POWER_CONNECTED)
             addAction(Intent.ACTION_POWER_DISCONNECTED)
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
         }
         registerReceiver(receiver, filter)
         registered = true
@@ -118,6 +120,7 @@ class MonitoringService : Service() {
 
         HistoryStore.addSample(this, snapshot)
         BatteryHealthStore.record(this, snapshot)
+        IdleDrainStore.record(this, snapshot)
         BatteryGuardWidgetProvider.updateAll(this, snapshot = snapshot)
 
         val sessionUpdate = ChargingSessionStore.update(
