@@ -354,5 +354,88 @@
   "notificationsDisabled": "Notificações da app desativadas",
   "alertChannelDisabled": "Canal de alertas da bateria desativado",
   "deliveryReady": "Alertas prontos",
-  "testRequiresCharging": "Aguarde até o dispositivo estar efetivamente a carregar antes de iniciar o teste."
+  "testRequiresCharging": "Aguarde até o dispositivo estar efetivamente a carregar antes de iniciar o teste.",
+  "capabilityMapTitle": "Mapa de capacidades do dispositivo",
+  "capabilityMapSubtitle": "Mostra quais sinais da bateria o dispositivo realmente expõe, de onde vem cada valor e o nível de confiança atribuído pelo Battery Guard.",
+  "capabilityMapSettingsBody": "Veja quais métricas de bateria o Android expõe neste dispositivo e como são obtidas.",
+  "capabilityLevel": "Nível da bateria",
+  "capabilityCurrent": "Corrente",
+  "capabilityPower": "Potência de carregamento",
+  "capabilityChargeCounter": "Contador de carga",
+  "capabilityStatus": "Estado da bateria",
+  "capabilityTechnology": "Tecnologia da bateria",
+  "capabilityPlugType": "Fonte de carregamento",
+  "sourceSystemReported": "Reportado pelo Android",
+  "sourceOemReported": "Reportado pelo OEM",
+  "sourceMeasured": "Medido",
+  "sourceCalculated": "Calculado",
+  "sourceEstimated": "Estimado",
+  "confidenceUnknown": "Desconhecida",
+  "sessionDetailTitle": "Sessão de carregamento",
+  "oemChargeLimitDetected": "Limite de carregamento do dispositivo detetado",
+  "oemChargeLimitBody": "O telefone permaneceu ligado ao carregador, mas parou intencionalmente de carregar perto de {level}%. O Battery Guard trata isto como proteção/pausa adaptativa do dispositivo, não como uma sessão com falha.",
+  "sessionEvidence": "Evidências da sessão",
+  "validityActive": "Ativa",
+  "validityValid": "Válida",
+  "validityPartial": "Parcial",
+  "validityInterrupted": "Interrompida",
+  "validityExcluded": "Excluída",
+  "validityUncertain": "Incerta",
+  "reasonTooShort": "A sessão é demasiado curta para ser considerada fiável.",
+  "reasonInsufficientSocDelta": "O nível da bateria mudou demasiado pouco para uma comparação fiável.",
+  "reasonPowerMissing": "A potência de carregamento não estava disponível nesta sessão.",
+  "reasonCurrentMissing": "A corrente de carregamento não estava disponível nesta sessão.",
+  "reasonTemperatureMissing": "A temperatura da bateria não estava disponível nesta sessão.",
+  "reasonUserUnplugged": "A sessão terminou quando o carregador foi desligado.",
+  "reasonSystemInterrupted": "O Android ou o dispositivo interrompeu a continuidade da monitorização.",
+  "reasonOemChargeLimit": "Foi detetado um limite de carregamento ou uma pausa adaptativa do dispositivo.",
+  "reasonMonitoringGap": "Ocorreu um longo intervalo sem monitorização durante a sessão.",
+  "reasonInvalidTelemetry": "A telemetria continha valores que o Battery Guard não podia considerar fiáveis.",
+  "chargingCurveTitle": "Curva de carregamento",
+  "chargingCurveNotEnoughData": "Ainda não existem amostras suficientes para construir a curva desta sessão.",
+  "chargingCurvePremiumTitle": "A curva completa é uma análise Pro",
+  "chargingCurvePremiumBody": "A versão Free mantém o resumo, as evidências e os sinais de proteção. Pro desbloqueia a curva completa de SoC, potência, temperatura e corrente com análise de fases.",
+  "chargingCurveSemantics": "Curva de carregamento normalizada com nível da bateria, potência, temperatura e corrente ao longo do tempo.",
+  "curveNormalizedHint": "As linhas são normalizadas separadamente para comparar a forma ao longo do tempo; utilize as métricas numéricas para valores absolutos.",
+  "curveAnalysis": "Análise da curva",
+  "curveDataPoints": "Pontos de dados: {count}",
+  "curvePeakPower": "Potência máxima observada: {value} W",
+  "curveTemperatureRise": "Variação de temperatura observada: {value} °C",
+  "phaseRampUp": "Arranque",
+  "phaseFast": "Carregamento rápido",
+  "phaseSteady": "Estável",
+  "phasePlateau": "Planalto",
+  "phaseThermalThrottle": "Limitação térmica",
+  "phaseTaper": "Redução final",
+  "phaseChargeLimit": "Limite / pausa de carga",
+  "phaseFull": "Completa",
+  "proFeatureCurves": "Curvas completas de carregamento e análise de fases",
+  "@oemChargeLimitBody": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@curveDataPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@curvePeakPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@curveTemperatureRise": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }
