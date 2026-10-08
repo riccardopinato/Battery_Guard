@@ -251,7 +251,7 @@
   "unlockPro": "Pro freischalten",
   "restorePurchases": "Käufe wiederherstellen",
   "storeUnavailable": "Google-Play-Käufe sind in diesem Build oder auf diesem Gerät nicht verfügbar.",
-  "proFeatureDoctor": "Kontrollierte Charge-Doctor-Tests",
+  "proFeatureDoctor": "Erweiterte numerische Charge-Doctor-Scores und persönliche Baseline",
   "proFeatureInsights30": "30-Tage-Insights",
   "purchaseError": "Kauf konnte nicht abgeschlossen werden.",
   "proSection": "Pro",
@@ -554,5 +554,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "proFeatureRanking": "Ladegerät- + Kabel-Ranking und Trends",
+  "proFeatureStress": "Detaillierter Battery-Stress-Score und Expositionsaufschlüsselung"
 }
