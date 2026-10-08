@@ -75,6 +75,19 @@ class MainActivity : FlutterActivity() {
                         ChargeTestStore.clear(this)
                         result.success(null)
                     }
+                    "getChargingSetups" ->
+                        result.success(ChargingSetupStore.getAll(this))
+                    "saveChargingSetup" -> {
+                        val values =
+                            call.arguments as? Map<*, *> ?: emptyMap<Any, Any>()
+                        ChargingSetupStore.save(this, values)
+                        result.success(null)
+                    }
+                    "deleteChargingSetup" -> {
+                        val id = call.arguments?.toString().orEmpty()
+                        ChargingSetupStore.delete(this, id)
+                        result.success(null)
+                    }
                     "getBatteryHealthReport" -> {
                         val snapshot = BatteryInfoReader.read(this)
                         BatteryHealthStore.record(this, snapshot)
