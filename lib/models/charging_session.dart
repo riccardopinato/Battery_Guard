@@ -174,7 +174,10 @@ class ChargingSession {
       reasonCodes: List.unmodifiable(reasons),
       oemChargeLimitDetected: map['oemChargeLimitDetected'] == true,
       oemChargeLimitLevel: map['oemChargeLimitLevel'] is num
-          ? (map['oemChargeLimitLevel'] as num).round().clamp(0, 100)
+          ? (map['oemChargeLimitLevel'] as num)
+              .round()
+              .clamp(0, 100)
+              .toInt()
           : null,
       curvePoints: List.unmodifiable(curve),
     );
