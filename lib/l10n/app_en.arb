@@ -259,7 +259,7 @@
   },
   "restorePurchases": "Restore purchases",
   "storeUnavailable": "Google Play purchase is not available on this build or device.",
-  "proFeatureDoctor": "Charge Doctor controlled tests",
+  "proFeatureDoctor": "Charge Doctor advanced numeric scores and personal baseline",
   "proFeatureInsights30": "30-day Insights",
   "purchaseError": "Purchase could not be completed.",
   "proSection": "Pro",
@@ -554,5 +554,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "proFeatureRanking": "Charger + cable ranking and trends",
+  "proFeatureStress": "Battery Stress detailed score and exposure breakdown"
 }
