@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.0 — Charging Session Intelligence
+- added bounded adaptive charging curves with SoC, power, current, voltage and temperature samples;
+- added a deterministic curve analyzer for ramp-up, fast charging, plateau, thermal throttling, taper, charge-limit pause and full-charge phases;
+- added a session detail screen with Free evidence/reason codes and Premium full charging-curve analysis;
+- added periodic 60-second foreground sampling so curves and OEM charging pauses do not depend only on Android battery broadcasts;
+- added centralized Free/Premium feature access: provenance, Capability Map, reason engine and OEM-limit detection are Free; full charging curves are Premium;
+- added regression tests for curve analysis, OEM pause semantics, feature access and legacy-session compatibility;
+- bumped source to 1.3.0+21.
+
+## 1.2.0 — Data Truth Foundation
+- added per-signal provenance, availability, confidence and observation timestamps;
+- added the free Device Capability Map;
+- added session validity states and explainable reason codes;
+- added OEM/adaptive charge-limit detection while the device remains plugged in;
+- preserved old 1.1.x sessions without inventing curve data or reason evidence;
+- expanded localizations in all six supported languages.
+
 ## 1.1.7
 - upgraded `in_app_purchase` to 3.3.1 and Android adapter to 0.5.3;
 - added Google Play ownership reconciliation so cached Pro can be revoked after a successful store query no longer reports ownership;
