@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
+import '../models/battery_intelligence.dart';
 import '../models/battery_stress.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
@@ -12,6 +13,7 @@ import '../models/charging_setup_profile.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
+import 'battery_intelligence_engine.dart';
 import 'feature_access.dart';
 import 'native_battery_service.dart';
 import 'premium_service.dart';
@@ -32,6 +34,7 @@ class AppController extends ChangeNotifier {
 
   BatterySnapshot snapshot = BatterySnapshot.empty();
   BatteryHealthReport batteryHealthReport = BatteryHealthReport.empty;
+  IdleDrainReport idleDrainReport = IdleDrainReport.empty;
   MonitoringConfig config = MonitoringConfig.defaults();
   List<HistoryEntry> history = const [];
   List<ChargingSession> chargingSessions = const [];
@@ -47,6 +50,26 @@ class AppController extends ChangeNotifier {
   String? lastError;
 
   bool get isWebPreview => kIsWeb;
+
+  BatteryEtaEstimate get standardEta =>
+      BatteryIntelligenceEngine.standardEta(
+        snapshot: snapshot,
+        currentSession: currentSession,
+        targetLevel: config.targetLevel,
+      );
+
+  BatteryEtaEstimate get smartEta =>
+      BatteryIntelligenceEngine.smartEta(
+        snapshot: snapshot,
+        currentSession: currentSession,
+        history: chargingSessions,
+        targetLevel: config.targetLevel,
+      );
+
+  BatteryEtaEstimate get effectiveEta =>
+      premium.isPro && canUseFeature(BatteryGuardFeature.smartEta)
+          ? smartEta
+          : standardEta;
 
   bool canUseFeature(BatteryGuardFeature feature) =>
       FeatureCatalog.isEnabled(feature, isPro: premium.isPro);
@@ -83,6 +106,7 @@ class AppController extends ChangeNotifier {
         _platform.getChargeTests(),
         _platform.getChargingSetups(),
         _platform.getBatteryHealthReport(),
+        _platform.getIdleDrainReport(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       config = values[1] as MonitoringConfig;
@@ -98,6 +122,7 @@ class AppController extends ChangeNotifier {
       chargeTests = values[9] as List<ChargeTest>;
       chargingSetups = values[10] as List<ChargingSetupProfile>;
       batteryHealthReport = values[11] as BatteryHealthReport;
+      idleDrainReport = values[12] as IdleDrainReport;
       lastError = null;
 
       await _subscription?.cancel();
@@ -143,6 +168,8 @@ class AppController extends ChangeNotifier {
       'isPlugged': true,
       'plugType': 'AC charger',
       'isPowerSaveMode': false,
+      'screenInteractive': false,
+      'screenStateAvailable': true,
       'timestamp': now.millisecondsSinceEpoch,
       'signals': {
         'level': {
@@ -228,6 +255,26 @@ class AppController extends ChangeNotifier {
       trendPercent: -2.8,
       averageTemperatureC: 32.4,
       maxTemperatureC: 41.1,
+      estimatorVersion: 'health_lab_2',
+      reportedHealthStatus: 'Good',
+      reportedHealthAvailable: true,
+      confidenceScore: 88,
+      totalSampleCount: 15,
+      outlierCount: 3,
+      socSpread: 52,
+      dispersionPercent: 5.2,
+      uncertaintyPercent: 1.8,
+      trendDirection: 'down',
+    );
+    idleDrainReport = const IdleDrainReport(
+      status: 'normal',
+      confidence: 'high',
+      segmentCount: 11,
+      baselineRatePercentPerHour: 0.42,
+      recentRatePercentPerHour: 0.48,
+      deltaPercent: 14.3,
+      powerSaveMode: false,
+      recentSegments: [],
     );
     reliability = ReliabilityStatus.fromMap({
       'notificationsGranted': true,
@@ -305,7 +352,46 @@ class AppController extends ChangeNotifier {
       });
     });
     history = const [];
-    currentSession = null;
+    currentSession = ChargingSession.fromMap({
+      'id': 'web-current',
+      'startedAt': now.subtract(const Duration(minutes: 30)).millisecondsSinceEpoch,
+      'lastObservedAt': now.millisecondsSinceEpoch,
+      'startLevel': 60,
+      'currentLevel': 76,
+      'endLevel': 76,
+      'startTemperatureC': 30.0,
+      'currentTemperatureC': 34.2,
+      'maxTemperatureC': 34.7,
+      'temperatureAvailable': true,
+      'averagePowerW': 16.8,
+      'averageCurrentMa': 3700,
+      'percentPerHour': 32.0,
+      'estimatedMinutesToTarget': 8,
+      'plugType': 'AC charger',
+      'targetLevel': 80,
+      'completed': false,
+      'quality': 'active',
+      'validity': 'active',
+      'reasonCodes': const [],
+      'curvePoints': [
+        {
+          'timestamp': now.subtract(const Duration(minutes: 30)).millisecondsSinceEpoch,
+          'level': 60,
+          'isCharging': true,
+          'isPlugged': true,
+          'screenStateAvailable': true,
+          'screenInteractive': false,
+        },
+        {
+          'timestamp': now.millisecondsSinceEpoch,
+          'level': 76,
+          'isCharging': true,
+          'isPlugged': true,
+          'screenStateAvailable': true,
+          'screenInteractive': false,
+        },
+      ],
+    });
     chargingSetups = [
       ChargingSetupProfile(
         id: 'web-samsung-25w',
@@ -388,10 +474,12 @@ class AppController extends ChangeNotifier {
         _platform.getSnapshot(),
         _platform.getCurrentChargingSession(),
         _platform.getBatteryHealthReport(),
+        _platform.getIdleDrainReport(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       currentSession = values[1] as ChargingSession?;
       batteryHealthReport = values[2] as BatteryHealthReport;
+      idleDrainReport = values[3] as IdleDrainReport;
       notifyListeners();
     } catch (error) {
       lastError = error.toString();
@@ -528,12 +616,21 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> refreshBatteryHealth() async {
+    await refreshBatteryIntelligence();
+  }
+
+  Future<void> refreshBatteryIntelligence() async {
     if (kIsWeb) {
       notifyListeners();
       return;
     }
     try {
-      batteryHealthReport = await _platform.getBatteryHealthReport();
+      final values = await Future.wait<Object>([
+        _platform.getBatteryHealthReport(),
+        _platform.getIdleDrainReport(),
+      ]);
+      batteryHealthReport = values[0] as BatteryHealthReport;
+      idleDrainReport = values[1] as IdleDrainReport;
       notifyListeners();
     } catch (error) {
       lastError = error.toString();
@@ -543,21 +640,8 @@ class AppController extends ChangeNotifier {
 
   Future<void> setNominalCapacityMah(int value) async {
     if (kIsWeb) {
-      final current = batteryHealthReport;
-      final estimate = current.estimatedFullCapacityMah;
-      batteryHealthReport = BatteryHealthReport(
-        nominalCapacityMah: value,
-        estimatedFullCapacityMah: estimate,
-        estimatedHealthPercent: value > 0 && estimate > 0
-            ? (estimate / value * 100).clamp(0, 100).toDouble()
-            : 0,
-        confidence: current.confidence,
-        sampleCount: current.sampleCount,
-        cycleCount: current.cycleCount,
-        trendPercent: current.trendPercent,
-        averageTemperatureC: current.averageTemperatureC,
-        maxTemperatureC: current.maxTemperatureC,
-      );
+      batteryHealthReport =
+          batteryHealthReport.withNominalCapacity(value);
       notifyListeners();
       return;
     }
