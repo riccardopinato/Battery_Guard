@@ -60,7 +60,7 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
     final l10n = AppLocalizations.of(context);
     final active = widget.controller.activeChargeTest;
     final tests = widget.controller.chargeTests;
-    final setups = widget.controller.chargingSetups;
+    final setups = widget.controller.accessibleChargingSetups;
     final selectedSetup = _selectedSetup();
     final scheme = Theme.of(context).colorScheme;
     final detailedScores = widget.controller.canUseFeature(
@@ -534,6 +534,7 @@ class _StartPanel extends StatelessWidget {
               'not_plugged' => l10n.testRequiresPlug,
               'not_charging' => l10n.testRequiresCharging,
               'power_unavailable' => l10n.testPowerUnavailable,
+              'premium_required' => l10n.multipleSetupsPro,
               _ => l10n.testPowerUnavailable,
             };
             ScaffoldMessenger.of(context).showSnackBar(
