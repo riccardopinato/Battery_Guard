@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 
 import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
+import '../models/battery_stress.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
+import '../models/charging_setup_profile.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
@@ -34,6 +36,7 @@ class AppController extends ChangeNotifier {
   List<HistoryEntry> history = const [];
   List<ChargingSession> chargingSessions = const [];
   List<ChargeTest> chargeTests = const [];
+  List<ChargingSetupProfile> chargingSetups = const [];
   ActiveChargeTest? activeChargeTest;
   ChargingSession? currentSession;
   ReliabilityStatus reliability = ReliabilityStatus.unknown;
@@ -70,6 +73,7 @@ class AppController extends ChangeNotifier {
         _platform.isOnboardingComplete(),
         _platform.getLocaleOverride(),
         _platform.getChargeTests(),
+        _platform.getChargingSetups(),
         _platform.getBatteryHealthReport(),
       ]);
       snapshot = values[0] as BatterySnapshot;
@@ -84,7 +88,8 @@ class AppController extends ChangeNotifier {
       localeOverride =
           language == null || language.isEmpty ? null : Locale(language);
       chargeTests = values[9] as List<ChargeTest>;
-      batteryHealthReport = values[10] as BatteryHealthReport;
+      chargingSetups = values[10] as List<ChargingSetupProfile>;
+      batteryHealthReport = values[11] as BatteryHealthReport;
       lastError = null;
 
       await _subscription?.cancel();
@@ -293,24 +298,62 @@ class AppController extends ChangeNotifier {
     });
     history = const [];
     currentSession = null;
-    chargeTests = List.generate(3, (index) {
+    chargingSetups = [
+      ChargingSetupProfile(
+        id: 'web-samsung-25w',
+        name: 'Samsung 25 W + cavo originale',
+        chargerName: 'Samsung 25 W',
+        cableName: 'Cavo originale',
+        source: 'AC charger',
+        notes: '',
+        createdAt: now.subtract(const Duration(days: 30)),
+        updatedAt: now,
+      ),
+      ChargingSetupProfile(
+        id: 'web-travel-20w',
+        name: 'Travel 20 W + USB-C',
+        chargerName: 'Travel 20 W',
+        cableName: 'USB-C',
+        source: 'AC charger',
+        notes: '',
+        createdAt: now.subtract(const Duration(days: 20)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+    ];
+    chargeTests = List.generate(6, (index) {
       final end = now.subtract(Duration(days: index + 1));
       final start = end.subtract(const Duration(minutes: 5));
+      final primary = index < 4;
+      final profile = primary ? chargingSetups[0] : chargingSetups[1];
+      final power = primary ? 20.8 - index * 0.35 : 15.1 - (index - 4) * 0.4;
       return ChargeTest(
         id: 'web-test-$index',
-        label: index == 0 ? 'USB-C 65 W' : 'Charger ${index + 1}',
+        profileId: profile.id,
+        label: profile.displayName,
+        chargerName: profile.chargerName,
+        cableName: profile.cableName,
         startedAt: start,
         endedAt: end,
-        startLevel: 35 + index * 5,
-        endLevel: 39 + index * 5,
-        averagePowerW: 17.8 - index * 2.1,
-        averageCurrentMa: 4100 - index * 400,
-        averageVoltageV: 4.28,
+        startLevel: 35 + index * 3,
+        endLevel: 40 + index * 3,
+        averagePowerW: power,
+        peakPowerW: power + 2.8,
+        averageCurrentMa: primary ? 4200 : 3200,
+        averageVoltageV: 4.25,
         startTemperatureC: 30.0,
-        maxTemperatureC: 33.4 + index,
+        averageTemperatureC: primary ? 33.0 : 32.0,
+        maxTemperatureC: primary ? 35.0 + index * 0.3 : 34.0,
+        temperatureAvailable: true,
         samples: 15,
-        source: index == 2 ? 'USB' : 'AC charger',
+        source: profile.source,
         confidence: ChargeTestConfidence.high,
+        powerCoefficientOfVariation: primary ? 0.07 + index * 0.01 : 0.14,
+        powerDropCount: primary ? (index == 3 ? 1 : 0) : 2,
+        stressScore: primary ? 18.0 + index * 2 : 28.0,
+        highSocMinutes: 0,
+        hotMinutes: primary ? 0 : 1.5,
+        veryHotMinutes: 0,
+        highVoltageMinutes: 0,
       );
     });
     loading = false;
@@ -512,7 +555,9 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> startChargeDoctorTest(String label) async {
+  Future<String?> startChargeDoctorTest(
+    ChargingSetupProfile setup,
+  ) async {
     if (activeChargeTest != null) return null;
 
     final first = kIsWeb ? snapshot : await _platform.getSnapshot();
@@ -523,7 +568,10 @@ class AppController extends ChangeNotifier {
     }
 
     activeChargeTest = ActiveChargeTest(
-      label: label.trim().isEmpty ? 'Charge Test' : label.trim(),
+      profileId: setup.id,
+      label: setup.displayName,
+      chargerName: setup.chargerName,
+      cableName: setup.cableName,
       startedAt: DateTime.now(),
       startLevel: first.level,
       startTemperatureC:
@@ -557,12 +605,28 @@ class AppController extends ChangeNotifier {
   void _addChargeDoctorSample(BatterySnapshot value) {
     final active = activeChargeTest;
     if (active == null) return;
-    if (value.powerAvailable) active.powers.add(value.powerW.abs());
-    if (value.currentAvailable) active.currents.add(value.currentMa.abs());
-    if (value.voltageAvailable) active.voltages.add(value.voltageV);
-    if (value.temperatureAvailable) {
-      active.temperatures.add(value.temperatureC);
-    }
+
+    final power = value.powerAvailable ? value.powerW.abs() : null;
+    final current = value.currentAvailable ? value.currentMa.abs() : null;
+    final voltage = value.voltageAvailable ? value.voltageV : null;
+    final temperature =
+        value.temperatureAvailable ? value.temperatureC : null;
+
+    if (power != null) active.powers.add(power);
+    if (current != null) active.currents.add(current);
+    if (voltage != null) active.voltages.add(voltage);
+    if (temperature != null) active.temperatures.add(temperature);
+
+    active.observations.add(
+      ChargeTestObservation(
+        timestamp: value.timestamp,
+        level: value.level,
+        powerW: power,
+        currentMa: current,
+        voltageV: voltage,
+        temperatureC: temperature,
+      ),
+    );
   }
 
   Future<ChargeTest?> stopChargeDoctorTest() async {
@@ -583,23 +647,48 @@ class AppController extends ChangeNotifier {
             : ChargeTestConfidence.low;
 
     final temperatures = active.temperatures;
+    final stress = BatteryStressAnalysis.fromSamples(
+      [
+        for (final sample in active.observations)
+          BatteryStressSample(
+            timestamp: sample.timestamp,
+            level: sample.level,
+            temperatureC: sample.temperatureC,
+            voltageV: sample.voltageV,
+          ),
+      ],
+    );
     final test = ChargeTest(
       id: endedAt.microsecondsSinceEpoch.toString(),
+      profileId: active.profileId,
       label: active.label,
+      chargerName: active.chargerName,
+      cableName: active.cableName,
       startedAt: active.startedAt,
       endedAt: endedAt,
       startLevel: active.startLevel,
       endLevel: finalSnapshot.level,
       averagePowerW: active.average(active.powers),
+      peakPowerW: active.peak(active.powers),
       averageCurrentMa: active.average(active.currents),
       averageVoltageV: active.average(active.voltages),
       startTemperatureC: active.startTemperatureC,
+      averageTemperatureC: active.average(temperatures),
       maxTemperatureC: temperatures.isEmpty
           ? 0
           : temperatures.reduce((a, b) => a > b ? a : b),
+      temperatureAvailable: temperatures.isNotEmpty,
       samples: active.samples,
       source: active.source,
       confidence: confidence,
+      powerCoefficientOfVariation:
+          active.coefficientOfVariation(active.powers),
+      powerDropCount: active.powerDropCount(),
+      stressScore: stress.dataSufficient ? stress.score : 0,
+      highSocMinutes: stress.highSocMinutes,
+      hotMinutes: stress.hotMinutes,
+      veryHotMinutes: stress.veryHotMinutes,
+      highVoltageMinutes: stress.highVoltageMinutes,
     );
 
     activeChargeTest = null;
@@ -608,6 +697,67 @@ class AppController extends ChangeNotifier {
 
     if (!kIsWeb) await _platform.saveChargeTest(test);
     return test;
+  }
+
+  Future<String?> saveChargingSetup({
+    String? id,
+    required String name,
+    required String chargerName,
+    required String cableName,
+    String notes = '',
+  }) async {
+    final normalizedName = name.trim();
+    final normalizedCharger = chargerName.trim();
+    final normalizedCable = cableName.trim();
+    if (normalizedName.isEmpty &&
+        normalizedCharger.isEmpty &&
+        normalizedCable.isEmpty) {
+      return 'invalid_setup';
+    }
+
+    final existingId = id?.trim() ?? '';
+    final creating = existingId.isEmpty;
+    if (creating &&
+        !premium.isPro &&
+        chargingSetups.isNotEmpty &&
+        !canUseFeature(BatteryGuardFeature.multipleChargingSetups)) {
+      return 'premium_required';
+    }
+
+    final now = DateTime.now();
+    final existing = existingId.isEmpty
+        ? null
+        : chargingSetups.where((item) => item.id == existingId).firstOrNull;
+    final profile = ChargingSetupProfile(
+      id: existing?.id ?? now.microsecondsSinceEpoch.toString(),
+      name: normalizedName.isNotEmpty
+          ? normalizedName
+          : [normalizedCharger, normalizedCable]
+              .where((value) => value.isNotEmpty)
+              .join(' + '),
+      chargerName: normalizedCharger,
+      cableName: normalizedCable,
+      source: snapshot.plugType,
+      notes: notes.trim(),
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    );
+
+    chargingSetups = [
+      profile,
+      ...chargingSetups.where((item) => item.id != profile.id),
+    ];
+    notifyListeners();
+    if (!kIsWeb) await _platform.saveChargingSetup(profile);
+    return profile.id;
+  }
+
+  Future<void> deleteChargingSetup(String id) async {
+    if (activeChargeTest?.profileId == id) return;
+    chargingSetups =
+        chargingSetups.where((item) => item.id != id).toList(growable: false);
+    notifyListeners();
+    if (!kIsWeb) await _platform.deleteChargingSetup(id);
   }
 
   Future<void> clearChargeTests() async {
