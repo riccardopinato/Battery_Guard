@@ -14,12 +14,14 @@ class BatteryStressSample {
     required this.level,
     this.temperatureC,
     this.voltageV,
+    this.powerW,
   });
 
   final DateTime timestamp;
   final int level;
   final double? temperatureC;
   final double? voltageV;
+  final double? powerW;
 }
 
 class BatteryStressAnalysis {
@@ -30,6 +32,7 @@ class BatteryStressAnalysis {
     required this.hotMinutes,
     required this.veryHotMinutes,
     required this.highVoltageMinutes,
+    required this.highPowerHeatMinutes,
     required this.maxTemperatureC,
     required this.reasons,
     required this.dataSufficient,
@@ -42,6 +45,7 @@ class BatteryStressAnalysis {
         hotMinutes: 0,
         veryHotMinutes: 0,
         highVoltageMinutes: 0,
+        highPowerHeatMinutes: 0,
         maxTemperatureC: null,
         reasons: [],
         dataSufficient: false,
@@ -63,6 +67,7 @@ class BatteryStressAnalysis {
             level: point.level,
             temperatureC: point.temperatureC,
             voltageV: point.voltageV,
+            powerW: point.powerW,
           ),
       ],
     );
@@ -78,7 +83,19 @@ class BatteryStressAnalysis {
     var hotSeconds = 0.0;
     var veryHotSeconds = 0.0;
     var highVoltageSeconds = 0.0;
+    var highPowerHeatSeconds = 0.0;
     double? maxTemperature;
+
+    final availablePowers = points
+        .map((point) => point.powerW)
+        .whereType<double>()
+        .where((value) => value > 0)
+        .toList(growable: false);
+    final peakPower = availablePowers.isEmpty
+        ? null
+        : availablePowers.reduce(
+            (left, right) => left > right ? left : right,
+          );
 
     for (var index = 1; index < points.length; index++) {
       final previous = points[index - 1];
@@ -96,13 +113,29 @@ class BatteryStressAnalysis {
         previous.temperatureC,
         current.temperatureC,
       ].whereType<double>().toList(growable: false);
+      double? intervalTemperature;
       if (temperatures.isNotEmpty) {
         final temp =
             temperatures.reduce((left, right) => left > right ? left : right);
+        intervalTemperature = temp;
         maxTemperature =
             maxTemperature == null || temp > maxTemperature ? temp : maxTemperature;
         if (temp >= 38) hotSeconds += seconds;
         if (temp >= 42) veryHotSeconds += seconds;
+      }
+
+      if (peakPower != null && peakPower > 0 && intervalTemperature != null) {
+        final powers = [
+          previous.powerW,
+          current.powerW,
+        ].whereType<double>().where((value) => value >= 0).toList(growable: false);
+        if (powers.isNotEmpty) {
+          final intervalPower =
+              powers.reduce((left, right) => left > right ? left : right);
+          if (intervalPower >= peakPower * 0.80 && intervalTemperature >= 38) {
+            highPowerHeatSeconds += seconds;
+          }
+        }
       }
 
       final voltages = [
@@ -120,12 +153,14 @@ class BatteryStressAnalysis {
     final hotMinutes = hotSeconds / 60.0;
     final veryHotMinutes = veryHotSeconds / 60.0;
     final highVoltageMinutes = highVoltageSeconds / 60.0;
+    final highPowerHeatMinutes = highPowerHeatSeconds / 60.0;
 
     var score = 0.0;
     score += (highSocMinutes * 0.8).clamp(0, 28).toDouble();
     score += (hotMinutes * 1.8).clamp(0, 32).toDouble();
     score += (veryHotMinutes * 3.0).clamp(0, 24).toDouble();
-    score += (highVoltageMinutes * 0.7).clamp(0, 16).toDouble();
+    score += (highVoltageMinutes * 0.7).clamp(0, 14).toDouble();
+    score += (highPowerHeatMinutes * 1.0).clamp(0, 12).toDouble();
 
     if (maxTemperature != null) {
       if (maxTemperature >= 45) {
@@ -143,6 +178,9 @@ class BatteryStressAnalysis {
     if (hotMinutes >= 10) reasons.add('HEAT_EXPOSURE');
     if (veryHotMinutes >= 3) reasons.add('VERY_HIGH_TEMPERATURE');
     if (highVoltageMinutes >= 20) reasons.add('HIGH_VOLTAGE_EXPOSURE');
+    if (highPowerHeatMinutes >= 5) {
+      reasons.add('HIGH_POWER_HEAT_OVERLAP');
+    }
 
     final level = switch (bounded) {
       < 25 => BatteryStressLevel.low,
@@ -158,6 +196,7 @@ class BatteryStressAnalysis {
       hotMinutes: hotMinutes,
       veryHotMinutes: veryHotMinutes,
       highVoltageMinutes: highVoltageMinutes,
+      highPowerHeatMinutes: highPowerHeatMinutes,
       maxTemperatureC: maxTemperature,
       reasons: List.unmodifiable(reasons),
       dataSufficient: true,
@@ -170,6 +209,7 @@ class BatteryStressAnalysis {
   final double hotMinutes;
   final double veryHotMinutes;
   final double highVoltageMinutes;
+  final double highPowerHeatMinutes;
   final double? maxTemperatureC;
   final List<String> reasons;
   final bool dataSufficient;
