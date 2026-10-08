@@ -1,3 +1,5 @@
+import 'battery_signal.dart';
+
 class BatterySnapshot {
   const BatterySnapshot({
     required this.level,
@@ -20,6 +22,7 @@ class BatterySnapshot {
     required this.plugType,
     required this.isPowerSaveMode,
     required this.timestamp,
+    required this.signals,
   });
 
   factory BatterySnapshot.empty() => BatterySnapshot(
@@ -43,6 +46,7 @@ class BatterySnapshot {
         plugType: 'None',
         isPowerSaveMode: false,
         timestamp: DateTime.now(),
+        signals: const {},
       );
 
   factory BatterySnapshot.fromMap(Map<dynamic, dynamic> map) {
@@ -59,6 +63,24 @@ class BatterySnapshot {
     String text(String key, [String fallback = '—']) {
       final value = map[key];
       return value?.toString() ?? fallback;
+    }
+
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(
+      number('timestamp', DateTime.now().millisecondsSinceEpoch).round(),
+    );
+    final rawSignals = map['signals'];
+    final signals = <String, BatterySignalMeta>{};
+    if (rawSignals is Map) {
+      for (final entry in rawSignals.entries) {
+        final value = entry.value;
+        if (value is Map) {
+          final key = entry.key.toString();
+          signals[key] = BatterySignalMeta.fromMap(
+            key,
+            value,
+          );
+        }
+      }
     }
 
     return BatterySnapshot(
@@ -81,9 +103,8 @@ class BatterySnapshot {
       isPlugged: boolean('isPlugged'),
       plugType: text('plugType', 'None'),
       isPowerSaveMode: boolean('isPowerSaveMode'),
-      timestamp: DateTime.fromMillisecondsSinceEpoch(
-        number('timestamp', DateTime.now().millisecondsSinceEpoch).round(),
-      ),
+      timestamp: timestamp,
+      signals: Map.unmodifiable(signals),
     );
   }
 
@@ -107,7 +128,11 @@ class BatterySnapshot {
   final String plugType;
   final bool isPowerSaveMode;
   final DateTime timestamp;
+  final Map<String, BatterySignalMeta> signals;
 
   double get voltageV => voltageMv / 1000;
   bool get cycleCountAvailable => cycleCount >= 0;
+
+  BatterySignalMeta signal(String key) =>
+      signals[key] ?? BatterySignalMeta.unavailable(key);
 }
