@@ -242,6 +242,13 @@ jobs:
             echo "premiumTestAds=disabled-by-pro-entitlement"
             echo "proProduct=battery_guard_pro_lifetime"
             echo "artifactPolicy=arm64-first"
+            echo "intelligenceFoundation=true"
+            echo "curveMaxPoints=120"
+            echo "freeDataProvenance=true"
+            echo "freeCapabilityMap=true"
+            echo "freeSessionReasons=true"
+            echo "freeOemLimitDetection=true"
+            echo "premiumChargingCurve=true"
           } > release/BUILD_EVIDENCE.txt
 
           (
