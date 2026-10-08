@@ -511,6 +511,10 @@ object ChargingSessionStore {
                 put("timestamp", now)
                 put("level", level)
                 put("isCharging", isCharging)
+                put(
+                    "isPlugged",
+                    snapshot["isPlugged"] as? Boolean ?: false,
+                )
                 put("temperatureAvailable", temperatureAvailable)
                 put("temperatureC", if (temperatureAvailable) temperature else 0.0)
                 put("voltageAvailable", voltageAvailable)
@@ -838,6 +842,7 @@ object ChargingSessionStore {
                     "timestamp" to item.optLong("timestamp", 0L),
                     "level" to item.optInt("level", 0),
                     "isCharging" to item.optBoolean("isCharging", false),
+                    "isPlugged" to item.optBoolean("isPlugged", false),
                     "temperatureAvailable" to
                         item.optBoolean("temperatureAvailable", false),
                     "temperatureC" to item.optDouble("temperatureC", 0.0),
