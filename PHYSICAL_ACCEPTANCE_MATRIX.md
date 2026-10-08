@@ -38,6 +38,18 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | Premium curve gate | — | — | Free sees lock; Pro sees full curve and phases | NOT RUN |
 | Legacy 1.1.x history migration | — | — | old sessions remain readable without fabricated curve/reason data | NOT RUN |
 | Signed update 1.1.7 -> 1.3.0 | — | — | update installs in place and preserves settings/history | NOT RUN |
+| Signed update 1.3.0 -> 1.5.0 | — | — | update installs in place and preserves curves/tests/settings | NOT RUN |
+| Free Charge Doctor Basic | — | — | create one setup, run tests, see qualitative bands/anomalies | NOT RUN |
+| Free second setup gate | — | — | second setup creation/use is blocked without deleting data | NOT RUN |
+| Pro multiple setup profiles | — | — | create/edit/use multiple charger+cable combinations | NOT RUN |
+| Setup persistence | — | — | profiles survive process death/reboot/update | NOT RUN |
+| Personal baseline isolation | — | — | tests from another profile never affect Speed baseline | NOT RUN |
+| Stability Score physical variance | — | — | unstable power pattern scores lower than stable pattern | NOT RUN |
+| Thermal Score unavailable data | — | — | no fake numeric thermal score when temperature is unavailable | NOT RUN |
+| Battery Stress Free | — | — | qualitative level visible without numeric breakdown | NOT RUN |
+| Battery Stress Pro | — | — | numeric score/exposure breakdown visible and plausible | NOT RUN |
+| Charger/cable ranking | — | — | ranking only compares user's reliable saved tests | NOT RUN |
+| Refund/revocation profiles | — | — | extra profiles remain stored but Free cannot start tests with them | NOT RUN |
 
 ## Pass rule
 No v1 production rollout until all core rows pass on at least one Samsung and one Xiaomi/Redmi/Poco-class device, or an explicit documented exception is accepted.
