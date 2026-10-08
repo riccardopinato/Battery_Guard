@@ -161,6 +161,13 @@ void main() {
         targetLevel: 80,
         completed: quality == ChargingSessionQuality.completed,
         quality: quality,
+        validity: quality == ChargingSessionQuality.completed
+            ? ChargingSessionValidity.valid
+            : ChargingSessionValidity.interrupted,
+        reasonCodes: const [],
+        oemChargeLimitDetected: false,
+        oemChargeLimitLevel: null,
+        curvePoints: const [],
       );
     }
 

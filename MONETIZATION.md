@@ -1,4 +1,4 @@
-# Monetization — v1.1.7
+# Monetization — v1.3.0
 
 Product ID: `battery_guard_pro_lifetime`
 
@@ -13,6 +13,9 @@ Type: Google Play non-consumable / one-time purchase.
 - foreground monitoring;
 - widget + Quick Settings;
 - charging history;
+- Device Capability Map and telemetry provenance/confidence;
+- session validity/reason codes and OEM charge-limit detection;
+- session summary with basic charging metrics;
 - 7-day Insights;
 - Google AdMob **Large Anchored Adaptive Banner** after consent where required.
 
@@ -30,7 +33,8 @@ Type: Google Play non-consumable / one-time purchase.
 - removes Battery Guard advertising permanently;
 - Battery Health Lab with estimated capacity/health, cycle count where exposed, trend and thermal profile;
 - Charge Doctor controlled tests and personal comparison;
-- 30-day Insights.
+- 30-day Insights;
+- full charging curves (SoC / power / temperature / current) and deterministic phase analysis.
 
 ## Principles
 - no subscription;
@@ -53,3 +57,21 @@ Create/activate `battery_guard_pro_lifetime` in Play Console and configure real 
 - A successful Play ownership query that no longer reports the lifetime product clears the local cached entitlement.
 - Client-side purchase data is NOT considered trusted anti-fraud verification.
 - Production rollout remains blocked until purchase tokens are verified by a trusted backend / Google Play Developer API workflow, including refund/revocation handling.
+
+
+## Intelligence Foundation monetization rule
+**Free protects and explains data quality. Pro unlocks deeper analysis.**
+
+Never paywall:
+- safety alerts;
+- monitoring reliability;
+- telemetry availability/provenance;
+- Device Capability Map;
+- session validity/reason codes;
+- OEM/adaptive charging-limit detection.
+
+Premium in MAXI STEP A:
+- full charging-curve visualization;
+- curve phase analysis.
+
+Curve samples are collected locally for both Free and Pro so upgrading later does not discard prior history. Free users do not receive the full curve visualization/analysis until entitlement is active.

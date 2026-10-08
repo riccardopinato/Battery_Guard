@@ -4,6 +4,7 @@ import '../l10n/battery_labels.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/charging_session.dart';
 import '../models/history_entry.dart';
+import 'charging_session_detail_screen.dart';
 import '../services/app_controller.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -101,6 +102,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               (session) => _SessionCard(
                 session: session,
                 dateLabel: _dateLabel(context, session.startedAt),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ChargingSessionDetailScreen(
+                        controller: widget.controller,
+                        session: session,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -208,10 +219,12 @@ class _SessionCard extends StatelessWidget {
   const _SessionCard({
     required this.session,
     required this.dateLabel,
+    required this.onTap,
   });
 
   final ChargingSession session;
   final String dateLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +239,7 @@ class _SessionCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         leading: const CircleAvatar(
           child: Icon(Icons.battery_charging_full_rounded),

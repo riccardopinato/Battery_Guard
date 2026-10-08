@@ -1,10 +1,11 @@
-# Release Gate — Battery Guard 1.1.7
+# Release Gate — Battery Guard 1.3.0
 
 ## Automated source/build gates
 - Flutter gen-l10n: required
 - Flutter analyze: required
 - Flutter tests: required
 - localization catalog parity: required
+- Intelligence Foundation provenance/session/curve regression tests: required
 - Web Preview build: required
 - PR Android ARM64 debug compile: required
 - committed pubspec.lock + --enforce-lockfile: required for signed/main and production builds
@@ -85,6 +86,12 @@ Mandatory scenarios include:
 - widget and Quick Settings;
 - unavailable telemetry rendering;
 - interrupted session recovery;
+- Capability Map/provenance truth;
+- OEM/adaptive charge-limit detection;
+- normal-unplug vs OEM-pause distinction;
+- bounded screen-off charging-curve collection;
+- Free/Premium curve feature-gate behavior;
+- legacy 1.1.x session compatibility;
 - Charge Doctor active-charging enforcement and setup grouping;
 - Battery Health plausibility;
 - AdMob/UMP/privacy choices;

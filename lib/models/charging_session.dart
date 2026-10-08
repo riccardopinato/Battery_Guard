@@ -1,3 +1,5 @@
+import 'charging_curve_point.dart';
+
 enum ChargingSessionQuality {
   active,
   completed,
@@ -9,6 +11,64 @@ enum ChargingSessionQuality {
       (item) => item.name == value?.toString(),
       orElse: () => ChargingSessionQuality.uncertain,
     );
+  }
+}
+
+enum ChargingSessionValidity {
+  active,
+  valid,
+  partial,
+  interrupted,
+  excluded,
+  uncertain;
+
+  static ChargingSessionValidity parse(
+    Object? value, {
+    required ChargingSessionQuality legacyQuality,
+  }) {
+    final parsed = ChargingSessionValidity.values.where(
+      (item) => item.name == value?.toString(),
+    );
+    if (parsed.isNotEmpty) return parsed.first;
+
+    return switch (legacyQuality) {
+      ChargingSessionQuality.active => ChargingSessionValidity.active,
+      ChargingSessionQuality.completed => ChargingSessionValidity.valid,
+      ChargingSessionQuality.interrupted => ChargingSessionValidity.interrupted,
+      ChargingSessionQuality.uncertain => ChargingSessionValidity.uncertain,
+    };
+  }
+}
+
+enum ChargingSessionReason {
+  tooShort,
+  insufficientSocDelta,
+  powerDataMissing,
+  currentDataMissing,
+  temperatureDataMissing,
+  userUnplugged,
+  systemInterrupted,
+  oemChargeLimit,
+  monitoringGap,
+  invalidTelemetry,
+  unknown;
+
+  static ChargingSessionReason parse(Object? value) {
+    return switch (value?.toString()) {
+      'TOO_SHORT' => ChargingSessionReason.tooShort,
+      'INSUFFICIENT_SOC_DELTA' =>
+        ChargingSessionReason.insufficientSocDelta,
+      'POWER_DATA_MISSING' => ChargingSessionReason.powerDataMissing,
+      'CURRENT_DATA_MISSING' => ChargingSessionReason.currentDataMissing,
+      'TEMPERATURE_DATA_MISSING' =>
+        ChargingSessionReason.temperatureDataMissing,
+      'USER_UNPLUGGED' => ChargingSessionReason.userUnplugged,
+      'SYSTEM_INTERRUPTED' => ChargingSessionReason.systemInterrupted,
+      'OEM_CHARGE_LIMIT' => ChargingSessionReason.oemChargeLimit,
+      'MONITORING_GAP' => ChargingSessionReason.monitoringGap,
+      'INVALID_TELEMETRY' => ChargingSessionReason.invalidTelemetry,
+      _ => ChargingSessionReason.unknown,
+    };
   }
 }
 
@@ -33,6 +93,11 @@ class ChargingSession {
     required this.targetLevel,
     required this.completed,
     required this.quality,
+    required this.validity,
+    required this.reasonCodes,
+    required this.oemChargeLimitDetected,
+    required this.oemChargeLimitLevel,
+    required this.curvePoints,
   });
 
   factory ChargingSession.fromMap(Map<dynamic, dynamic> map) {
@@ -56,6 +121,25 @@ class ChargingSession {
           ((map['completed'] as bool? ?? false) ? 'completed' : 'active'),
     );
     final maxTemperatureC = number('maxTemperatureC').toDouble();
+
+    final rawReasons = map['reasonCodes'];
+    final reasons = <ChargingSessionReason>[];
+    if (rawReasons is Iterable) {
+      for (final value in rawReasons) {
+        final reason = ChargingSessionReason.parse(value);
+        if (reason != ChargingSessionReason.unknown) reasons.add(reason);
+      }
+    }
+
+    final rawCurve = map['curvePoints'];
+    final curve = <ChargingCurvePoint>[];
+    if (rawCurve is Iterable) {
+      for (final value in rawCurve) {
+        if (value is Map) {
+          curve.add(ChargingCurvePoint.fromMap(value));
+        }
+      }
+    }
 
     return ChargingSession(
       id: text('id', ''),
@@ -83,6 +167,19 @@ class ChargingSession {
       completed: map['completed'] as bool? ??
           quality == ChargingSessionQuality.completed,
       quality: quality,
+      validity: ChargingSessionValidity.parse(
+        map['validity'],
+        legacyQuality: quality,
+      ),
+      reasonCodes: List.unmodifiable(reasons),
+      oemChargeLimitDetected: map['oemChargeLimitDetected'] == true,
+      oemChargeLimitLevel: map['oemChargeLimitLevel'] is num
+          ? (map['oemChargeLimitLevel'] as num)
+              .round()
+              .clamp(0, 100)
+              .toInt()
+          : null,
+      curvePoints: List.unmodifiable(curve),
     );
   }
 
@@ -105,9 +202,16 @@ class ChargingSession {
   final int targetLevel;
   final bool completed;
   final ChargingSessionQuality quality;
+  final ChargingSessionValidity validity;
+  final List<ChargingSessionReason> reasonCodes;
+  final bool oemChargeLimitDetected;
+  final int? oemChargeLimitLevel;
+  final List<ChargingCurvePoint> curvePoints;
 
   bool get trustedForInsights =>
-      quality == ChargingSessionQuality.completed && completed;
+      completed && validity == ChargingSessionValidity.valid;
+
+  bool get hasCurve => curvePoints.length >= 2;
 
   Duration get duration => (endedAt ?? DateTime.now()).difference(startedAt);
 

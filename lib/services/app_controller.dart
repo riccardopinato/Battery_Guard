@@ -10,6 +10,7 @@ import '../models/charging_session.dart';
 import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
+import 'feature_access.dart';
 import 'native_battery_service.dart';
 import 'premium_service.dart';
 
@@ -43,6 +44,9 @@ class AppController extends ChangeNotifier {
   String? lastError;
 
   bool get isWebPreview => kIsWeb;
+
+  bool canUseFeature(BatteryGuardFeature feature) =>
+      FeatureCatalog.isEnabled(feature, isPro: premium.isPro);
 
   Future<void> initialize() async {
     loading = true;
@@ -116,6 +120,9 @@ class AppController extends ChangeNotifier {
       'voltageAvailable': true,
       'currentAvailable': true,
       'powerAvailable': true,
+      'chargeCounterAvailable': true,
+      'chargeCounterMah': 3820.0,
+      'cycleCount': 187,
       'status': 'Charging',
       'health': 'Good',
       'technology': 'Li-ion',
@@ -124,6 +131,74 @@ class AppController extends ChangeNotifier {
       'plugType': 'AC charger',
       'isPowerSaveMode': false,
       'timestamp': now.millisecondsSinceEpoch,
+      'signals': {
+        'level': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'temperature': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'voltage': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'current': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'medium',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'power': {
+          'available': true,
+          'source': 'calculated',
+          'confidence': 'medium',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'chargeCounter': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'medium',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'cycleCount': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'status': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'health': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'medium',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'technology': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'medium',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+        'plugType': {
+          'available': true,
+          'source': 'system_reported',
+          'confidence': 'high',
+          'observedAt': now.millisecondsSinceEpoch,
+        },
+      },
     });
     config = MonitoringConfig.defaults().copyWith(
       enabled: true,
@@ -159,27 +234,62 @@ class AppController extends ChangeNotifier {
     chargingSessions = List.generate(5, (index) {
       final start = now.subtract(Duration(days: index + 1, hours: 2));
       final end = start.add(Duration(minutes: 58 + index * 4));
-      return ChargingSession(
-        id: 'web-$index',
-        startedAt: start,
-        endedAt: end,
-        lastObservedAt: end,
-        startLevel: 28 + index * 3,
-        currentLevel: 82 + index,
-        endLevel: 82 + index,
-        startTemperatureC: 29.5,
-        currentTemperatureC: 34.0 + index * 0.4,
-        maxTemperatureC: 35.0 + index * 0.5,
-        temperatureAvailable: true,
-        averagePowerW: 15.0 + index,
-        averageCurrentMa: 3500,
-        percentPerHour: 45.0 - index * 2,
-        estimatedMinutesToTarget: null,
-        plugType: index.isEven ? 'AC charger' : 'USB',
-        targetLevel: 80,
-        completed: true,
-        quality: ChargingSessionQuality.completed,
-      );
+      final points = List.generate(9, (pointIndex) {
+        final fraction = pointIndex / 8;
+        final timestamp = start.add(
+          Duration(
+            milliseconds:
+                (end.difference(start).inMilliseconds * fraction).round(),
+          ),
+        );
+        final level = (28 + index * 3 + (54 * fraction)).round().clamp(0, 100);
+        final power = pointIndex < 5
+            ? 18.0 + index + pointIndex * 0.8
+            : 21.0 + index - (pointIndex - 4) * 3.0;
+        return {
+          'timestamp': timestamp.millisecondsSinceEpoch,
+          'level': level,
+          'isCharging': true,
+          'isPlugged': true,
+          'temperatureAvailable': true,
+          'temperatureC': 29.5 + pointIndex * 0.6,
+          'voltageAvailable': true,
+          'voltageV': 4.0 + fraction * 0.25,
+          'currentAvailable': true,
+          'currentMa': 3500.0 - pointIndex * 120,
+          'powerAvailable': true,
+          'powerW': power.clamp(3.0, 30.0),
+        };
+      });
+
+      return ChargingSession.fromMap({
+        'id': 'web-$index',
+        'startedAt': start.millisecondsSinceEpoch,
+        'endedAt': end.millisecondsSinceEpoch,
+        'lastObservedAt': end.millisecondsSinceEpoch,
+        'startLevel': 28 + index * 3,
+        'currentLevel': 82 + index,
+        'endLevel': 82 + index,
+        'startTemperatureC': 29.5,
+        'currentTemperatureC': 34.0 + index * 0.4,
+        'maxTemperatureC': 35.0 + index * 0.5,
+        'temperatureAvailable': true,
+        'averagePowerW': 15.0 + index,
+        'averageCurrentMa': 3500,
+        'percentPerHour': 45.0 - index * 2,
+        'estimatedMinutesToTarget': -1,
+        'plugType': index.isEven ? 'AC charger' : 'USB',
+        'targetLevel': 80,
+        'completed': true,
+        'quality': 'completed',
+        'validity': index == 4 ? 'partial' : 'valid',
+        'reasonCodes': index == 4
+            ? ['POWER_DATA_MISSING', 'USER_UNPLUGGED']
+            : ['USER_UNPLUGGED'],
+        'oemChargeLimitDetected': index == 0,
+        'oemChargeLimitLevel': index == 0 ? 80 : -1,
+        'curvePoints': points,
+      });
     });
     history = const [];
     currentSession = null;

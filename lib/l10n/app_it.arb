@@ -354,5 +354,88 @@
   "notificationsDisabled": "Notifiche app disattivate",
   "alertChannelDisabled": "Canale avvisi batteria disattivato",
   "deliveryReady": "Avvisi pronti",
-  "testRequiresCharging": "Attendi che il dispositivo sia effettivamente in carica prima di avviare il test."
+  "testRequiresCharging": "Attendi che il dispositivo sia effettivamente in carica prima di avviare il test.",
+  "capabilityMapTitle": "Mappa capacità dispositivo",
+  "capabilityMapSubtitle": "Mostra quali segnali batteria il dispositivo espone realmente, da dove arriva ogni dato e quale affidabilità Battery Guard gli assegna.",
+  "capabilityMapSettingsBody": "Controlla quali metriche batteria Android espone su questo dispositivo e come vengono ricavate.",
+  "capabilityLevel": "Livello batteria",
+  "capabilityCurrent": "Corrente",
+  "capabilityPower": "Potenza di ricarica",
+  "capabilityChargeCounter": "Contatore di carica",
+  "capabilityStatus": "Stato batteria",
+  "capabilityTechnology": "Tecnologia batteria",
+  "capabilityPlugType": "Sorgente di ricarica",
+  "sourceSystemReported": "Rilevato da Android",
+  "sourceOemReported": "Rilevato dall'OEM",
+  "sourceMeasured": "Misurato",
+  "sourceCalculated": "Calcolato",
+  "sourceEstimated": "Stimato",
+  "confidenceUnknown": "Sconosciuta",
+  "sessionDetailTitle": "Sessione di ricarica",
+  "oemChargeLimitDetected": "Limite di ricarica del dispositivo rilevato",
+  "oemChargeLimitBody": "Il telefono è rimasto collegato ma ha interrotto intenzionalmente la ricarica intorno al {level}%. Battery Guard lo considera una protezione/pausa adattiva del dispositivo, non una sessione guasta.",
+  "sessionEvidence": "Evidenze della sessione",
+  "validityActive": "In corso",
+  "validityValid": "Valida",
+  "validityPartial": "Parziale",
+  "validityInterrupted": "Interrotta",
+  "validityExcluded": "Esclusa",
+  "validityUncertain": "Incerta",
+  "reasonTooShort": "Sessione troppo breve per essere considerata affidabile.",
+  "reasonInsufficientSocDelta": "Il livello batteria è cambiato troppo poco per un confronto affidabile.",
+  "reasonPowerMissing": "La potenza di ricarica non era esposta durante questa sessione.",
+  "reasonCurrentMissing": "La corrente di ricarica non era esposta durante questa sessione.",
+  "reasonTemperatureMissing": "La temperatura batteria non era esposta durante questa sessione.",
+  "reasonUserUnplugged": "La sessione è terminata quando il caricatore è stato scollegato.",
+  "reasonSystemInterrupted": "Android o il dispositivo hanno interrotto la continuità del monitoraggio.",
+  "reasonOemChargeLimit": "È stato rilevato un limite di ricarica o una pausa adattiva del dispositivo.",
+  "reasonMonitoringGap": "Durante la sessione si è verificato un lungo intervallo senza monitoraggio.",
+  "reasonInvalidTelemetry": "La telemetria conteneva valori che Battery Guard non poteva considerare affidabili.",
+  "chargingCurveTitle": "Curva di ricarica",
+  "chargingCurveNotEnoughData": "Non ci sono ancora abbastanza campioni per costruire la curva di questa sessione.",
+  "chargingCurvePremiumTitle": "La curva completa è un'analisi Pro",
+  "chargingCurvePremiumBody": "La versione Free mantiene riepilogo, evidenze e segnali di protezione. Pro sblocca la curva completa di SoC, potenza, temperatura e corrente con analisi delle fasi.",
+  "chargingCurveSemantics": "Curva di ricarica normalizzata con livello batteria, potenza, temperatura e corrente nel tempo.",
+  "curveNormalizedHint": "Le linee sono normalizzate separatamente per confrontarne l'andamento nel tempo; usa le metriche numeriche per i valori assoluti.",
+  "curveAnalysis": "Analisi della curva",
+  "curveDataPoints": "Punti dati: {count}",
+  "curvePeakPower": "Potenza di picco osservata: {value} W",
+  "curveTemperatureRise": "Variazione temperatura osservata: {value} °C",
+  "phaseRampUp": "Avvio",
+  "phaseFast": "Ricarica rapida",
+  "phaseSteady": "Stabile",
+  "phasePlateau": "Plateau",
+  "phaseThermalThrottle": "Limitazione termica",
+  "phaseTaper": "Riduzione finale",
+  "phaseChargeLimit": "Limite / pausa ricarica",
+  "phaseFull": "Completa",
+  "proFeatureCurves": "Curve complete di ricarica e analisi delle fasi",
+  "@oemChargeLimitBody": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@curveDataPoints": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@curvePeakPower": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@curveTemperatureRise": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

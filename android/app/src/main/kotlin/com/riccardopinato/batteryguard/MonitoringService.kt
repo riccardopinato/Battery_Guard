@@ -5,11 +5,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 
 class MonitoringService : Service() {
     private var registered = false
     private var previousPlugged: Boolean? = null
+    private val samplingHandler = Handler(Looper.getMainLooper())
+    private val samplingRunnable = object : Runnable {
+        override fun run() {
+            if (MonitoringPreferences.get(this@MonitoringService).enabled) {
+                processSnapshot(BatteryInfoReader.read(this@MonitoringService))
+                samplingHandler.postDelayed(this, PERIODIC_SAMPLE_MS)
+            }
+        }
+    }
 
     private val runtimePrefs by lazy {
         getSharedPreferences("battery_guard_runtime", Context.MODE_PRIVATE)
@@ -39,6 +50,8 @@ class MonitoringService : Service() {
         )
         registerBatteryReceiver()
         processSnapshot(initial)
+        samplingHandler.removeCallbacks(samplingRunnable)
+        samplingHandler.postDelayed(samplingRunnable, PERIODIC_SAMPLE_MS)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -55,6 +68,7 @@ class MonitoringService : Service() {
         runtimePrefs.edit()
             .putLong("lastServiceStopAt", System.currentTimeMillis())
             .apply()
+        samplingHandler.removeCallbacks(samplingRunnable)
         if (registered) {
             try {
                 unregisterReceiver(receiver)
@@ -364,6 +378,8 @@ class MonitoringService : Service() {
     }
 
     companion object {
+        private const val PERIODIC_SAMPLE_MS = 60 * 1000L
+
         fun sync(context: Context) {
             val intent = Intent(context, MonitoringService::class.java)
             if (MonitoringPreferences.get(context).enabled) {

@@ -14,9 +14,15 @@ object ChargingSessionStore {
     private const val COMPLETED = "completed"
     private const val MAX_SESSIONS = 80
     private const val MIN_RATE_WINDOW_MS = 3 * 60 * 1000L
+    private const val MIN_VALID_DURATION_MS = 3 * 60 * 1000L
+    private const val MIN_VALID_SOC_DELTA = 5
     private const val SLOW_WINDOW_MS = 20 * 60 * 1000L
     private const val RAPID_TEMP_WINDOW_MS = 20 * 60 * 1000L
     private const val MAX_SESSION_GAP_MS = 45 * 60 * 1000L
+    private const val OEM_PAUSE_DETECTION_MS = 8 * 60 * 1000L
+    private const val CURVE_MIN_INTERVAL_MS = 30 * 1000L
+    private const val CURVE_MAX_INTERVAL_MS = 2 * 60 * 1000L
+    private const val MAX_CURVE_POINTS = 120
     private val lock = Any()
 
     data class UpdateResult(
@@ -51,7 +57,13 @@ object ChargingSessionStore {
                 migrateActive(active, now)
                 val lastObserved = active.optLong("lastObservedAt", now)
                 if (now - lastObserved > MAX_SESSION_GAP_MS) {
-                    finalizeInterruptedLocked(prefs, active, lastObserved)
+                    finalizeLocked(
+                        prefs = prefs,
+                        active = active,
+                        endedAt = lastObserved,
+                        completionReason = "MONITORING_GAP",
+                        interrupted = true,
+                    )
                     active = null
                 }
             }
@@ -59,15 +71,20 @@ object ChargingSessionStore {
             if (!plugged) {
                 if (active != null) {
                     active = updateObject(
-                        active,
-                        snapshot,
-                        targetLevel,
-                        now,
+                        active = active,
+                        snapshot = snapshot,
+                        targetLevel = targetLevel,
+                        now = now,
                         includePowerSample = false,
+                        forceCurvePoint = true,
                     )
-                    active.put("endedAt", now)
-                    active.put("quality", "completed")
-                    addCompletedLocked(prefs, active)
+                    finalizeLocked(
+                        prefs = prefs,
+                        active = active,
+                        endedAt = now,
+                        completionReason = "USER_UNPLUGGED",
+                        interrupted = false,
+                    )
                     prefs.edit().remove(ACTIVE).apply()
                 }
                 return emptyResult()
@@ -77,13 +94,16 @@ object ChargingSessionStore {
                 createActive(snapshot, targetLevel, now)
             } else {
                 updateObject(
-                    active,
-                    snapshot,
-                    targetLevel,
-                    now,
+                    active = active,
+                    snapshot = snapshot,
+                    targetLevel = targetLevel,
+                    now = now,
                     includePowerSample = true,
+                    forceCurvePoint = false,
                 )
             }
+
+            updateOemChargeLimitState(active, snapshot, now)
 
             val elapsed = now - active.optLong("startedAt", now)
             val currentTemp = active.optDouble("currentTemperatureC", 0.0)
@@ -221,7 +241,8 @@ object ChargingSessionStore {
         val powerAvailable = snapshot["powerAvailable"] as? Boolean ?: false
         val currentAvailable =
             snapshot["currentAvailable"] as? Boolean ?: false
-        val power = if (powerAvailable) abs(doubleValue(snapshot, "powerW")) else 0.0
+        val power =
+            if (powerAvailable) abs(doubleValue(snapshot, "powerW")) else 0.0
         val current =
             if (currentAvailable) abs(doubleValue(snapshot, "currentMa")) else 0.0
 
@@ -231,6 +252,8 @@ object ChargingSessionStore {
             put("lastObservedAt", now)
             put("endedAt", 0L)
             put("quality", "active")
+            put("validity", "active")
+            put("reasonCodes", JSONArray())
             put("startLevel", level)
             put("currentLevel", level)
             put("endLevel", level)
@@ -248,6 +271,12 @@ object ChargingSessionStore {
             put("slowChargingAlerted", false)
             put("adaptiveSlowChargingAlerted", false)
             put("adaptiveTemperatureAlerted", false)
+            put("notChargingSince", 0L)
+            put("notChargingLevel", level)
+            put("oemChargeLimitDetected", false)
+            put("oemChargeLimitLevel", -1)
+            put("curvePoints", JSONArray())
+            appendCurvePoint(this, snapshot, now, force = true)
         }
     }
 
@@ -257,6 +286,7 @@ object ChargingSessionStore {
         targetLevel: Int,
         now: Long,
         includePowerSample: Boolean,
+        forceCurvePoint: Boolean,
     ): JSONObject {
         val level = intValue(snapshot, "level")
         val temperatureAvailable =
@@ -309,18 +339,218 @@ object ChargingSessionStore {
                 )
             }
         }
+
+        appendCurvePoint(
+            active = active,
+            snapshot = snapshot,
+            now = now,
+            force = forceCurvePoint,
+        )
         return active
     }
 
-    private fun finalizeInterruptedLocked(
+    private fun updateOemChargeLimitState(
+        active: JSONObject,
+        snapshot: Map<String, Any>,
+        now: Long,
+    ) {
+        val plugged = snapshot["isPlugged"] as? Boolean ?: false
+        val charging = snapshot["isCharging"] as? Boolean ?: false
+        val level = intValue(snapshot, "level")
+
+        if (!plugged || charging || level !in 60..99) {
+            active.put("notChargingSince", 0L)
+            active.put("notChargingLevel", level)
+            return
+        }
+
+        val since = active.optLong("notChargingSince", 0L)
+        if (since <= 0L) {
+            active.put("notChargingSince", now)
+            active.put("notChargingLevel", level)
+            return
+        }
+
+        val initialLevel = active.optInt("notChargingLevel", level)
+        if (abs(level - initialLevel) > 1) {
+            active.put("notChargingSince", now)
+            active.put("notChargingLevel", level)
+            return
+        }
+
+        if (now - since >= OEM_PAUSE_DETECTION_MS) {
+            active.put("oemChargeLimitDetected", true)
+            active.put("oemChargeLimitLevel", level)
+        }
+    }
+
+    private fun finalizeLocked(
         prefs: SharedPreferences,
         active: JSONObject,
-        lastObservedAt: Long,
+        endedAt: Long,
+        completionReason: String,
+        interrupted: Boolean,
     ) {
-        active.put("endedAt", lastObservedAt)
-        active.put("quality", "interrupted")
+        active.put("endedAt", endedAt)
+        active.put("lastObservedAt", endedAt)
+        active.put("quality", if (interrupted) "interrupted" else "completed")
+
+        val reasons = JSONArray()
+        val duration = endedAt - active.optLong("startedAt", endedAt)
+        val gained =
+            active.optInt("endLevel", 0) - active.optInt("startLevel", 0)
+
+        if (duration < MIN_VALID_DURATION_MS) {
+            reasons.put("TOO_SHORT")
+        }
+        if (gained < MIN_VALID_SOC_DELTA) {
+            reasons.put("INSUFFICIENT_SOC_DELTA")
+        }
+        if (active.optInt("powerSampleCount", 0) <= 0) {
+            reasons.put("POWER_DATA_MISSING")
+        }
+        if (active.optInt("currentSampleCount", 0) <= 0) {
+            reasons.put("CURRENT_DATA_MISSING")
+        }
+        if (!active.optBoolean("temperatureAvailable", false)) {
+            reasons.put("TEMPERATURE_DATA_MISSING")
+        }
+        if (active.optBoolean("oemChargeLimitDetected", false)) {
+            reasons.put("OEM_CHARGE_LIMIT")
+        }
+
+        when (completionReason) {
+            "MONITORING_GAP" -> {
+                reasons.put("MONITORING_GAP")
+                reasons.put("SYSTEM_INTERRUPTED")
+            }
+            "USER_UNPLUGGED" -> reasons.put("USER_UNPLUGGED")
+        }
+
+        val validity = when {
+            interrupted -> "interrupted"
+            duration < MIN_VALID_DURATION_MS || gained < MIN_VALID_SOC_DELTA ->
+                "excluded"
+            active.optInt("powerSampleCount", 0) <= 0 ||
+                active.optInt("currentSampleCount", 0) <= 0 ||
+                !active.optBoolean("temperatureAvailable", false) ->
+                "partial"
+            else -> "valid"
+        }
+
+        active.put("validity", validity)
+        active.put("reasonCodes", reasons)
         addCompletedLocked(prefs, active)
-        prefs.edit().remove(ACTIVE).apply()
+    }
+
+    private fun appendCurvePoint(
+        active: JSONObject,
+        snapshot: Map<String, Any>,
+        now: Long,
+        force: Boolean,
+    ) {
+        val points = active.optJSONArray("curvePoints") ?: JSONArray()
+        val last =
+            if (points.length() > 0) {
+                points.optJSONObject(points.length() - 1)
+            } else {
+                null
+            }
+
+        val level = intValue(snapshot, "level")
+        val isCharging = snapshot["isCharging"] as? Boolean ?: false
+        val temperatureAvailable =
+            snapshot["temperatureAvailable"] as? Boolean ?: false
+        val voltageAvailable =
+            snapshot["voltageAvailable"] as? Boolean ?: false
+        val currentAvailable =
+            snapshot["currentAvailable"] as? Boolean ?: false
+        val powerAvailable =
+            snapshot["powerAvailable"] as? Boolean ?: false
+        val temperature = doubleValue(snapshot, "temperatureC")
+        val voltageV = doubleValue(snapshot, "voltageMv") / 1000.0
+        val current = abs(doubleValue(snapshot, "currentMa"))
+        val power = abs(doubleValue(snapshot, "powerW"))
+
+        val shouldRecord = if (last == null || force) {
+            true
+        } else {
+            val elapsed = now - last.optLong("timestamp", now)
+            val lastPowerAvailable = last.optBoolean("powerAvailable", false)
+            val lastPower = last.optDouble("powerW", 0.0)
+            val meaningfulPowerChange =
+                powerAvailable &&
+                    lastPowerAvailable &&
+                    max(power, lastPower) > 0.5 &&
+                    abs(power - lastPower) / max(power, lastPower) >= 0.15
+            val meaningfulTemperatureChange =
+                temperatureAvailable &&
+                    last.optBoolean("temperatureAvailable", false) &&
+                    abs(
+                        temperature -
+                            last.optDouble("temperatureC", temperature),
+                    ) >= 0.5
+
+            elapsed >= CURVE_MAX_INTERVAL_MS ||
+                (
+                    elapsed >= CURVE_MIN_INTERVAL_MS &&
+                        (
+                            level != last.optInt("level", level) ||
+                                isCharging !=
+                                    last.optBoolean("isCharging", isCharging) ||
+                                meaningfulPowerChange ||
+                                meaningfulTemperatureChange
+                            )
+                    )
+        }
+
+        if (!shouldRecord) return
+
+        points.put(
+            JSONObject().apply {
+                put("timestamp", now)
+                put("level", level)
+                put("isCharging", isCharging)
+                put(
+                    "isPlugged",
+                    snapshot["isPlugged"] as? Boolean ?: false,
+                )
+                put("temperatureAvailable", temperatureAvailable)
+                put("temperatureC", if (temperatureAvailable) temperature else 0.0)
+                put("voltageAvailable", voltageAvailable)
+                put("voltageV", if (voltageAvailable) voltageV else 0.0)
+                put("currentAvailable", currentAvailable)
+                put("currentMa", if (currentAvailable) current else 0.0)
+                put("powerAvailable", powerAvailable)
+                put("powerW", if (powerAvailable) power else 0.0)
+            },
+        )
+
+        active.put(
+            "curvePoints",
+            if (points.length() > MAX_CURVE_POINTS) {
+                compactCurve(points)
+            } else {
+                points
+            },
+        )
+    }
+
+    private fun compactCurve(points: JSONArray): JSONArray {
+        if (points.length() <= MAX_CURVE_POINTS) return points
+
+        val compacted = JSONArray()
+        compacted.put(points.optJSONObject(0))
+
+        var index = 2
+        while (index < points.length() - 1) {
+            compacted.put(points.optJSONObject(index))
+            index += 2
+        }
+
+        val last = points.optJSONObject(points.length() - 1)
+        if (last != null) compacted.put(last)
+        return compacted
     }
 
     private fun baselineFor(
@@ -342,6 +572,9 @@ object ChargingSessionStore {
             val item = array.optJSONObject(index) ?: continue
             migrateCompleted(item)
             if (item.optString("quality", "uncertain") != "completed") continue
+            if (item.optString("validity", "uncertain") !in listOf("valid", "partial")) {
+                continue
+            }
             if (item.optString("plugType", "") != plugType) continue
 
             val endedAt = item.optLong("endedAt", 0L)
@@ -351,7 +584,7 @@ object ChargingSessionStore {
 
             val gained =
                 item.optInt("endLevel", 0) - item.optInt("startLevel", 0)
-            if (gained < 5) continue
+            if (gained < MIN_VALID_SOC_DELTA) continue
 
             val rate = percentPerHour(item, endedAt)
             if (rate <= 0.0) continue
@@ -421,6 +654,13 @@ object ChargingSessionStore {
                 -1
             }
         val quality = item.optString("quality", "uncertain")
+        val reasonCodes = jsonArrayToStringList(
+            item.optJSONArray("reasonCodes") ?: JSONArray(),
+        )
+        val curvePoints = jsonArrayToMapList(
+            item.optJSONArray("curvePoints") ?: JSONArray(),
+        )
+        val oemLevel = item.optInt("oemChargeLimitLevel", -1)
 
         return mapOf(
             "id" to item.optString("id", startedAt.toString()),
@@ -428,6 +668,11 @@ object ChargingSessionStore {
             "endedAt" to endedAt,
             "lastObservedAt" to lastObservedAt,
             "quality" to quality,
+            "validity" to item.optString(
+                "validity",
+                legacyValidity(quality),
+            ),
+            "reasonCodes" to reasonCodes,
             "startLevel" to item.optInt("startLevel", 0),
             "currentLevel" to currentLevel,
             "endLevel" to item.optInt("endLevel", currentLevel),
@@ -446,6 +691,10 @@ object ChargingSessionStore {
             "plugType" to item.optString("plugType", "Sconosciuto"),
             "targetLevel" to target,
             "completed" to (quality == "completed"),
+            "oemChargeLimitDetected" to
+                item.optBoolean("oemChargeLimitDetected", false),
+            "oemChargeLimitLevel" to if (oemLevel >= 0) oemLevel else null,
+            "curvePoints" to curvePoints,
         )
     }
 
@@ -488,6 +737,12 @@ object ChargingSessionStore {
         if (!item.has("quality")) {
             item.put("quality", "active")
         }
+        if (!item.has("validity")) {
+            item.put("validity", "active")
+        }
+        if (!item.has("reasonCodes")) {
+            item.put("reasonCodes", JSONArray())
+        }
         if (!item.has("temperatureAvailable")) {
             item.put(
                 "temperatureAvailable",
@@ -499,6 +754,21 @@ object ChargingSessionStore {
         }
         if (!item.has("currentSampleCount")) {
             item.put("currentSampleCount", item.optInt("sampleCount", 0))
+        }
+        if (!item.has("notChargingSince")) {
+            item.put("notChargingSince", 0L)
+        }
+        if (!item.has("notChargingLevel")) {
+            item.put("notChargingLevel", item.optInt("currentLevel", 0))
+        }
+        if (!item.has("oemChargeLimitDetected")) {
+            item.put("oemChargeLimitDetected", false)
+        }
+        if (!item.has("oemChargeLimitLevel")) {
+            item.put("oemChargeLimitLevel", -1)
+        }
+        if (!item.has("curvePoints")) {
+            item.put("curvePoints", JSONArray())
         }
     }
 
@@ -513,6 +783,15 @@ object ChargingSessionStore {
                 },
             )
         }
+        if (!item.has("validity")) {
+            item.put(
+                "validity",
+                legacyValidity(item.optString("quality", "uncertain")),
+            )
+        }
+        if (!item.has("reasonCodes")) {
+            item.put("reasonCodes", JSONArray())
+        }
         if (!item.has("lastObservedAt")) {
             item.put(
                 "lastObservedAt",
@@ -525,6 +804,61 @@ object ChargingSessionStore {
                 item.optDouble("maxTemperatureC", 0.0) != 0.0,
             )
         }
+        if (!item.has("oemChargeLimitDetected")) {
+            item.put("oemChargeLimitDetected", false)
+        }
+        if (!item.has("oemChargeLimitLevel")) {
+            item.put("oemChargeLimitLevel", -1)
+        }
+        if (!item.has("curvePoints")) {
+            item.put("curvePoints", JSONArray())
+        }
+    }
+
+    private fun legacyValidity(quality: String): String = when (quality) {
+        "active" -> "active"
+        "completed" -> "valid"
+        "interrupted" -> "interrupted"
+        else -> "uncertain"
+    }
+
+    private fun jsonArrayToStringList(array: JSONArray): List<String> {
+        val result = ArrayList<String>(array.length())
+        for (index in 0 until array.length()) {
+            val value = array.optString(index, "")
+            if (value.isNotBlank()) result.add(value)
+        }
+        return result
+    }
+
+    private fun jsonArrayToMapList(
+        array: JSONArray,
+    ): List<Map<String, Any?>> {
+        val result = ArrayList<Map<String, Any?>>(array.length())
+        for (index in 0 until array.length()) {
+            val item = array.optJSONObject(index) ?: continue
+            result.add(
+                mapOf(
+                    "timestamp" to item.optLong("timestamp", 0L),
+                    "level" to item.optInt("level", 0),
+                    "isCharging" to item.optBoolean("isCharging", false),
+                    "isPlugged" to item.optBoolean("isPlugged", false),
+                    "temperatureAvailable" to
+                        item.optBoolean("temperatureAvailable", false),
+                    "temperatureC" to item.optDouble("temperatureC", 0.0),
+                    "voltageAvailable" to
+                        item.optBoolean("voltageAvailable", false),
+                    "voltageV" to item.optDouble("voltageV", 0.0),
+                    "currentAvailable" to
+                        item.optBoolean("currentAvailable", false),
+                    "currentMa" to item.optDouble("currentMa", 0.0),
+                    "powerAvailable" to
+                        item.optBoolean("powerAvailable", false),
+                    "powerW" to item.optDouble("powerW", 0.0),
+                ),
+            )
+        }
+        return result
     }
 
     private fun intValue(

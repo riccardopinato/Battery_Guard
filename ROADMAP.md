@@ -116,3 +116,33 @@
 - Evidence Bundle records targetSdk, package, Billing adapter and local-Pro bypass state;
 - production candidate records and verifies upload certificate identity;
 - branch protection remains an external repository-administration gate.
+
+
+## 1.2.0 — Data Truth & Capability Foundation ✅ IMPLEMENTED / DEVICE QA PENDING
+- signal provenance: availability + source + confidence + timestamp;
+- free Device Capability Map;
+- session validity model: active / valid / partial / interrupted / excluded / uncertain;
+- explainable reason codes;
+- OEM/adaptive charging pause detection while still plugged in;
+- legacy 1.1.x session compatibility without invented evidence.
+
+## 1.3.0 — Charging Session Intelligence ✅ IMPLEMENTED / DEVICE QA PENDING
+- adaptive bounded curve sampling;
+- periodic 60 s foreground observation independent of broadcast frequency;
+- curve points: SoC, power, current, voltage, temperature, charging/plugged state;
+- deterministic phase analysis;
+- Free session evidence and OEM-limit explanation;
+- Premium full charging curve + phase analysis;
+- centralized feature catalog for current MAXI STEP A Free/Premium boundaries;
+- six-language localization parity;
+- regression coverage for provenance, session reasons, feature access and curve analyzer.
+
+## NEXT — MAXI STEP B: Charging Intelligence
+Target: v1.4 + v1.5
+- Charge Doctor 2.0;
+- charger/cable profiles;
+- Stability Score;
+- Speed / Stability / Thermal / Overall score separation;
+- personal baseline and charger ranking;
+- Battery Stress Engine;
+- Free qualitative summary vs Premium detailed score/breakdown/trends.

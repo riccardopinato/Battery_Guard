@@ -29,6 +29,15 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | Temperature unavailable | — | — | Home/History/session/widget never show fake 0.0 °C | NOT RUN |
 | Charge Doctor while plugged but not charging | — | — | test start blocked with localized message | NOT RUN |
 | Charge Doctor setup grouping | — | — | different named charger/cable setups do not share baseline | NOT RUN |
+| Capability Map / provenance | — | — | availability/source/confidence reflect actual device telemetry | NOT RUN |
+| OEM/adaptive charge limit | — | — | remain plugged at device limit >= 8 min; detected as protection/pause, not broken session | NOT RUN |
+| Normal unplug vs OEM pause | — | — | ordinary unplug is not classified as charge-limit phase | NOT RUN |
+| Charging curve screen-off | — | — | bounded points continue while FGS is active and screen is off | NOT RUN |
+| Charging curve bound | — | — | long session remains bounded; no unbounded storage growth | NOT RUN |
+| Free session evidence | — | — | validity/reasons/OEM limit remain visible without Pro | NOT RUN |
+| Premium curve gate | — | — | Free sees lock; Pro sees full curve and phases | NOT RUN |
+| Legacy 1.1.x history migration | — | — | old sessions remain readable without fabricated curve/reason data | NOT RUN |
+| Signed update 1.1.7 -> 1.3.0 | — | — | update installs in place and preserves settings/history | NOT RUN |
 
 ## Pass rule
 No v1 production rollout until all core rows pass on at least one Samsung and one Xiaomi/Redmi/Poco-class device, or an explicit documented exception is accepted.

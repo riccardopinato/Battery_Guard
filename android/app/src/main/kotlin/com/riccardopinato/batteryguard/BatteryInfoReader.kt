@@ -10,6 +10,7 @@ import kotlin.math.abs
 
 object BatteryInfoReader {
     fun read(context: Context, sourceIntent: Intent? = null): Map<String, Any> {
+        val observedAt = System.currentTimeMillis()
         val batteryIntent =
             if (sourceIntent?.action == Intent.ACTION_BATTERY_CHANGED) {
                 sourceIntent
@@ -20,15 +21,16 @@ object BatteryInfoReader {
                 )
             }
 
-        if (batteryIntent == null) return emptySnapshot()
+        if (batteryIntent == null) return emptySnapshot(observedAt)
 
         val levelRaw =
             batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
         val scale =
             batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100)
                 .coerceAtLeast(1)
+        val levelAvailable = levelRaw >= 0
         val level =
-            if (levelRaw >= 0) {
+            if (levelAvailable) {
                 ((levelRaw * 100f) / scale).toInt().coerceIn(0, 100)
             } else {
                 0
@@ -64,10 +66,15 @@ object BatteryInfoReader {
         )
         val pluggedCode =
             batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-        val technology =
+        val rawTechnology =
             batteryIntent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY)
                 .orEmpty()
-                .ifBlank { "—" }
+        val technologyAvailable = rawTechnology.isNotBlank()
+        val technology = rawTechnology.ifBlank { "—" }
+        val statusAvailable =
+            statusCode != BatteryManager.BATTERY_STATUS_UNKNOWN
+        val healthAvailable =
+            healthCode != BatteryManager.BATTERY_HEALTH_UNKNOWN
 
         val isCharging =
             statusCode == BatteryManager.BATTERY_STATUS_CHARGING ||
@@ -106,6 +113,7 @@ object BatteryInfoReader {
             } else {
                 -1
             }
+        val cycleCountAvailable = cycleCount >= 0
 
         val powerAvailable =
             currentAvailable && voltageAvailable && voltageMv > 0
@@ -118,6 +126,75 @@ object BatteryInfoReader {
 
         val powerManager =
             context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        val signals = linkedMapOf<String, Map<String, Any>>(
+            "level" to meta(
+                levelAvailable,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+            "temperature" to meta(
+                temperatureAvailable,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+            "voltage" to meta(
+                voltageAvailable,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+            "current" to meta(
+                currentAvailable,
+                "system_reported",
+                "medium",
+                observedAt,
+            ),
+            "power" to meta(
+                powerAvailable,
+                "calculated",
+                "medium",
+                observedAt,
+            ),
+            "chargeCounter" to meta(
+                chargeCounterAvailable,
+                "system_reported",
+                "medium",
+                observedAt,
+            ),
+            "cycleCount" to meta(
+                cycleCountAvailable,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+            "status" to meta(
+                statusAvailable,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+            "health" to meta(
+                healthAvailable,
+                "system_reported",
+                "medium",
+                observedAt,
+            ),
+            "technology" to meta(
+                technologyAvailable,
+                "system_reported",
+                "medium",
+                observedAt,
+            ),
+            "plugType" to meta(
+                true,
+                "system_reported",
+                "high",
+                observedAt,
+            ),
+        )
 
         return mapOf(
             "level" to level,
@@ -139,32 +216,72 @@ object BatteryInfoReader {
             "isPlugged" to isPlugged,
             "plugType" to plugTypeLabel(pluggedCode),
             "isPowerSaveMode" to powerManager.isPowerSaveMode,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to observedAt,
+            "signals" to signals,
         )
     }
 
-    private fun emptySnapshot(): Map<String, Any> = mapOf(
-        "level" to 0,
-        "temperatureC" to 0.0,
-        "voltageMv" to 0,
-        "currentMa" to 0.0,
-        "powerW" to 0.0,
-        "temperatureAvailable" to false,
-        "voltageAvailable" to false,
-        "currentAvailable" to false,
-        "powerAvailable" to false,
-        "chargeCounterAvailable" to false,
-        "chargeCounterMah" to 0.0,
-        "cycleCount" to -1,
-        "status" to "Sconosciuto",
-        "health" to "Sconosciuta",
-        "technology" to "—",
-        "isCharging" to false,
-        "isPlugged" to false,
-        "plugType" to "Nessuno",
-        "isPowerSaveMode" to false,
-        "timestamp" to System.currentTimeMillis(),
-    )
+    private fun meta(
+        available: Boolean,
+        source: String,
+        confidence: String,
+        observedAt: Long,
+    ): Map<String, Any> {
+        return mapOf(
+            "available" to available,
+            "source" to if (available) source else "unavailable",
+            "confidence" to if (available) confidence else "unknown",
+            "observedAt" to observedAt,
+        )
+    }
+
+    private fun emptySnapshot(observedAt: Long): Map<String, Any> {
+        val unavailableSignals = linkedMapOf<String, Map<String, Any>>()
+        listOf(
+            "level",
+            "temperature",
+            "voltage",
+            "current",
+            "power",
+            "chargeCounter",
+            "cycleCount",
+            "status",
+            "health",
+            "technology",
+            "plugType",
+        ).forEach { key ->
+            unavailableSignals[key] = meta(
+                false,
+                "unavailable",
+                "unknown",
+                observedAt,
+            )
+        }
+
+        return mapOf(
+            "level" to 0,
+            "temperatureC" to 0.0,
+            "voltageMv" to 0,
+            "currentMa" to 0.0,
+            "powerW" to 0.0,
+            "temperatureAvailable" to false,
+            "voltageAvailable" to false,
+            "currentAvailable" to false,
+            "powerAvailable" to false,
+            "chargeCounterAvailable" to false,
+            "chargeCounterMah" to 0.0,
+            "cycleCount" to -1,
+            "status" to "Sconosciuto",
+            "health" to "Sconosciuta",
+            "technology" to "—",
+            "isCharging" to false,
+            "isPlugged" to false,
+            "plugType" to "Nessuno",
+            "isPowerSaveMode" to false,
+            "timestamp" to observedAt,
+            "signals" to unavailableSignals,
+        )
+    }
 
     private fun statusLabel(status: Int): String = when (status) {
         BatteryManager.BATTERY_STATUS_CHARGING -> "In carica"
