@@ -276,13 +276,13 @@ class _ChargeDoctorScreenState extends State<ChargeDoctorScreen> {
 
     if (!mounted) return;
     if (result == 'premium_required') {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(this.context).showSnackBar(
         SnackBar(content: Text(l10n.multipleSetupsPro)),
       );
       return;
     }
     if (result == 'invalid_setup') {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(this.context).showSnackBar(
         SnackBar(content: Text(l10n.setupRequiresName)),
       );
       return;
@@ -396,7 +396,7 @@ class _SetupSection extends StatelessWidget {
                   onPressed: canAdd
                       ? onCreate
                       : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(this.context).showSnackBar(
                             SnackBar(content: Text(l10n.multipleSetupsPro)),
                           );
                         },
@@ -537,7 +537,7 @@ class _StartPanel extends StatelessWidget {
               'premium_required' => l10n.multipleSetupsPro,
               _ => l10n.testPowerUnavailable,
             };
-            ScaffoldMessenger.of(context).showSnackBar(
+            ScaffoldMessenger.of(this.context).showSnackBar(
               SnackBar(content: Text(message)),
             );
           },
