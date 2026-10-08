@@ -363,6 +363,7 @@ class AppController extends ChangeNotifier {
         hotMinutes: primary ? 0 : 1.5,
         veryHotMinutes: 0,
         highVoltageMinutes: 0,
+        highPowerHeatMinutes: 0,
       );
     });
     loading = false;
@@ -669,6 +670,7 @@ class AppController extends ChangeNotifier {
             level: sample.level,
             temperatureC: sample.temperatureC,
             voltageV: sample.voltageV,
+            powerW: sample.powerW,
           ),
       ],
     );
@@ -704,6 +706,7 @@ class AppController extends ChangeNotifier {
       hotMinutes: stress.hotMinutes,
       veryHotMinutes: stress.veryHotMinutes,
       highVoltageMinutes: stress.highVoltageMinutes,
+      highPowerHeatMinutes: stress.highPowerHeatMinutes,
     );
 
     activeChargeTest = null;
