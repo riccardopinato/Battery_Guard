@@ -250,6 +250,11 @@ class _StressCard extends StatelessWidget {
                     value:
                         '${analysis.highVoltageMinutes.toStringAsFixed(1)} min',
                   ),
+                  _Metric(
+                    label: l10n.powerHeatExposure,
+                    value:
+                        '${analysis.highPowerHeatMinutes.toStringAsFixed(1)} min',
+                  ),
                 ],
               ),
             ] else ...[
