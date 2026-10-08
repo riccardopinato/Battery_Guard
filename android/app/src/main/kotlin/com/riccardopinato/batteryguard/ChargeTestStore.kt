@@ -88,6 +88,7 @@ object ChargeTestStore {
         "hotMinutes" to item.optDouble("hotMinutes", 0.0),
         "veryHotMinutes" to item.optDouble("veryHotMinutes", 0.0),
         "highVoltageMinutes" to item.optDouble("highVoltageMinutes", 0.0),
+        "highPowerHeatMinutes" to item.optDouble("highPowerHeatMinutes", 0.0),
     )
 
     private fun parseArray(raw: String?): JSONArray {
