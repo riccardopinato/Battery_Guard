@@ -6,6 +6,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/monitoring_config.dart';
 import '../services/app_controller.dart';
 import '../widgets/premium_card.dart';
+import 'capability_map_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({required this.controller, super.key});
@@ -272,6 +273,22 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: Text(_languageLabel(context)),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _chooseLanguage(context),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.analytics_outlined),
+                title: Text(l10n.capabilityMapTitle),
+                subtitle: Text(l10n.capabilityMapSettingsBody),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => CapabilityMapScreen(
+                        controller: controller,
+                      ),
+                    ),
+                  );
+                },
               ),
               const Divider(height: 1),
               ListTile(
