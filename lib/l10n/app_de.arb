@@ -565,5 +565,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "healthReportedStatus": "Von Android gemeldeter Akkustatus",
+  "healthReportedExplainer": "Dieser Android-Status meldet Zustände wie Gut, Überhitzt oder Kalt. Er ist kein Hersteller-Prozentwert für die Akkugesundheit.",
+  "healthEstimateExplainer": "Battery Guard schätzt die Vollkapazität aus kompatiblen, lokal erfassten Ladezähler-Messwerten.",
+  "confidenceScore": "Vertrauenswert",
+  "uncertainty": "Geschätzte Unsicherheit",
+  "outliers": "Ausreißer",
+  "outlierInspector": "Ausreißerprüfung",
+  "noOutliers": "Keine aktuellen Ausreißer erkannt.",
+  "socCoverage": "SoC-Abdeckung",
+  "advancedHealthAnalysis": "Erweiterte Health-Lab-Analyse",
+  "observedTrend": "Beobachteter Kapazitätstrend",
+  "trendStable": "Innerhalb der Unsicherheit stabil",
+  "trendUp": "Beobachtete Schätzung ist höher",
+  "trendDown": "Beobachtete Schätzung ist niedriger",
+  "standardEta": "Standard-ETA",
+  "smartEta": "Smart ETA",
+  "etaLearning": "Lernt aus weiterer Ladehistorie",
+  "etaHistory": "Verwendete historische Sitzungen",
+  "idleDrain": "Idle Drain",
+  "idleDrainSubtitle": "Vergleicht die Entladung bei ausgeschaltetem Bildschirm mit der lokalen Basis dieses Geräts. Ordnet Verbrauch nicht einzelnen Apps zu.",
+  "idleDrainLearning": "Lernt deine Leerlauf-Basis",
+  "idleDrainNormal": "Im Rahmen deiner Basis",
+  "idleDrainElevated": "Über deiner üblichen Basis",
+  "idleDrainHigh": "Deutlich über deiner üblichen Basis",
+  "idleDrainBaseline": "Basis",
+  "idleDrainRecent": "Aktuell",
+  "screenContextUsed": "Bildschirmstatus berücksichtigt"
 }
