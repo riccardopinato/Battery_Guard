@@ -556,5 +556,14 @@
     }
   },
   "proFeatureRanking": "Clasificación cargador + cable y tendencias",
-  "proFeatureStress": "Puntuación detallada de Battery Stress y desglose de exposición"
+  "proFeatureStress": "Puntuación detallada de Battery Stress y desglose de exposición",
+  "powerHeatExposure": "Potencia alta + calor",
+  "powerHeatDetail": "Solapamiento de potencia alta + calor: {minutes} min",
+  "@powerHeatDetail": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  }
 }
