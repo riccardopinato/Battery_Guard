@@ -565,5 +565,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "healthReportedStatus": "État de batterie signalé par Android",
+  "healthReportedExplainer": "Cet état Android indique des conditions comme Bonne, Surchauffée ou Froide. Ce n'est pas un pourcentage de santé constructeur.",
+  "healthEstimateExplainer": "Battery Guard estime la capacité pleine à partir d'échantillons compatibles du compteur de charge conservés localement.",
+  "confidenceScore": "Score de confiance",
+  "uncertainty": "Incertitude estimée",
+  "outliers": "Valeurs aberrantes",
+  "outlierInspector": "Inspecteur des valeurs aberrantes",
+  "noOutliers": "Aucune valeur aberrante récente détectée.",
+  "socCoverage": "Couverture SoC",
+  "advancedHealthAnalysis": "Analyse Health Lab avancée",
+  "observedTrend": "Tendance de capacité observée",
+  "trendStable": "Stable dans l'incertitude",
+  "trendUp": "L'estimation observée est plus élevée",
+  "trendDown": "L'estimation observée est plus basse",
+  "standardEta": "ETA standard",
+  "smartEta": "Smart ETA",
+  "etaLearning": "Apprentissage à partir de davantage d'historique de charge",
+  "etaHistory": "Sessions historiques utilisées",
+  "idleDrain": "Idle Drain",
+  "idleDrainSubtitle": "Compare la décharge écran éteint à la référence locale de cet appareil. N'attribue pas la consommation à des apps individuelles.",
+  "idleDrainLearning": "Apprentissage de votre référence au repos",
+  "idleDrainNormal": "Conforme à votre référence",
+  "idleDrainElevated": "Au-dessus de votre référence habituelle",
+  "idleDrainHigh": "Bien au-dessus de votre référence habituelle",
+  "idleDrainBaseline": "Référence",
+  "idleDrainRecent": "Récent",
+  "screenContextUsed": "État de l'écran inclus"
 }
