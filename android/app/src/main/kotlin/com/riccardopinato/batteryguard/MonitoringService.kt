@@ -121,6 +121,12 @@ class MonitoringService : Service() {
         HistoryStore.addSample(this, snapshot)
         BatteryHealthStore.record(this, snapshot)
         IdleDrainStore.record(this, snapshot)
+        ChargeProtectionManager.observe(
+            context = this,
+            snapshot = snapshot,
+            enabled = config.chargeProtectionEnabled,
+            targetLevel = config.targetLevel,
+        )
         BatteryGuardWidgetProvider.updateAll(this, snapshot = snapshot)
 
         val sessionUpdate = ChargingSessionStore.update(
