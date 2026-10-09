@@ -696,7 +696,10 @@ class AppController extends ChangeNotifier {
   Future<void> setChargeProtectionEnabled(bool value) async {
     if (!canUseFeature(BatteryGuardFeature.chargeProtection)) return;
     await updateConfig(
-      config.copyWith(chargeProtectionEnabled: value),
+      config.copyWith(
+        chargeProtectionEnabled: value,
+        enabled: value ? true : config.enabled,
+      ),
     );
     await verifyChargeProtection();
   }
