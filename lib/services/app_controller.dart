@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
 import '../models/battery_intelligence.dart';
+import '../models/charge_protection.dart';
+import '../models/device_battery_profile.dart';
 import '../models/battery_stress.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
@@ -14,6 +16,7 @@ import '../models/history_entry.dart';
 import '../models/monitoring_config.dart';
 import '../models/reliability_status.dart';
 import 'battery_intelligence_engine.dart';
+import 'device_battery_profile_lookup.dart';
 import 'feature_access.dart';
 import 'native_battery_service.dart';
 import 'premium_service.dart';
@@ -35,6 +38,12 @@ class AppController extends ChangeNotifier {
   BatterySnapshot snapshot = BatterySnapshot.empty();
   BatteryHealthReport batteryHealthReport = BatteryHealthReport.empty;
   IdleDrainReport idleDrainReport = IdleDrainReport.empty;
+  DeviceIdentity deviceIdentity = DeviceIdentity.empty;
+  DeviceBatteryProfile deviceBatteryProfile =
+      DeviceBatteryProfile.idle(DeviceIdentity.empty);
+  ChargeProtectionCapability chargeProtectionCapability =
+      ChargeProtectionCapability.unknown;
+  ChargeProtectionState chargeProtectionState = ChargeProtectionState.disabled;
   MonitoringConfig config = MonitoringConfig.defaults();
   List<HistoryEntry> history = const [];
   List<ChargingSession> chargingSessions = const [];
@@ -47,6 +56,7 @@ class AppController extends ChangeNotifier {
   bool onboardingComplete = false;
   bool loading = true;
   bool notificationsGranted = false;
+  bool deviceProfileLoading = false;
   String? lastError;
 
   bool get isWebPreview => kIsWeb;
@@ -107,6 +117,9 @@ class AppController extends ChangeNotifier {
         _platform.getChargingSetups(),
         _platform.getBatteryHealthReport(),
         _platform.getIdleDrainReport(),
+        _platform.getDeviceIdentity(),
+        _platform.getChargeProtectionCapability(),
+        _platform.getChargeProtectionState(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       config = values[1] as MonitoringConfig;
@@ -123,6 +136,11 @@ class AppController extends ChangeNotifier {
       chargingSetups = values[10] as List<ChargingSetupProfile>;
       batteryHealthReport = values[11] as BatteryHealthReport;
       idleDrainReport = values[12] as IdleDrainReport;
+      deviceIdentity = values[13] as DeviceIdentity;
+      deviceBatteryProfile = DeviceBatteryProfile.idle(deviceIdentity);
+      chargeProtectionCapability =
+          values[14] as ChargeProtectionCapability;
+      chargeProtectionState = values[15] as ChargeProtectionState;
       lastError = null;
 
       await _subscription?.cancel();
@@ -148,6 +166,51 @@ class AppController extends ChangeNotifier {
 
   void _initializeWebPreview() {
     final now = DateTime.now();
+    deviceIdentity = const DeviceIdentity(
+      manufacturer: 'Samsung',
+      brand: 'Samsung',
+      model: 'Galaxy S24',
+      device: 'e3q',
+      product: 'e3qxxx',
+      sdkInt: 36,
+      androidRelease: '16',
+      socManufacturer: 'Qualcomm',
+      socModel: 'SM8650',
+    );
+    deviceBatteryProfile = DeviceBatteryProfile(
+      identity: deviceIdentity,
+      status: DeviceSpecLookupStatus.found,
+      nominalCapacityMah: 4855,
+      typicalCapacityMah: 5000,
+      maxChargePowerW: 45,
+      sourceName: 'Web Preview source',
+      sourceUrl: 'https://example.invalid',
+      sourceConfidence: 'medium',
+      exactMatch: true,
+      matchedDeviceName: 'Samsung Galaxy S24',
+      fetchedAt: now,
+    );
+    chargeProtectionCapability = const ChargeProtectionCapability(
+      adapterId: 'samsung_battery_protection',
+      mode: ChargeProtectionMode.systemSetting,
+      supportsDirectControl: false,
+      systemLimitAvailable: true,
+      supportedTargets: <int>[80, 85, 90, 95],
+      confidence: 'medium',
+      guideCode: 'samsung_battery_protection',
+      manufacturer: 'Samsung',
+      model: 'Galaxy S24',
+    );
+    chargeProtectionState = ChargeProtectionState(
+      enabled: true,
+      targetLevel: 80,
+      verification: ChargeProtectionVerification.verifiedStopped,
+      observedLevel: 80,
+      observedIsCharging: false,
+      observedIsPlugged: true,
+      verifiedAt: now,
+      requiresUserAction: true,
+    );
     snapshot = BatterySnapshot.fromMap({
       'level': 76,
       'temperatureC': 34.2,
@@ -244,6 +307,7 @@ class AppController extends ChangeNotifier {
       enabled: true,
       lowLevel: 20,
       targetLevel: 80,
+      chargeProtectionEnabled: true,
     );
     batteryHealthReport = const BatteryHealthReport(
       nominalCapacityMah: 5000,
@@ -475,11 +539,13 @@ class AppController extends ChangeNotifier {
         _platform.getCurrentChargingSession(),
         _platform.getBatteryHealthReport(),
         _platform.getIdleDrainReport(),
+        _platform.getChargeProtectionState(),
       ]);
       snapshot = values[0] as BatterySnapshot;
       currentSession = values[1] as ChargingSession?;
       batteryHealthReport = values[2] as BatteryHealthReport;
       idleDrainReport = values[3] as IdleDrainReport;
+      chargeProtectionState = values[4] as ChargeProtectionState;
       notifyListeners();
     } catch (error) {
       lastError = error.toString();
@@ -598,6 +664,62 @@ class AppController extends ChangeNotifier {
 
   Future<void> openNotificationSettings() async {
     if (!kIsWeb) await _platform.openNotificationSettings();
+  }
+
+  Future<void> refreshDeviceBatteryProfile() async {
+    if (!canUseFeature(BatteryGuardFeature.deviceBatteryProfileLive)) return;
+    deviceProfileLoading = true;
+    notifyListeners();
+    try {
+      if (kIsWeb) {
+        deviceProfileLoading = false;
+        notifyListeners();
+        return;
+      }
+      deviceBatteryProfile =
+          await lookupDeviceBatteryProfile(deviceIdentity);
+      lastError = null;
+    } catch (error) {
+      lastError = error.toString();
+    } finally {
+      deviceProfileLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> applyDeviceCapacityToHealthLab() async {
+    final capacity = deviceBatteryProfile.preferredCapacityMah;
+    if (capacity == null || capacity <= 0) return;
+    await setNominalCapacityMah(capacity);
+  }
+
+  Future<void> setChargeProtectionEnabled(bool value) async {
+    if (!canUseFeature(BatteryGuardFeature.chargeProtection)) return;
+    await updateConfig(
+      config.copyWith(chargeProtectionEnabled: value),
+    );
+    await verifyChargeProtection();
+  }
+
+  Future<void> verifyChargeProtection() async {
+    if (kIsWeb) {
+      notifyListeners();
+      return;
+    }
+    try {
+      chargeProtectionState = await _platform.verifyChargeProtection();
+      chargeProtectionCapability =
+          await _platform.getChargeProtectionCapability();
+      notifyListeners();
+    } catch (error) {
+      lastError = error.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<bool> openChargeProtectionSettings() async {
+    if (kIsWeb) return false;
+    return _platform.openChargeProtectionSettings();
   }
 
   Future<bool> testAlert() async {
