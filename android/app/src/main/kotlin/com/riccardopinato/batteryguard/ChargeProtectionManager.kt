@@ -163,8 +163,8 @@ object ChargeProtectionManager {
 
     fun openSystemBatterySettings(context: Context): Boolean {
         val intents = listOf(
-            Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS),
             Intent(Settings.ACTION_SETTINGS),
+            Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS),
         )
         for (intent in intents) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
