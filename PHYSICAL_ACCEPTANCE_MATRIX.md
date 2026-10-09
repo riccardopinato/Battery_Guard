@@ -50,6 +50,19 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | Battery Stress Pro | — | — | numeric score/exposure breakdown visible and plausible | NOT RUN |
 | Charger/cable ranking | — | — | ranking only compares user's reliable saved tests | NOT RUN |
 | Refund/revocation profiles | — | — | extra profiles remain stored but Free cannot start tests with them | NOT RUN |
+| D1 manual language switch | — | — | EN/IT/ES/FR/DE/PT change the whole app immediately, not only Home | NOT RUN |
+| D1 locale persistence | — | — | selected language survives process restart; System returns to device locale | NOT RUN |
+| D2 exact Android identity | — | — | manufacturer/model shown by Battery Guard matches Android device information | NOT RUN |
+| D2 live model resolution | — | — | model code resolves to correct commercial model when provider coverage exists | NOT RUN |
+| D2 live stock battery specs | — | — | returned mAh is plausible, source/confidence visible; wrong/no match fails safely | NOT RUN |
+| D4 Health Lab adoption | — | — | stock capacity changes nominal baseline only after explicit tap | NOT RUN |
+| D3 target range | — | — | 70/75/80/85/90/95/100 persist and monitoring remains active when protection is enabled | NOT RUN |
+| D3 OEM/system capability | — | — | Samsung/Xiaomi path is presented as system-setting capability, never direct control | NOT RUN |
+| D3 below-target truth | — | — | plugged+charging below target reports below target, never stopped | NOT RUN |
+| D3 still-charging truth | — | — | at/above target + charging=true reports still charging, never verified | NOT RUN |
+| D3 verified stop readback | — | — | at/above target + plugged=true + charging=false reports VERIFIED STOP | NOT RUN |
+| D3 overnight protection | — | — | leave connected overnight; verify OEM limit/readback and FGS reliability without runaway polling | NOT RUN |
+| D5 Health/ETA/Idle calibration | — | — | collect exact-artifact evidence; tune only if observed evidence justifies changes | NOT RUN |
 
 ## Pass rule
 No v1 production rollout until all core rows pass on at least one Samsung and one Xiaomi/Redmi/Poco-class device, or an explicit documented exception is accepted.

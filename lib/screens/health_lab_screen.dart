@@ -187,6 +187,36 @@ class HealthLabScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (controller.deviceBatteryProfile.hasCapacity) ...[
+              const SizedBox(height: 14),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.factory_outlined),
+                  title: Text(l10n.stockBatteryCapacity),
+                  subtitle: Text(
+                    '${controller.deviceBatteryProfile.preferredCapacityMah} mAh\n'
+                    '${l10n.batterySpecSource}: '
+                    '${controller.deviceBatteryProfile.sourceName}',
+                  ),
+                  isThreeLine: false,
+                  trailing: controller.batteryHealthReport.nominalCapacityMah ==
+                          controller.deviceBatteryProfile.preferredCapacityMah
+                      ? const Icon(Icons.check_circle_rounded)
+                      : FilledButton.tonal(
+                          onPressed: () async {
+                            await controller.applyDeviceCapacityToHealthLab();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.applyStockCapacitySuccess),
+                              ),
+                            );
+                          },
+                          child: Text(l10n.useForHealthLab),
+                        ),
+                ),
+              ),
+            ],
             const SizedBox(height: 14),
             GridView.count(
               crossAxisCount: MediaQuery.sizeOf(context).width < 520 ? 2 : 4,

@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.5.0+23 — Charging Intelligence**
+Versione sorgente: **1.8.0+26 — Device Intelligence & Charge Protection**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -22,6 +22,7 @@ Evidence attuale:
 - Free qualitative Speed/Stability/Thermal/Stress assessment; Pro numeric score breakdown
 - charger/cable ranking and historical trends in Pro
 - explainable Battery Stress exposure engine for normal sessions and controlled tests
+- MAXI STEP D Device Intelligence + Charge Protection implemented; physical D5 acceptance pending
 - PHYSICAL UPDATE VERIFIED: **PENDING**
 - STORE READY: **NO — external production gates pending**
 
@@ -48,7 +49,7 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - quattro assi separati Speed / Stability / Thermal / Overall;
 - Battery Stress qualitativo Free e breakdown numerico Pro;
 - ranking e trend storici dei setup in Pro;
-- Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Charge Doctor avanzato + curve + ranking + stress dettagliato + Insights 30 giorni;
+- Battery Guard Pro lifetime: rimozione pubblicità + Battery Health Lab + Device Battery Profile Live + Charge Protection + Charge Doctor avanzato + curve + ranking + stress dettagliato + Insights 30 giorni;
 - AdMob Free con UMP/Privacy Options e Large Anchored Adaptive Banner, separato dalla NavigationBar;
 - Test Ads obbligatori nelle build INTERNAL/QA;
 - nuova icona launcher adaptive con variante themed/monochrome Android 13+;
@@ -60,7 +61,7 @@ Non considerare una build verde equivalente a validazione fisica del foreground 
 - gestione sessioni interrotte/non affidabili;
 - storage locale bounded.
 
-Battery Guard **non interrompe fisicamente la ricarica** e non inventa una percentuale di battery health.
+Battery Guard **non finge di poter interrompere fisicamente la ricarica**: usa un controllo diretto solo se una capability specifica e verificata lo consente; altrimenti usa la protezione OEM/sistema quando disponibile oppure mantiene l'avviso. Non inventa una percentuale di battery health.
 
 ## Privacy
 
@@ -87,3 +88,16 @@ MAXI STEP C extends the existing local telemetry stack without a parallel databa
 - Smart ETA learns only from valid personal charging-session evidence and uses screen context only when Android exposed it.
 - Idle Drain records only qualifying screen-off, unplugged intervals and compares them with the device's own comparable baseline.
 - All Battery Intelligence data remains local; Web Preview uses simulated evidence and does not certify native behavior.
+
+## Device Intelligence & Charge Protection — v1.8
+
+- Pro rileva l'identità non univoca del modello Android senza usare seriale/fingerprint hardware.
+- Il lookup online è manuale: risolve quando possibile il codice modello nel nome commerciale e cerca capacità batteria/potenza stock.
+- Il provider specs è una fonte community e viene mostrato come tale; match e confidence restano visibili.
+- La capacità stock può essere passata esplicitamente a Health Lab, senza sovrascrittura automatica.
+- La soglia di protezione è configurabile 70/75/80/85/90/95/100%.
+- Pixel/Samsung/Xiaomi compatibili vengono trattati come capability OEM/system-setting, non come falsa API di controllo universale.
+- Stato **Verificato** solo dopo readback: collegato + soglia raggiunta + Android non più in charging.
+- L'attivazione di Charge Protection mantiene attivo il monitoraggio necessario alla verifica.
+- Web Preview dimostra UI/state flow ma non certifica comportamento OEM.
+

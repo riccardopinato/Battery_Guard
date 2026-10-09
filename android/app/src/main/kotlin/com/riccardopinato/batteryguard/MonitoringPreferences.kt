@@ -5,12 +5,13 @@ import java.util.Calendar
 
 object MonitoringPreferences {
     private const val FILE = "battery_guard_config"
-    private val targetSteps = intArrayOf(80, 85, 90, 100)
+    private val targetSteps = intArrayOf(70, 75, 80, 85, 90, 95, 100)
 
     data class Config(
         val enabled: Boolean,
         val lowLevel: Int,
         val targetLevel: Int,
+        val chargeProtectionEnabled: Boolean,
         val temperatureThresholdC: Double,
         val notifyLow: Boolean,
         val notifyFull: Boolean,
@@ -25,7 +26,9 @@ object MonitoringPreferences {
         return Config(
             enabled = prefs.getBoolean("enabled", false),
             lowLevel = prefs.getInt("lowLevel", 20).coerceIn(5, 45),
-            targetLevel = prefs.getInt("targetLevel", 80).coerceIn(50, 100),
+            targetLevel = prefs.getInt("targetLevel", 80).coerceIn(70, 100),
+            chargeProtectionEnabled =
+                prefs.getBoolean("chargeProtectionEnabled", false),
             temperatureThresholdC = prefs
                 .getFloat("temperatureThresholdC", 42f)
                 .toDouble()
@@ -49,6 +52,7 @@ object MonitoringPreferences {
             "enabled" to config.enabled,
             "lowLevel" to config.lowLevel,
             "targetLevel" to config.targetLevel,
+            "chargeProtectionEnabled" to config.chargeProtectionEnabled,
             "temperatureThresholdC" to config.temperatureThresholdC,
             "notifyLow" to config.notifyLow,
             "notifyFull" to config.notifyFull,
@@ -78,8 +82,13 @@ object MonitoringPreferences {
                 "targetLevel",
                 (values["targetLevel"] as? Number)
                     ?.toInt()
-                    ?.coerceIn(50, 100)
+                    ?.coerceIn(70, 100)
                     ?: current.targetLevel,
+            )
+            .putBoolean(
+                "chargeProtectionEnabled",
+                values["chargeProtectionEnabled"] as? Boolean
+                    ?: current.chargeProtectionEnabled,
             )
             .putFloat(
                 "temperatureThresholdC",
@@ -137,7 +146,7 @@ object MonitoringPreferences {
     fun setTargetLevel(context: Context, targetLevel: Int) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
             .edit()
-            .putInt("targetLevel", targetLevel.coerceIn(50, 100))
+            .putInt("targetLevel", targetLevel.coerceIn(70, 100))
             .apply()
     }
 

@@ -3,6 +3,7 @@ class MonitoringConfig {
     required this.enabled,
     required this.lowLevel,
     required this.targetLevel,
+    required this.chargeProtectionEnabled,
     required this.temperatureThresholdC,
     required this.notifyLow,
     required this.notifyFull,
@@ -16,6 +17,7 @@ class MonitoringConfig {
         enabled: false,
         lowLevel: 20,
         targetLevel: 80,
+        chargeProtectionEnabled: false,
         temperatureThresholdC: 42,
         notifyLow: true,
         notifyFull: true,
@@ -33,7 +35,10 @@ class MonitoringConfig {
           .clamp(5, 45),
       targetLevel: ((map['targetLevel'] as num?)?.round() ??
               defaults.targetLevel)
-          .clamp(50, 100),
+          .clamp(70, 100),
+      chargeProtectionEnabled:
+          map['chargeProtectionEnabled'] as bool? ??
+              defaults.chargeProtectionEnabled,
       temperatureThresholdC:
           (map['temperatureThresholdC'] as num?)?.toDouble() ??
               defaults.temperatureThresholdC,
@@ -53,6 +58,7 @@ class MonitoringConfig {
   final bool enabled;
   final int lowLevel;
   final int targetLevel;
+  final bool chargeProtectionEnabled;
   final double temperatureThresholdC;
   final bool notifyLow;
   final bool notifyFull;
@@ -65,6 +71,7 @@ class MonitoringConfig {
     bool? enabled,
     int? lowLevel,
     int? targetLevel,
+    bool? chargeProtectionEnabled,
     double? temperatureThresholdC,
     bool? notifyLow,
     bool? notifyFull,
@@ -77,6 +84,8 @@ class MonitoringConfig {
       enabled: enabled ?? this.enabled,
       lowLevel: lowLevel ?? this.lowLevel,
       targetLevel: targetLevel ?? this.targetLevel,
+      chargeProtectionEnabled:
+          chargeProtectionEnabled ?? this.chargeProtectionEnabled,
       temperatureThresholdC:
           temperatureThresholdC ?? this.temperatureThresholdC,
       notifyLow: notifyLow ?? this.notifyLow,
@@ -92,6 +101,7 @@ class MonitoringConfig {
         'enabled': enabled,
         'lowLevel': lowLevel,
         'targetLevel': targetLevel,
+        'chargeProtectionEnabled': chargeProtectionEnabled,
         'temperatureThresholdC': temperatureThresholdC,
         'notifyLow': notifyLow,
         'notifyFull': notifyFull,

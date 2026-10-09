@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.8.0+26 — MAXI STEP D: Device Intelligence & Charge Protection
+- fixed the runtime localization regression: changing/restoring the locale now rebuilds MaterialApp rather than only the home subtree;
+- added Pro Device Intelligence using non-unique Android model identity and an explicit live battery-spec lookup;
+- added live model-code -> marketing-name resolution from a Google-Play-derived mapping before community spec matching;
+- live lookup exposes source/match confidence and never overwrites Health Lab capacity automatically;
+- added 70–100% charge-protection targets in 5-point steps;
+- added truthful charge-protection capability states: direct control / OEM system setting / alert only;
+- added Pixel, Samsung and Xiaomi/Redmi/POCO system-protection guidance;
+- no public-API-inaccessible direct charging control is claimed;
+- a charge stop is verified only from readback showing target reached, device still plugged and isCharging=false;
+- wired charge protection into existing foreground monitoring without a second background engine;
+- integrated detected stock battery capacity into Health Lab through explicit user action;
+- added six-language UI strings and deterministic regression tests;
+- physical-device validation and post-D calibration remain pending.
+
+
 ## 1.7.0+25 — MAXI STEP C: Battery Intelligence
 - completed the v1.6 Health Lab 2 milestone and v1.7 Smart ETA / Idle Drain milestone in one integrated release;
 - separated Android-reported battery health status from Battery Guard estimated capacity health;

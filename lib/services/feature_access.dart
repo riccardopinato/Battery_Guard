@@ -15,6 +15,8 @@ enum BatteryGuardFeature {
   standardEta,
   smartEta,
   idleDrain,
+  deviceBatteryProfileLive,
+  chargeProtection,
 }
 
 enum FeatureTier {
@@ -43,6 +45,8 @@ class FeatureCatalog {
       BatteryGuardFeature.standardEta => FeatureTier.free,
       BatteryGuardFeature.smartEta => FeatureTier.premium,
       BatteryGuardFeature.idleDrain => FeatureTier.premium,
+      BatteryGuardFeature.deviceBatteryProfileLive => FeatureTier.premium,
+      BatteryGuardFeature.chargeProtection => FeatureTier.premium,
     };
   }
 

@@ -173,7 +173,47 @@
 - no per-app drain attribution and no unsupported battery-degradation claims;
 - six-language UI + Web Preview simulation + regression tests.
 
-## NEXT — MAXI STEP D
-- post-C physical evidence accumulation and calibration;
-- tune thresholds/formulas only from observed device evidence;
-- no new product scope until Battery Intelligence device QA is reviewed.
+## 1.8.0 — MAXI STEP D: Device Intelligence & Charge Protection ✅ IMPLEMENTED / PHYSICAL QA PENDING
+
+### D1 — Localization Repair
+- fixed runtime locale propagation at the MaterialApp boundary;
+- device locale + persisted manual override now rebuild the complete Flutter app surface;
+- six-language Device Intelligence / Charge Protection catalog added;
+- physical language switching remains an acceptance scenario before CERTIFIED.
+
+### D2 — Device Battery Profile Live
+- Android identity reads manufacturer/brand/model/product/SKU without serial number or unique hardware ID;
+- exact Build.MODEL can be resolved live to a marketing name through a Google-Play-derived device mapping;
+- Pro live lookup retrieves stock battery capacity and available wired-charge power from a community specs provider;
+- provider/source, matched device and confidence are visible;
+- fuzzy/low-confidence data is never applied automatically;
+- online lookup is explicit/user-triggered and never background telemetry;
+- production provider admission/terms/freshness remain a release gate.
+
+### D3 — Charge Limit Capability Matrix + OEM adapters
+- user target range expanded to 70/75/80/85/90/95/100%;
+- Pro Charge Protection distinguishes direct control, OEM/system setting and alert-only capability;
+- Pixel, Samsung and Xiaomi/Redmi/POCO system-protection guidance/adapters added;
+- no OEM is falsely marked as direct-control through unsupported Android public APIs;
+- monitoring records real plugged/charging readback state;
+- VERIFIED STOP requires plugged + target reached + isCharging=false;
+- command/request success alone can never produce a verified badge;
+- future verified direct adapters must execute command -> delayed readback before success.
+
+### D4 — Health Lab integration
+- detected stock capacity can be explicitly adopted as the Health Lab nominal/design baseline;
+- existing manual value is never silently overwritten;
+- source/confidence remain separate from Battery Guard's own measured capacity estimate.
+
+### D5 — Physical Evidence & Calibration ⏳ PENDING
+- validate exact 1.8.0+26 artifact on real devices;
+- language switch + restart persistence;
+- exact-model resolution + live stock-capacity lookup;
+- OEM/system charge-limit setup and readback around selected thresholds;
+- overnight foreground/background reliability;
+- Health Lab / Smart ETA / Idle Drain accumulation;
+- tune thresholds/formulas only from observed device evidence.
+
+## NEXT
+- complete D5 on the exact signed artifact produced by CI;
+- no new product scope until MAXI STEP D physical evidence and calibration are reviewed.

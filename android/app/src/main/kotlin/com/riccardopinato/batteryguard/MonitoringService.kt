@@ -121,6 +121,38 @@ class MonitoringService : Service() {
         HistoryStore.addSample(this, snapshot)
         BatteryHealthStore.record(this, snapshot)
         IdleDrainStore.record(this, snapshot)
+        val protectionState = ChargeProtectionManager.observe(
+            context = this,
+            snapshot = snapshot,
+            enabled = config.chargeProtectionEnabled,
+            targetLevel = config.targetLevel,
+        )
+        val protectionCapability = ChargeProtectionManager.capability(this)
+        if (
+            config.chargeProtectionEnabled &&
+            level >= config.targetLevel &&
+            isCharging &&
+            protectionCapability["supportsDirectControl"] == true &&
+            protectionState["verification"] == "still_charging"
+        ) {
+            val attempt = ChargeProtectionManager.applyLimit(
+                this,
+                config.targetLevel,
+            )
+            if (attempt["commandSent"] == true) {
+                samplingHandler.postDelayed(
+                    {
+                        ChargeProtectionManager.observe(
+                            context = this,
+                            snapshot = BatteryInfoReader.read(this),
+                            enabled = true,
+                            targetLevel = config.targetLevel,
+                        )
+                    },
+                    2_000L,
+                )
+            }
+        }
         BatteryGuardWidgetProvider.updateAll(this, snapshot = snapshot)
 
         val sessionUpdate = ChargingSessionStore.update(
