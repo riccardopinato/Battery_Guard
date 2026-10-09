@@ -1,4 +1,4 @@
-# Monetization — v1.5.0
+# Monetization — v1.8.0
 
 Product ID: `battery_guard_pro_lifetime`
 
@@ -117,3 +117,21 @@ Refund/revocation never deletes extra setup data. Extra setup profiles become in
 - Idle Drain Sentinel.
 
 Premium gating stays centralized through `FeatureCatalog`; data collection and user-owned local evidence are not deleted when Pro is unavailable.
+
+## Device Intelligence / Charge Protection tier boundary — v1.8
+
+**Free remains complete for protection basics**
+- lower/upper threshold alerts;
+- foreground monitoring and reliability diagnostics;
+- OEM/adaptive charging-pause evidence already observed by Battery Guard;
+- manual nominal-capacity entry and Health summary.
+
+**Pro adds optimization depth**
+- live detected-device battery-spec lookup with source/confidence;
+- one-tap adoption of verified-enough stock capacity into Health Lab;
+- Charge Protection target workflow 70–100%;
+- OEM/system battery-protection guidance;
+- live charge-stop readback verification.
+
+Premium never converts an unsupported capability into a claimed capability. A phone with no controllable/system charging limit gets the truthful alert-only path.
+
