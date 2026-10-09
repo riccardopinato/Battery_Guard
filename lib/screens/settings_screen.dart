@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../ads/privacy_options_tile.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../models/charge_protection.dart';
+import '../models/device_battery_profile.dart';
 import '../models/monitoring_config.dart';
 import '../services/app_controller.dart';
 import '../widgets/premium_card.dart';
@@ -73,6 +75,57 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => _chooseTarget(context, config),
               ),
               const Divider(height: 1),
+              if (controller.premium.isPro) ...[
+                SwitchListTile.adaptive(
+                  title: Text(l10n.chargeProtectionTitle),
+                  subtitle: Text(_chargeProtectionSummary(l10n)),
+                  value: config.chargeProtectionEnabled,
+                  onChanged: controller.setChargeProtectionEnabled,
+                ),
+                if (config.chargeProtectionEnabled) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Icon(
+                      controller.chargeProtectionState.isVerifiedStopped
+                          ? Icons.verified_rounded
+                          : Icons.fact_check_outlined,
+                    ),
+                    title: Text(l10n.chargeProtectionVerification),
+                    subtitle: Text(_chargeProtectionVerificationLabel(l10n)),
+                    trailing: FilledButton.tonal(
+                      onPressed: controller.verifyChargeProtection,
+                      child: Text(l10n.verifyChargeProtection),
+                    ),
+                  ),
+                  if (controller
+                      .chargeProtectionCapability.systemLimitAvailable) ...[
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.settings_suggest_outlined),
+                      title: Text(l10n.openBatteryProtectionSettings),
+                      subtitle: Text(_chargeProtectionGuide(l10n)),
+                      trailing: const Icon(Icons.open_in_new_rounded),
+                      onTap: controller.openChargeProtectionSettings,
+                    ),
+                  ],
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.verified_user_outlined),
+                    title: Text(l10n.chargeProtectionTruthNotice),
+                    subtitle: Text(
+                      controller.chargeProtectionCapability.supportsDirectControl
+                          ? l10n.chargeProtectionSystemAvailable
+                          : _chargeProtectionCapabilityLabel(l10n),
+                    ),
+                  ),
+                ],
+              ] else
+                ListTile(
+                  leading: const Icon(Icons.lock_outline_rounded),
+                  title: Text(l10n.chargeProtectionTitle),
+                  subtitle: Text(l10n.chargeProtectionProOnly),
+                ),
+              const Divider(height: 1),
               ListTile(
                 title: Text(l10n.maxTemperature),
                 subtitle: Text(
@@ -109,6 +162,70 @@ class SettingsScreen extends StatelessWidget {
                   config.copyWith(notifyUnplugged: value),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _Section(
+            title: l10n.deviceIntelligenceTitle,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.smartphone_rounded),
+                title: Text(l10n.deviceIdentity),
+                subtitle: Text(
+                  '${controller.deviceIdentity.displayName}\n'
+                  'Android ${controller.deviceIdentity.androidRelease} '
+                  '(API ${controller.deviceIdentity.sdkInt})',
+                ),
+                isThreeLine: true,
+              ),
+              const Divider(height: 1),
+              if (controller.premium.isPro) ...[
+                ListTile(
+                  leading: const Icon(Icons.travel_explore_rounded),
+                  title: Text(l10n.detectBatterySpecsOnline),
+                  subtitle: Text(l10n.detectBatterySpecsBody),
+                  trailing: controller.deviceProfileLoading
+                      ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh_rounded),
+                  onTap: controller.deviceProfileLoading
+                      ? null
+                      : controller.refreshDeviceBatteryProfile,
+                ),
+                const Divider(height: 1),
+                _deviceBatteryProfileTile(context),
+                if (controller.deviceBatteryProfile.hasCapacity) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.science_outlined),
+                    title: Text(l10n.useForHealthLab),
+                    subtitle: Text(l10n.stockBatteryCapacity),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () async {
+                      await controller.applyDeviceCapacityToHealthLab();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.applyStockCapacitySuccess),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: Text(l10n.onlineLookupPrivacy),
+                  subtitle: Text(l10n.deviceIdentityBody),
+                ),
+              ] else
+                ListTile(
+                  leading: const Icon(Icons.lock_outline_rounded),
+                  title: Text(l10n.detectBatterySpecsOnline),
+                  subtitle: Text(l10n.deviceSpecsProOnly),
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -367,6 +484,105 @@ class SettingsScreen extends StatelessWidget {
     return l10n.oemBackgroundHint;
   }
 
+  String _chargeProtectionSummary(AppLocalizations l10n) {
+    if (!controller.config.chargeProtectionEnabled) {
+      return l10n.chargeProtectionBody;
+    }
+    return _chargeProtectionVerificationLabel(l10n);
+  }
+
+  String _chargeProtectionCapabilityLabel(AppLocalizations l10n) {
+    return controller.chargeProtectionCapability.mode ==
+            ChargeProtectionMode.systemSetting
+        ? l10n.chargeProtectionSystemAvailable
+        : l10n.chargeProtectionAlertOnly;
+  }
+
+  String _chargeProtectionVerificationLabel(AppLocalizations l10n) {
+    return switch (controller.chargeProtectionState.verification) {
+      ChargeProtectionVerification.verifiedStopped =>
+        l10n.chargeProtectionVerifiedStopped,
+      ChargeProtectionVerification.stillCharging =>
+        l10n.chargeProtectionStillCharging,
+      ChargeProtectionVerification.belowTarget =>
+        l10n.chargeProtectionBelowTarget,
+      ChargeProtectionVerification.unplugged =>
+        l10n.chargeProtectionUnplugged,
+      ChargeProtectionVerification.notApplicable =>
+        l10n.chargeProtectionNotApplicable,
+      ChargeProtectionVerification.disabled =>
+        l10n.chargeProtectionBody,
+      ChargeProtectionVerification.unsupported =>
+        l10n.chargeProtectionAlertOnly,
+      ChargeProtectionVerification.failed =>
+        l10n.chargeProtectionPending,
+      ChargeProtectionVerification.pending =>
+        l10n.chargeProtectionPending,
+    };
+  }
+
+  String _chargeProtectionGuide(AppLocalizations l10n) {
+    return switch (controller.chargeProtectionCapability.guideCode) {
+      'pixel_80' => l10n.chargeProtectionGuidePixel,
+      'samsung_battery_protection' => l10n.chargeProtectionGuideSamsung,
+      'xiaomi_battery_protection' => l10n.chargeProtectionGuideXiaomi,
+      _ => l10n.chargeProtectionGuideGeneric,
+    };
+  }
+
+  Widget _deviceBatteryProfileTile(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final profile = controller.deviceBatteryProfile;
+    return switch (profile.status) {
+      DeviceSpecLookupStatus.found => ListTile(
+          leading: const Icon(Icons.battery_charging_full_rounded),
+          title: Text(l10n.stockBatteryCapacity),
+          subtitle: Text(
+            '${profile.preferredCapacityMah} mAh\n'
+            '${profile.matchedDeviceName ?? controller.deviceIdentity.displayName}\n'
+            '${l10n.batterySpecSource}: ${profile.sourceName} • '
+            '${_profileConfidenceLabel(l10n, profile)}',
+          ),
+          isThreeLine: true,
+        ),
+      DeviceSpecLookupStatus.notFound => ListTile(
+          leading: const Icon(Icons.search_off_rounded),
+          title: Text(l10n.stockBatteryCapacity),
+          subtitle: Text(l10n.batterySpecNotFound),
+        ),
+      DeviceSpecLookupStatus.error => ListTile(
+          leading: const Icon(Icons.cloud_off_rounded),
+          title: Text(l10n.stockBatteryCapacity),
+          subtitle: Text(l10n.batterySpecLookupError),
+        ),
+      DeviceSpecLookupStatus.unsupported => ListTile(
+          leading: const Icon(Icons.public_off_outlined),
+          title: Text(l10n.stockBatteryCapacity),
+          subtitle: Text(l10n.dataUnavailable),
+        ),
+      DeviceSpecLookupStatus.idle => ListTile(
+          leading: const Icon(Icons.battery_unknown_rounded),
+          title: Text(l10n.stockBatteryCapacity),
+          subtitle: Text(l10n.detectBatterySpecsBody),
+        ),
+    };
+  }
+
+  String _profileConfidenceLabel(
+    AppLocalizations l10n,
+    DeviceBatteryProfile profile,
+  ) {
+    final confidence = switch (profile.sourceConfidence) {
+      'high' => l10n.confidenceHigh,
+      'medium' => l10n.confidenceMedium,
+      _ => l10n.confidenceLow,
+    };
+    final match = profile.exactMatch
+        ? l10n.batterySpecExactMatch
+        : l10n.batterySpecApproximateMatch;
+    return '$match • $confidence';
+  }
+
   String _languageLabel(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return switch (controller.localeOverride?.languageCode) {
@@ -478,7 +694,7 @@ class SettingsScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
-              for (final level in const [80, 85, 90, 100])
+              for (final level in const [70, 75, 80, 85, 90, 95, 100])
                 ListTile(
                   title: Text('$level%'),
                   trailing: level == config.targetLevel
