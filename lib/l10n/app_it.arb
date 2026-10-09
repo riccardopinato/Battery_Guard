@@ -461,7 +461,7 @@
   "rankingNeedsTests": "Esegui test affidabili sui tuoi setup per costruire la classifica.",
   "rankingTestsAndPower": "{tests} test • media {power} W",
   "trendNotEnoughData": "Trend in attesa",
-  "trendStable": "Trend stabile",
+  "trendStable": "Stabile entro l'incertezza",
   "trendImproving": "+{value} punti",
   "trendWorsening": "-{value} punti",
   "rankingProTitle": "Confronta i tuoi setup di ricarica",
@@ -577,7 +577,6 @@
   "socCoverage": "Copertura SoC",
   "advancedHealthAnalysis": "Analisi avanzata Health Lab",
   "observedTrend": "Trend capacità osservata",
-  "trendStable": "Stabile entro l'incertezza",
   "trendUp": "Stima osservata più alta",
   "trendDown": "Stima osservata più bassa",
   "standardEta": "ETA standard",
@@ -626,5 +625,6 @@
   "chargeProtectionGuideXiaomi": "Apri Batteria > Protezione batteria o Ricarica intelligente su Xiaomi/Redmi/POCO. La disponibilità varia per modello e versione HyperOS/MIUI.",
   "chargeProtectionGuideGeneric": "Android non espone un'API pubblica universale che permetta a una normale app di interrompere fisicamente la ricarica.",
   "chargeProtectionTruthNotice": "Comando inviato non significa stop riuscito. Solo la rilettura dello stato di carica può marcarlo come verificato.",
-  "applyStockCapacitySuccess": "Capacità stock applicata a Health Lab."
+  "applyStockCapacitySuccess": "Capacità stock applicata a Health Lab.",
+  "chargeProtectionTargetUnsupported": "La soglia selezionata non è esposta da questo adapter di protezione OEM. Per questa soglia Battery Guard manterrà solo l'avviso."
 }
