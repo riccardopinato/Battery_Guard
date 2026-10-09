@@ -149,8 +149,8 @@ Guardrails:
 - where the OEM exposes its own battery-protection setting, Battery Guard guides the user and verifies behavior from live battery state;
 - a future direct-control adapter may be enabled only when the specific device/platform capability is actually available and validated;
 - COMMAND SENT != CHARGE STOPPED;
-- VERIFIED STOP requires post-action readback showing the device remains plugged in, target is reached and Android reports it is no longer charging;
-- no green/protected badge from intent launch, setting screen launch, command return or exception-free execution alone.
+- VERIFIED STOP requires a recent observed `CHARGING -> NOT_CHARGING` transition on the same target/plug session, with the device still plugged and target reached; a static stopped snapshot is insufficient;
+- no green/protected badge from intent launch, setting screen launch, command return, exception-free execution, or a target-unsupported OEM path alone.
 
 **D5 calibration rule**
 Health Lab, Smart ETA, Idle Drain and charge-protection thresholds may be tuned only from physical evidence tied to an exact artifact/device. No formula is promoted merely because CI is green.
