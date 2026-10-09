@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import '../models/battery_snapshot.dart';
 import '../models/battery_health_report.dart';
 import '../models/battery_intelligence.dart';
+import '../models/charge_protection.dart';
+import '../models/device_battery_profile.dart';
 import '../models/charge_test.dart';
 import '../models/charging_session.dart';
 import '../models/charging_setup_profile.dart';
@@ -30,6 +32,37 @@ class NativeBatteryService {
         .map((event) => BatterySnapshot.fromMap(event as Map<dynamic, dynamic>))
         .asBroadcastStream();
   }
+
+  Future<DeviceIdentity> getDeviceIdentity() async {
+    final raw =
+        await _control.invokeMethod<Map<dynamic, dynamic>>('getDeviceIdentity');
+    return DeviceIdentity.fromMap(raw ?? const {});
+  }
+
+  Future<ChargeProtectionCapability> getChargeProtectionCapability() async {
+    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>(
+      'getChargeProtectionCapability',
+    );
+    return ChargeProtectionCapability.fromMap(raw ?? const {});
+  }
+
+  Future<ChargeProtectionState> getChargeProtectionState() async {
+    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>(
+      'getChargeProtectionState',
+    );
+    return ChargeProtectionState.fromMap(raw ?? const {});
+  }
+
+  Future<ChargeProtectionState> verifyChargeProtection() async {
+    final raw = await _control.invokeMethod<Map<dynamic, dynamic>>(
+      'verifyChargeProtection',
+    );
+    return ChargeProtectionState.fromMap(raw ?? const {});
+  }
+
+  Future<bool> openChargeProtectionSettings() async =>
+      await _control.invokeMethod<bool>('openChargeProtectionSettings') ??
+      false;
 
   Future<BatterySnapshot> getSnapshot() async {
     final raw =
