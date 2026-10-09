@@ -91,6 +91,9 @@ class ChargeProtectionCapability {
   final String guideCode;
   final String manufacturer;
   final String model;
+
+  bool supportsTarget(int targetLevel) =>
+      supportsDirectControl || supportedTargets.contains(targetLevel);
 }
 
 class ChargeProtectionState {
@@ -104,6 +107,9 @@ class ChargeProtectionState {
     this.verifiedAt,
     this.commandSent = false,
     this.requiresUserAction = false,
+    this.verificationMode = 'alert_only',
+    this.observedAt,
+    this.commandSentAt,
   });
 
   factory ChargeProtectionState.fromMap(Map<dynamic, dynamic> map) {
@@ -122,6 +128,18 @@ class ChargeProtectionState {
           : null,
       commandSent: map['commandSent'] as bool? ?? false,
       requiresUserAction: map['requiresUserAction'] as bool? ?? false,
+      verificationMode:
+          map['verificationMode']?.toString() ?? 'alert_only',
+      observedAt: ((map['observedAt'] as num?)?.toInt() ?? 0) > 0
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (map['observedAt'] as num).toInt(),
+            )
+          : null,
+      commandSentAt: ((map['commandSentAt'] as num?)?.toInt() ?? 0) > 0
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (map['commandSentAt'] as num).toInt(),
+            )
+          : null,
     );
   }
 
@@ -143,6 +161,9 @@ class ChargeProtectionState {
   final DateTime? verifiedAt;
   final bool commandSent;
   final bool requiresUserAction;
+  final String verificationMode;
+  final DateTime? observedAt;
+  final DateTime? commandSentAt;
 
   bool get isVerifiedStopped =>
       verification == ChargeProtectionVerification.verifiedStopped;
