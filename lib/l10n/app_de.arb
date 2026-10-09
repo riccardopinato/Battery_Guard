@@ -461,7 +461,7 @@
   "rankingNeedsTests": "Führe zuverlässige Tests durch, um ein Ranking aufzubauen.",
   "rankingTestsAndPower": "{tests} Tests • Ø {power} W",
   "trendNotEnoughData": "Trend ausstehend",
-  "trendStable": "Stabiler Trend",
+  "trendStable": "Innerhalb der Unsicherheit stabil",
   "trendImproving": "+{value} Punkte",
   "trendWorsening": "-{value} Punkte",
   "rankingProTitle": "Vergleiche deine Lade-Setups",
@@ -577,7 +577,6 @@
   "socCoverage": "SoC-Abdeckung",
   "advancedHealthAnalysis": "Erweiterte Health-Lab-Analyse",
   "observedTrend": "Beobachteter Kapazitätstrend",
-  "trendStable": "Innerhalb der Unsicherheit stabil",
   "trendUp": "Beobachtete Schätzung ist höher",
   "trendDown": "Beobachtete Schätzung ist niedriger",
   "standardEta": "Standard-ETA",
@@ -626,5 +625,6 @@
   "chargeProtectionGuideXiaomi": "Auf Xiaomi/Redmi/POCO Batterie > Akkuschutz oder Intelligentes Laden öffnen. Verfügbarkeit hängt von Modell und HyperOS/MIUI ab.",
   "chargeProtectionGuideGeneric": "Android bietet keine universelle öffentliche API, mit der eine normale App den Ladevorgang physisch unterbrechen kann.",
   "chargeProtectionTruthNotice": "Ein gesendeter Befehl ist kein Erfolgsnachweis. Nur das erneute Lesen des Ladezustands kann den Stopp verifizieren.",
-  "applyStockCapacitySuccess": "Werkskapazität in Health Lab übernommen."
+  "applyStockCapacitySuccess": "Werkskapazität in Health Lab übernommen.",
+  "chargeProtectionTargetUnsupported": "Das gewählte Ziel wird von diesem OEM-Schutzadapter nicht angeboten. Battery Guard verwendet für diesen Schwellenwert nur den Alarm."
 }
