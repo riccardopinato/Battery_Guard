@@ -38,3 +38,20 @@ Battery Intelligence adds only local diagnostic evidence:
 - Smart ETA inputs/results: computed locally from charging sessions.
 
 Battery Guard does not send this evidence to an app backend and does not provide it to AdMob as targeting input.
+
+## Device Intelligence live lookup — v1.8
+
+When a Pro user explicitly taps the online device-spec lookup:
+- Battery Guard reads non-unique Android make/model/product information locally;
+- the Android model code may be sent to a public device-name mapping endpoint derived from the Google Play supported-device catalog;
+- the resolved/non-resolved make/model query may then be sent to the selected phone-specifications provider;
+- no serial number, Android ID, advertising ID, battery history, Health Lab samples or charging-session history is intentionally included in those lookup requests;
+- the lookup is user-triggered, not periodic background telemetry;
+- returned specs are cached only in current app state in this implementation; Health Lab persists only a capacity after explicit user adoption.
+
+The exact production provider, its privacy/terms and the final Play Data Safety questionnaire must be re-checked before STORE READY.
+
+## Charge Protection — v1.8
+
+Charge-protection capability detection, target, live battery readback and verification state are processed locally. OEM/system settings are opened through Android intents where available. Battery Guard does not send charge-limit state to its own backend.
+
