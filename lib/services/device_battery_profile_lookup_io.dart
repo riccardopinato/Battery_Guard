@@ -4,6 +4,8 @@ import 'dart:io';
 import '../models/device_battery_profile.dart';
 
 const _host = 'phone-specs-api-production.up.railway.app';
+const _deviceMapHost = 'cdn.jsdelivr.net';
+const _deviceMapPath = '/gh/bsthen/device-models/devices.json';
 const _sourceName = 'Phone Specs API (community)';
 const _sourceUrl = 'https://github.com/rinehartwang1979/phone-specs-api';
 
@@ -22,34 +24,62 @@ Future<DeviceBatteryProfile> lookupDeviceBatteryProfile(
     ..connectionTimeout = const Duration(seconds: 8)
     ..idleTimeout = const Duration(seconds: 8);
   try {
-    final searchUri = Uri.https(
-      _host,
-      '/api/v1/search',
-      <String, String>{'q': identity.lookupQuery},
-    );
-    final searchJson = await _getJson(client, searchUri);
-    final candidates = _collectMaps(searchJson).toList(growable: false);
-    if (candidates.isEmpty) {
+    final marketingName = await _resolveMarketingName(client, identity);
+    final queries = <String>{
+      if (marketingName != null && marketingName.isNotEmpty)
+        '${identity.manufacturer} $marketingName'.trim(),
+      if (marketingName != null && marketingName.isNotEmpty)
+        '${identity.brand} $marketingName'.trim(),
+      identity.lookupQuery,
+      identity.model,
+    }.where((value) => value.trim().isNotEmpty).toList(growable: false);
+
+    Map<String, dynamic>? best;
+    var bestScore = -1;
+    for (final query in queries) {
+      final searchUri = Uri.https(
+        _host,
+        '/api/v1/search',
+        <String, String>{'q': query},
+      );
+      dynamic searchJson;
+      try {
+        searchJson = await _getJson(client, searchUri);
+      } catch (_) {
+        continue;
+      }
+      final candidates = _collectMaps(searchJson)
+          .where(_looksLikePhoneRecord)
+          .toList(growable: false);
+      for (final candidate in candidates) {
+        final score = _scoreCandidate(
+          candidate,
+          identity,
+          marketingName: marketingName,
+        );
+        if (score > bestScore) {
+          best = candidate;
+          bestScore = score;
+        }
+      }
+      if (bestScore >= 100) break;
+    }
+
+    if (best == null || bestScore < 35) {
       return DeviceBatteryProfile(
         identity: identity,
         status: DeviceSpecLookupStatus.notFound,
         sourceName: _sourceName,
         sourceUrl: _sourceUrl,
         fetchedAt: DateTime.now(),
-        errorCode: 'NO_MATCH',
+        errorCode: 'NO_RELIABLE_MATCH',
       );
     }
 
-    candidates.sort(
-      (a, b) => _scoreCandidate(b, identity).compareTo(
-        _scoreCandidate(a, identity),
-      ),
-    );
-    final best = candidates.first;
     final candidateText = _candidateText(best);
-    final modelNeedle = _normalize(identity.model);
-    final exactMatch =
-        modelNeedle.isNotEmpty && _normalize(candidateText).contains(modelNeedle);
+    final expectedName = _normalize(marketingName ?? identity.model);
+    final exactMatch = expectedName.isNotEmpty &&
+        _normalize(candidateText).contains(expectedName);
     dynamic details = best;
 
     final id = _readId(best);
@@ -161,19 +191,70 @@ Iterable<Map<String, dynamic>> _collectMaps(dynamic node) sync* {
   }
 }
 
-int _scoreCandidate(Map<String, dynamic> map, DeviceIdentity identity) {
+int _scoreCandidate(
+  Map<String, dynamic> map,
+  DeviceIdentity identity, {
+  String? marketingName,
+}) {
   final haystack = _normalize(_candidateText(map));
   var score = 0;
   final model = _normalize(identity.model);
+  final marketing = _normalize(marketingName ?? '');
   final manufacturer = _normalize(identity.manufacturer);
   final brand = _normalize(identity.brand);
+
+  if (marketing.isNotEmpty && haystack.contains(marketing)) score += 120;
   if (model.isNotEmpty && haystack.contains(model)) score += 100;
   if (manufacturer.isNotEmpty && haystack.contains(manufacturer)) score += 30;
   if (brand.isNotEmpty && haystack.contains(brand)) score += 20;
-  for (final token in model.split(' ')) {
+
+  final tokens = <String>{
+    ...marketing.split(' '),
+    ...model.split(' '),
+  };
+  for (final token in tokens) {
     if (token.length >= 2 && haystack.contains(token)) score += 5;
   }
   return score;
+}
+
+bool _looksLikePhoneRecord(Map<String, dynamic> map) {
+  return map.containsKey('id') &&
+      (map.containsKey('model') ||
+          map.containsKey('model_name') ||
+          map.containsKey('battery_capacity'));
+}
+
+Future<String?> _resolveMarketingName(
+  HttpClient client,
+  DeviceIdentity identity,
+) async {
+  final model = identity.model.trim();
+  if (model.isEmpty) return null;
+
+  try {
+    final uri = Uri.https(_deviceMapHost, _deviceMapPath);
+    final json = await _getJson(client, uri);
+    if (json is! Map) return null;
+
+    dynamic raw = json[model] ?? json[model.toUpperCase()];
+    if (raw == null) {
+      for (final entry in json.entries) {
+        if (entry.key.toString().toLowerCase() == model.toLowerCase()) {
+          raw = entry.value;
+          break;
+        }
+      }
+    }
+    if (raw is Map) {
+      final name = raw['name']?.toString().trim();
+      if (name != null && name.isNotEmpty) return name;
+    }
+  } catch (_) {
+    // Device-name resolution is an optional enrichment. The live specs lookup
+    // still falls back to Android's own model/product identity.
+  }
+  return null;
 }
 
 String _candidateText(Map<String, dynamic> map) {
@@ -305,7 +386,11 @@ double? _extractChargePower(dynamic node) {
       return;
     }
     final p = path.toLowerCase();
-    if (!(p.contains('charg') && (p.contains('power') || p.contains('watt')))) {
+    if (!(p.contains('charg') &&
+        (p.contains('power') ||
+            p.contains('watt') ||
+            p.contains('wired') ||
+            p.contains('wireless')))) {
       return;
     }
     final values = <double>[];
