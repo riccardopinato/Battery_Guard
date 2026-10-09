@@ -102,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.settings_suggest_outlined),
-                      title: Text(l10n.openBatteryProtectionSettings),
+                      title: Text(l10n.openSystemSettings),
                       subtitle: Text(_chargeProtectionGuide(l10n)),
                       trailing: const Icon(Icons.open_in_new_rounded),
                       onTap: controller.openChargeProtectionSettings,
