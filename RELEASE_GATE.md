@@ -1,4 +1,4 @@
-# Release Gate — Battery Guard 1.5.0
+# Release Gate — Battery Guard 1.8.0
 
 ## Automated source/build gates
 - Flutter gen-l10n: required
@@ -7,6 +7,8 @@
 - localization catalog parity: required
 - Intelligence Foundation provenance/session/curve regression tests: required
 - Charging Intelligence setup/score/ranking/stress regression tests: required
+- Device Intelligence model/config/capability truth regression tests: required
+- Device Intelligence localization catalog parity: required
 - Web Preview build: required
 - PR Android ARM64 debug compile: required
 - committed pubspec.lock + --enforce-lockfile: required for signed/main and production builds
@@ -103,6 +105,15 @@ Mandatory scenarios include:
 - charger/cable ranking and trend behavior;
 - refund/revocation keeps profile data but blocks extra Free setup use;
 - Battery Health plausibility;
+- runtime locale switch + persisted locale after restart;
+- Android model identity matches Settings/About-device model identity where exposed;
+- Pro live battery-spec lookup returns either a source-attributed plausible match or a truthful no-match/error;
+- stock battery capacity is never auto-applied to Health Lab;
+- charge-protection target accepts 70/75/80/85/90/95/100%;
+- OEM/system charge-protection guidance is correct for the tested device/software;
+- at/above target while still charging never shows VERIFIED STOP;
+- at/above target + still plugged + Android not charging may show VERIFIED STOP;
+- any future direct-control adapter must prove command -> delayed readback;
 - AdMob/UMP/privacy choices;
 - Pro buy/restore/refund/revocation;
 - signed in-place update with data preservation.
