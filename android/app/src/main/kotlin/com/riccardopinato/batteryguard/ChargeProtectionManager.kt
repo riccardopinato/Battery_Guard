@@ -145,9 +145,10 @@ object ChargeProtectionManager {
                 prefs.getBoolean("observedIsPlugged", false),
             "verifiedAt" to prefs.getLong("verifiedAt", 0L),
             "commandSent" to false,
-            "requiresUserAction" to
+            "requiresUserAction" to (
                 config.chargeProtectionEnabled &&
-                    ((capability["mode"] as? String) == "system_setting"),
+                    ((capability["mode"] as? String) == "system_setting")
+                ),
         )
     }
 
