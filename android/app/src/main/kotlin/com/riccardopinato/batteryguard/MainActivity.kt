@@ -41,6 +41,27 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "getSnapshot" ->
                         result.success(BatteryInfoReader.read(this))
+                    "getDeviceIdentity" ->
+                        result.success(DeviceIntelligence.identity())
+                    "getChargeProtectionCapability" ->
+                        result.success(ChargeProtectionManager.capability(this))
+                    "getChargeProtectionState" ->
+                        result.success(
+                            ChargeProtectionManager.state(
+                                this,
+                                MonitoringPreferences.get(this).targetLevel,
+                            ),
+                        )
+                    "verifyChargeProtection" ->
+                        result.success(
+                            ChargeProtectionManager.verifyNow(this),
+                        )
+                    "openChargeProtectionSettings" ->
+                        result.success(
+                            ChargeProtectionManager.openSystemBatterySettings(
+                                this,
+                            ),
+                        )
                     "getConfig" ->
                         result.success(MonitoringPreferences.asMap(this))
                     "setConfig" -> {
