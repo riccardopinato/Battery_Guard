@@ -60,7 +60,9 @@ The matrix must be executed against the exact candidate artifact SHA. CI/emulato
 | D3 OEM/system capability | — | — | Samsung/Xiaomi path is presented as system-setting capability, never direct control | NOT RUN |
 | D3 below-target truth | — | — | plugged+charging below target reports below target, never stopped | NOT RUN |
 | D3 still-charging truth | — | — | at/above target + charging=true reports still charging, never verified | NOT RUN |
-| D3 verified stop readback | — | — | at/above target + plugged=true + charging=false reports VERIFIED STOP | NOT RUN |
+| D3 static stopped snapshot | — | — | launch/restart while already plugged+not charging at target; must remain unverified/pending | NOT RUN |
+| D3 unsupported custom target | — | — | choose target not exposed by OEM adapter; remains alert-only, never verified stop | NOT RUN |
+| D3 verified stop readback | — | — | observe CHARGING, then at/above target observe plugged=true + charging=false within the transition window; only then VERIFIED STOP | NOT RUN |
 | D3 overnight protection | — | — | leave connected overnight; verify OEM limit/readback and FGS reliability without runaway polling | NOT RUN |
 | D5 Health/ETA/Idle calibration | — | — | collect exact-artifact evidence; tune only if observed evidence justifies changes | NOT RUN |
 
