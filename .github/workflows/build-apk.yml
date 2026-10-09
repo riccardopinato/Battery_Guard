@@ -264,6 +264,9 @@ jobs:
             echo "premiumBatteryStressDetails=true"
             echo "personalBaselineScope=profileId"
             echo "batteryStressModel=exposure-heuristic-v1"
+            echo "chargeProtectionTransitionRequired=true"
+            echo "directControlRequiresCommandReadback=true"
+            echo "staticStoppedSnapshotCanVerify=false"
           } > release/BUILD_EVIDENCE.txt
 
           (
