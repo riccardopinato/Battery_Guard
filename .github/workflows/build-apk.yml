@@ -76,6 +76,10 @@ jobs:
       - name: Test
         run: flutter test
 
+      - name: Android unit tests
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+
       - name: Build Web Preview
         run: flutter build web --release --base-href /Battery_Guard/
 
