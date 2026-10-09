@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.8.1+27 — Charge Protection strict readback hardening
+- tightened the v24 truth contract from static-state verification to an observed charging-state transition;
+- a static plugged + not-charging snapshot at/above target no longer produces VERIFIED STOP;
+- OEM/system limits require a recent CHARGING -> NOT_CHARGING transition on the same target and plug session;
+- alert-only targets can never produce a verified charge-stop state;
+- target-specific OEM capability is enforced: unsupported custom targets remain alert-only even when the OEM has another supported limit;
+- future direct-control adapters require both a real command dispatch and a fresh post-command transition readback;
+- added native Kotlin unit tests and a dedicated CI Android-unit-test gate;
+- versionCode 27 supersedes the pre-hardening 1.8.0 physical-test artifact.
+
+
 ## 1.8.0+26 — MAXI STEP D: Device Intelligence & Charge Protection
 - fixed the runtime localization regression: changing/restoring the locale now rebuilds MaterialApp rather than only the home subtree;
 - added Pro Device Intelligence using non-unique Android model identity and an explicit live battery-spec lookup;

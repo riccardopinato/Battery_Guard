@@ -196,7 +196,10 @@
 - Pixel, Samsung and Xiaomi/Redmi/POCO system-protection guidance/adapters added;
 - no OEM is falsely marked as direct-control through unsupported Android public APIs;
 - monitoring records real plugged/charging readback state;
-- VERIFIED STOP requires plugged + target reached + isCharging=false;
+- VERIFIED STOP requires a recent observed CHARGING -> NOT_CHARGING transition with the phone still plugged and target reached;
+- a static not-charging snapshot is insufficient;
+- alert-only or target-unsupported OEM paths can never produce VERIFIED STOP;
+- direct-control adapters additionally require a fresh real command dispatch before the transition;
 - command/request success alone can never produce a verified badge;
 - future verified direct adapters must execute command -> delayed readback before success.
 

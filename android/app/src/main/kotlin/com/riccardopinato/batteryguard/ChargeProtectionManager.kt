@@ -67,23 +67,41 @@ object ChargeProtectionManager {
     }
 
     fun applyLimit(context: Context, targetLevel: Int): Map<String, Any> {
+        val target = targetLevel.coerceIn(70, 100)
         val capability = capability(context)
         val direct = capability["supportsDirectControl"] as? Boolean ?: false
+
         if (!direct) {
             return linkedMapOf(
                 "commandSent" to false,
                 "requiresUserAction" to
                     ((capability["mode"] as? String) == "system_setting"),
                 "verification" to "unsupported",
-                "targetLevel" to targetLevel.coerceIn(70, 100),
+                "targetLevel" to target,
             )
         }
 
+        // No public Android API currently gives Battery Guard a universal
+        // direct charging cut-off. A future device-specific adapter must
+        // return true only after a real command was dispatched.
+        val commandSent = sendDirectLimitIfSupported(
+            context = context,
+            targetLevel = target,
+            adapterId = capability["adapterId"]?.toString().orEmpty(),
+        )
+        if (commandSent) {
+            context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+                .edit()
+                .putLong("lastCommandSentAt", System.currentTimeMillis())
+                .putInt("lastCommandTarget", target)
+                .apply()
+        }
+
         return linkedMapOf(
-            "commandSent" to false,
+            "commandSent" to commandSent,
             "requiresUserAction" to false,
-            "verification" to "failed",
-            "targetLevel" to targetLevel.coerceIn(70, 100),
+            "verification" to if (commandSent) "pending" else "failed",
+            "targetLevel" to target,
         )
     }
 
@@ -97,30 +115,72 @@ object ChargeProtectionManager {
         val level = (snapshot["level"] as? Number)?.toInt() ?: -1
         val isCharging = snapshot["isCharging"] as? Boolean ?: false
         val isPlugged = snapshot["isPlugged"] as? Boolean ?: false
-
-        val verification = when {
-            !enabled -> "disabled"
-            target >= 100 -> "not_applicable"
-            !isPlugged -> "unplugged"
-            level < 0 -> "pending"
-            level < target -> "below_target"
-            !isCharging -> "verified_stopped"
-            else -> "still_charging"
-        }
         val now = System.currentTimeMillis()
+
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+        val previousObservedAt = prefs.getLong("observedAt", 0L)
+        val previous = if (previousObservedAt > 0L) {
+            ChargeProtectionVerificationPolicy.PreviousObservation(
+                enabled = prefs.getBoolean("enabled", false),
+                targetLevel = prefs.getInt("targetLevel", -1),
+                level = prefs.getInt("observedLevel", -1),
+                isPlugged = prefs.getBoolean("observedIsPlugged", false),
+                isCharging = prefs.getBoolean("observedIsCharging", false),
+                observedAt = previousObservedAt,
+                verification = prefs.getString(
+                    "verification",
+                    "pending",
+                ) ?: "pending",
+            )
+        } else {
+            null
+        }
+
+        val commandSentAt = prefs.getLong("lastCommandSentAt", 0L)
+        val command = if (commandSentAt > 0L) {
+            ChargeProtectionVerificationPolicy.CommandEvidence(
+                sentAt = commandSentAt,
+                targetLevel = prefs.getInt("lastCommandTarget", -1),
+            )
+        } else {
+            null
+        }
+
+        val capability = capability(context)
+        val verificationMode = verificationModeForTarget(
+            capability = capability,
+            targetLevel = target,
+        )
+        val verification = ChargeProtectionVerificationPolicy.evaluate(
+            enabled = enabled,
+            targetLevel = target,
+            level = level,
+            isPlugged = isPlugged,
+            isCharging = isCharging,
+            capabilityMode = verificationMode,
+            now = now,
+            previous = previous,
+            command = command,
+        )
+
+        val previousVerifiedAt = prefs.getLong("verifiedAt", 0L)
+        val verifiedAt = when {
+            verification != "verified_stopped" -> 0L
+            previous?.verification == "verified_stopped" &&
+                previousVerifiedAt > 0L -> previousVerifiedAt
+            else -> now
+        }
+
         prefs.edit()
             .putBoolean("enabled", enabled)
             .putInt("targetLevel", target)
             .putString("verification", verification)
+            .putString("verificationMode", verificationMode)
             .putInt("observedLevel", level)
             .putBoolean("observedIsCharging", isCharging)
             .putBoolean("observedIsPlugged", isPlugged)
-            .putLong(
-                "verifiedAt",
-                if (verification == "verified_stopped") now
-                else prefs.getLong("verifiedAt", 0L),
-            )
+            .putLong("observedAt", now)
+            .putLong("verifiedAt", verifiedAt)
             .apply()
 
         return state(context, target)
@@ -130,21 +190,33 @@ object ChargeProtectionManager {
         val config = MonitoringPreferences.get(context)
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         val capability = capability(context)
+        val target = targetLevel.coerceIn(70, 100)
+        val commandSentAt = prefs.getLong("lastCommandSentAt", 0L)
+        val commandTarget = prefs.getInt("lastCommandTarget", -1)
+        val verificationMode = verificationModeForTarget(
+            capability = capability,
+            targetLevel = target,
+        )
+
         return linkedMapOf(
             "enabled" to config.chargeProtectionEnabled,
-            "targetLevel" to targetLevel.coerceIn(70, 100),
+            "targetLevel" to target,
             "verification" to
                 (prefs.getString(
                     "verification",
                     if (config.chargeProtectionEnabled) "pending" else "disabled",
                 ) ?: "pending"),
+            "verificationMode" to verificationMode,
             "observedLevel" to prefs.getInt("observedLevel", -1),
             "observedIsCharging" to
                 prefs.getBoolean("observedIsCharging", false),
             "observedIsPlugged" to
                 prefs.getBoolean("observedIsPlugged", false),
+            "observedAt" to prefs.getLong("observedAt", 0L),
             "verifiedAt" to prefs.getLong("verifiedAt", 0L),
-            "commandSent" to false,
+            "commandSent" to
+                (commandSentAt > 0L && commandTarget == target),
+            "commandSentAt" to commandSentAt,
             "requiresUserAction" to (
                 config.chargeProtectionEnabled &&
                     ((capability["mode"] as? String) == "system_setting")
@@ -177,6 +249,37 @@ object ChargeProtectionManager {
             } catch (_: Throwable) {
             }
         }
+        return false
+    }
+
+    private fun verificationModeForTarget(
+        capability: Map<String, Any>,
+        targetLevel: Int,
+    ): String {
+        val mode = capability["mode"]?.toString().orEmpty()
+        if (mode == "direct_control") return mode
+        if (mode != "system_setting") return "alert_only"
+
+        @Suppress("UNCHECKED_CAST")
+        val supportedTargets =
+            capability["supportedTargets"] as? List<Int> ?: emptyList()
+        return if (supportedTargets.contains(targetLevel)) {
+            "system_setting"
+        } else {
+            "alert_only"
+        }
+    }
+
+    private fun sendDirectLimitIfSupported(
+        context: Context,
+        targetLevel: Int,
+        adapterId: String,
+    ): Boolean {
+        // Reserved for physically validated device-specific adapters.
+        // Returning false is intentional until a real supported command exists.
+        context.applicationContext
+        targetLevel.coerceIn(70, 100)
+        adapterId.length
         return false
     }
 

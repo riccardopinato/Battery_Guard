@@ -112,8 +112,10 @@ Mandatory scenarios include:
 - charge-protection target accepts 70/75/80/85/90/95/100%;
 - OEM/system charge-protection guidance is correct for the tested device/software;
 - at/above target while still charging never shows VERIFIED STOP;
-- at/above target + still plugged + Android not charging may show VERIFIED STOP;
-- any future direct-control adapter must prove command -> delayed readback;
+- at/above target + still plugged + Android not charging is NOT sufficient by itself;
+- VERIFIED STOP requires a recent observed charging -> not-charging transition on the same target/plug session;
+- an OEM adapter must support the selected target or the flow remains alert-only;
+- any future direct-control adapter must prove real command dispatch -> delayed readback transition;
 - AdMob/UMP/privacy choices;
 - Pro buy/restore/refund/revocation;
 - signed in-place update with data preservation.

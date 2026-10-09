@@ -76,6 +76,10 @@ jobs:
       - name: Test
         run: flutter test
 
+      - name: Android unit tests
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+
       - name: Build Web Preview
         run: flutter build web --release --base-href /Battery_Guard/
 
@@ -260,6 +264,9 @@ jobs:
             echo "premiumBatteryStressDetails=true"
             echo "personalBaselineScope=profileId"
             echo "batteryStressModel=exposure-heuristic-v1"
+            echo "chargeProtectionTransitionRequired=true"
+            echo "directControlRequiresCommandReadback=true"
+            echo "staticStoppedSnapshotCanVerify=false"
           } > release/BUILD_EVIDENCE.txt
 
           (

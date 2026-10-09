@@ -461,7 +461,7 @@
   "rankingNeedsTests": "Run reliable tests on your setups to build a ranking.",
   "rankingTestsAndPower": "{tests} tests • {power} W average",
   "trendNotEnoughData": "Trend pending",
-  "trendStable": "Stable trend",
+  "trendStable": "Stable within uncertainty",
   "trendImproving": "+{value} score",
   "trendWorsening": "-{value} score",
   "rankingProTitle": "Compare your charging setups",
@@ -577,7 +577,6 @@
   "socCoverage": "SoC coverage",
   "advancedHealthAnalysis": "Advanced Health Lab analysis",
   "observedTrend": "Observed capacity trend",
-  "trendStable": "Stable within uncertainty",
   "trendUp": "Observed estimate is higher",
   "trendDown": "Observed estimate is lower",
   "standardEta": "Standard ETA",
@@ -626,5 +625,6 @@
   "chargeProtectionGuideXiaomi": "Open Xiaomi/Redmi/POCO Battery settings > Battery protection or Smart charging. Availability varies by model and HyperOS/MIUI version.",
   "chargeProtectionGuideGeneric": "Android does not expose a universal public API that lets a normal app physically cut charging.",
   "chargeProtectionTruthNotice": "Command sent is never treated as proof. Only a charging-state readback can mark the stop as verified.",
-  "applyStockCapacitySuccess": "Stock capacity applied to Health Lab."
+  "applyStockCapacitySuccess": "Stock capacity applied to Health Lab.",
+  "chargeProtectionTargetUnsupported": "The selected target is not exposed by this OEM protection adapter. Battery Guard will keep alert-only behavior for this threshold."
 }

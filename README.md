@@ -4,7 +4,7 @@ Battery Guard è una utility Android Flutter/Dart local-first per monitorare ric
 
 ## Stato
 
-Versione sorgente: **1.8.0+26 — Device Intelligence & Charge Protection**
+Versione sorgente: **1.8.1+27 — Device Intelligence & Charge Protection**
 
 Evidence attuale:
 - IMPLEMENTED
@@ -97,7 +97,7 @@ MAXI STEP C extends the existing local telemetry stack without a parallel databa
 - La capacità stock può essere passata esplicitamente a Health Lab, senza sovrascrittura automatica.
 - La soglia di protezione è configurabile 70/75/80/85/90/95/100%.
 - Pixel/Samsung/Xiaomi compatibili vengono trattati come capability OEM/system-setting, non come falsa API di controllo universale.
-- Stato **Verificato** solo dopo readback: collegato + soglia raggiunta + Android non più in charging.
+- Stato **Verificato** solo dopo una transizione osservata e recente `CHARGING → NOT_CHARGING`: stesso target, telefono ancora collegato e soglia raggiunta. Uno snapshot statico non basta.
 - L'attivazione di Charge Protection mantiene attivo il monitoraggio necessario alla verifica.
 - Web Preview dimostra UI/state flow ma non certifica comportamento OEM.
 

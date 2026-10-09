@@ -492,10 +492,15 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _chargeProtectionCapabilityLabel(AppLocalizations l10n) {
-    return controller.chargeProtectionCapability.mode ==
-            ChargeProtectionMode.systemSetting
-        ? l10n.chargeProtectionSystemAvailable
-        : l10n.chargeProtectionAlertOnly;
+    final capability = controller.chargeProtectionCapability;
+    if (capability.mode == ChargeProtectionMode.systemSetting &&
+        capability.supportsTarget(controller.config.targetLevel)) {
+      return l10n.chargeProtectionSystemAvailable;
+    }
+    if (capability.mode == ChargeProtectionMode.systemSetting) {
+      return l10n.chargeProtectionTargetUnsupported;
+    }
+    return l10n.chargeProtectionAlertOnly;
   }
 
   String _chargeProtectionVerificationLabel(AppLocalizations l10n) {
