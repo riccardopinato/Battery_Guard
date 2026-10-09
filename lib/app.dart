@@ -21,12 +21,16 @@ class BatteryGuardApp extends StatefulWidget {
 class _BatteryGuardAppState extends State<BatteryGuardApp>
     with WidgetsBindingObserver {
   late final AppController _controller;
+  Locale? _localeOverride;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _controller = AppController()..initialize();
+    _controller = AppController();
+    _localeOverride = _controller.localeOverride;
+    _controller.addListener(_syncLocaleOverride);
+    _controller.initialize();
   }
 
   @override
@@ -38,9 +42,16 @@ class _BatteryGuardAppState extends State<BatteryGuardApp>
     }
   }
 
+  void _syncLocaleOverride() {
+    final next = _controller.localeOverride;
+    if (next == _localeOverride || !mounted) return;
+    setState(() => _localeOverride = next);
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _controller.removeListener(_syncLocaleOverride);
     _controller.dispose();
     super.dispose();
   }
@@ -53,7 +64,7 @@ class _BatteryGuardAppState extends State<BatteryGuardApp>
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
-      locale: _controller.localeOverride,
+      locale: _localeOverride,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: AnimatedBuilder(
