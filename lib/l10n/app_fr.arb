@@ -461,7 +461,7 @@
   "rankingNeedsTests": "Effectuez des tests fiables pour construire le classement.",
   "rankingTestsAndPower": "{tests} tests • moyenne {power} W",
   "trendNotEnoughData": "Tendance en attente",
-  "trendStable": "Tendance stable",
+  "trendStable": "Stable dans l'incertitude",
   "trendImproving": "+{value} points",
   "trendWorsening": "-{value} points",
   "rankingProTitle": "Comparez vos configurations de charge",
@@ -577,7 +577,6 @@
   "socCoverage": "Couverture SoC",
   "advancedHealthAnalysis": "Analyse Health Lab avancée",
   "observedTrend": "Tendance de capacité observée",
-  "trendStable": "Stable dans l'incertitude",
   "trendUp": "L'estimation observée est plus élevée",
   "trendDown": "L'estimation observée est plus basse",
   "standardEta": "ETA standard",
@@ -626,5 +625,6 @@
   "chargeProtectionGuideXiaomi": "Ouvrez Batterie > Protection de la batterie ou Charge intelligente sur Xiaomi/Redmi/POCO. La disponibilité dépend du modèle et de HyperOS/MIUI.",
   "chargeProtectionGuideGeneric": "Android n'expose pas d'API publique universelle permettant à une application normale de couper physiquement la charge.",
   "chargeProtectionTruthNotice": "Un ordre envoyé ne prouve jamais l'arrêt. Seule une relecture de l'état de charge peut le vérifier.",
-  "applyStockCapacitySuccess": "Capacité d'origine appliquée à Health Lab."
+  "applyStockCapacitySuccess": "Capacité d'origine appliquée à Health Lab.",
+  "chargeProtectionTargetUnsupported": "La cible sélectionnée n'est pas exposée par cet adaptateur de protection OEM. Battery Guard conservera uniquement l'alerte pour ce seuil."
 }
