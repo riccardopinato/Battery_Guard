@@ -51,7 +51,7 @@ Free ads must never receive Battery Guard battery telemetry, charging history, H
 - social/community
 - SMS automatici
 - cloud/account obbligatorio
-- controllo hardware della ricarica
+- controllo hardware universale/non verificato della ricarica
 - battery-health % inventata
 
 ## Data truth
@@ -130,4 +130,28 @@ Guardrails:
 - screen ON/OFF context is used only when explicitly observed;
 - Idle Drain never claims which app caused drain and excludes charging intervals;
 - thresholds are heuristics for personal comparison, not chemical degradation measurements.
+
+## Device Intelligence & Charge Protection doctrine — v1.8
+
+**PRO — Device Battery Profile Live**
+- Battery Guard may read non-unique Android make/model/product/SKU information to identify the phone;
+- a live lookup is performed only after explicit user action;
+- exact model-code resolution may use a current Google-Play-derived mapping;
+- battery specifications come from a separately disclosed provider and keep source/match confidence;
+- external stock capacity is reference evidence, not measured battery health;
+- applying stock capacity to Health Lab requires explicit user action;
+- low-confidence/fuzzy evidence must remain visibly uncertain.
+
+**PRO — Charge Protection**
+- the target is selectable from 70% to 100%;
+- capability states are explicit: direct-control / OEM-system-setting / alert-only;
+- Android public API limitations must never be hidden;
+- where the OEM exposes its own battery-protection setting, Battery Guard guides the user and verifies behavior from live battery state;
+- a future direct-control adapter may be enabled only when the specific device/platform capability is actually available and validated;
+- COMMAND SENT != CHARGE STOPPED;
+- VERIFIED STOP requires post-action readback showing the device remains plugged in, target is reached and Android reports it is no longer charging;
+- no green/protected badge from intent launch, setting screen launch, command return or exception-free execution alone.
+
+**D5 calibration rule**
+Health Lab, Smart ETA, Idle Drain and charge-protection thresholds may be tuned only from physical evidence tied to an exact artifact/device. No formula is promoted merely because CI is green.
 
