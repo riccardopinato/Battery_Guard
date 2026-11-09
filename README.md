@@ -101,3 +101,8 @@ MAXI STEP C extends the existing local telemetry stack without a parallel databa
 - L'attivazione di Charge Protection mantiene attivo il monitoraggio necessario alla verifica.
 - Web Preview dimostra UI/state flow ma non certifica comportamento OEM.
 
+
+
+## Template Notion
+
+[Catalogo di ricerca](docs/TEMPLATE_NOTION/README.md), senza template importati o acquisti attivati.
